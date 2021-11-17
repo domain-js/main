@@ -45,6 +45,7 @@
     ]
   },
   "dependencies": {
+    "@open-node/graceful": "^0.4.0",
     "axios": "^0.24.0",
     "crypto-js": "^4.1.1",
     "ioredis": "^4.28.0",
