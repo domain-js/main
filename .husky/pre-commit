@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ ! -f "$(dirname "$0")/_/husky.sh" ]; then
+  npx husky install
+fi
+. "$(dirname "$0")/_/husky.sh"
+
+npm run lint-staged && npm run build 

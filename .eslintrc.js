@@ -3,6 +3,7 @@ module.exports = {
   plugins: ["@typescript-eslint"],
   extends: ["airbnb", "eslint:recommended", "plugin:@typescript-eslint/recommended"],
   ignorePatterns: [".eslintrc.js"],
+  root: true,
   env: {
     es6: true,
     node: true,
