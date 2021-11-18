@@ -61,6 +61,8 @@ export function DM(_: typeof lodash) {
         const Before = Module.Before || ((...args: any[]) => args);
         const After = Module.After;
 
+        if (After && typeof After !== "function") throw Error("After is not a function");
+
         const main = exec(Main, Before, After, args);
         if (_.has(deps, name)) throw Error(`Name ${name} duplicate`);
         _.set(deps, name, main);

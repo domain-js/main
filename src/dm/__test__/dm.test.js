@@ -1,10 +1,10 @@
 const _ = require("lodash");
 const { DM } = require("../dm.ts");
-const case1 = require("../../samples/case1");
-const case2 = require("../../samples/case2-incorrect");
-const case3 = require("../../samples/case3-incorrect");
-const case5 = require("../../samples/case5-incorrect");
-const case6 = require("../../samples/case6-incorrect");
+const case1 = require("../samples/case1");
+const case2 = require("../samples/case2-incorrect");
+const case3 = require("../samples/case3-incorrect");
+const case5 = require("../samples/case5-incorrect");
+const case6 = require("../samples/case6-incorrect");
 
 describe("Dependency Injection Manager.", () => {
   describe("exec", () => {
