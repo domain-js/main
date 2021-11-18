@@ -36,7 +36,7 @@ interface Registed {
   };
 }
 
-export function main(cnf: Cnf, deps: Deps) {
+export function Main(cnf: Cnf, deps: Deps) {
   const { cron = {} } = cnf;
 
   const ciaTaskType = "cronJob";
@@ -95,7 +95,7 @@ export function main(cnf: Cnf, deps: Deps) {
   // name string 任务名称
   // interval string | number 任务执行间隔
   // startAt string 任务开始于
-  const regist = (name: string, intervalStr: string, startAt: string) => {
+  const regist = (name: string, intervalStr: string, startAt?: string) => {
     if (startedAt) throw Error("计划任务系统已经启动，禁止注册");
     if (registed[name]) throw Error(`Same name cron has been registed: ${name}`);
 
@@ -136,4 +136,4 @@ export function main(cnf: Cnf, deps: Deps) {
   return { regist, start, getStats };
 }
 
-main.Deps = ["cia"];
+export const Deps = ["cia"];

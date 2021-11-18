@@ -1,4 +1,4 @@
-const { main: Cron } = require("../dist");
+import { Main as Cron } from "..";
 
 describe("cron", () => {
   const cnf = {};
