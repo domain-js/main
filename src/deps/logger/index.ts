@@ -80,7 +80,7 @@ export function Main(cnf: Cnf) {
   ) => {
     if (isAsync) {
       const handler = {
-        async apply<T extends Function>(fn: T, me: any, args: any[]) {
+        async apply(fn: T, me: any, args: Parameters<T>) {
           const callId = uuid();
           try {
             info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
@@ -103,7 +103,7 @@ export function Main(cnf: Cnf) {
     }
 
     const handler = {
-      apply<T extends Function>(fn: T, me: any, args: any[]) {
+      apply(fn: T, me: any, args: Parameters<T>) {
         const callId = uuid();
         try {
           info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
