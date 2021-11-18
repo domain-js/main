@@ -1,7 +1,7 @@
-const AES = require("../dist").main;
+import * as AES from "..";
 
 describe("AES", () => {
-  const aes = AES();
+  const aes = AES.Main();
   const key = "AES_KEY";
   describe("encrypt", () => {
     it("case1", () => {
