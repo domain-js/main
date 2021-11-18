@@ -17,6 +17,7 @@ interface Cnf {
 interface Err extends Error {
   code?: string | number;
   data?: any;
+  [propName: string]: any;
 }
 
 export function Main(cnf: Cnf) {
@@ -72,18 +73,42 @@ export function Main(cnf: Cnf) {
   const logger = <T extends (...args: any[]) => any>(
     fn: T,
     name: string,
-    isAsync = true,
+    isAsync = false,
     transform = (x: ReturnType<T>): any => x,
-    errorHandler = (e: Err | unknown) => (e instanceof Error ? e.message : ""),
+    errorHandler = (e: any) => (e instanceof Error ? e.message : ""),
     argsHandler: (arg: Parameters<T>) => string = JSON.stringify,
   ) => {
     if (isAsync) {
-      return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+      const handler = {
+        async apply<T extends Function>(fn: T, me: any, args: any[]) {
+          const callId = uuid();
+          try {
+            info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
+            const startedAt = Date.now();
+            const res = await Reflect.apply(fn, me, args);
+            info(
+              `Completed: ${name}\t${callId}\t${Date.now() - startedAt}ms\t${JSON.stringify(
+                transform(res),
+              )}`,
+            );
+            return res;
+          } catch (e) {
+            info(`Error: ${name}\t${callId}\t${errorHandler(e)}`, e instanceof Error && e.stack);
+            throw e;
+          }
+        },
+      };
+
+      return new Proxy(fn, handler) as T;
+    }
+
+    const handler = {
+      apply<T extends Function>(fn: T, me: any, args: any[]) {
         const callId = uuid();
         try {
           info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
           const startedAt = Date.now();
-          const res = await fn(...args);
+          const res = Reflect.apply(fn, me, args);
           info(
             `Completed: ${name}\t${callId}\t${Date.now() - startedAt}ms\t${JSON.stringify(
               transform(res),
@@ -94,25 +119,10 @@ export function Main(cnf: Cnf) {
           info(`Error: ${name}\t${callId}\t${errorHandler(e)}`, e instanceof Error && e.stack);
           throw e;
         }
-      };
-    }
-    return (...args: Parameters<T>): ReturnType<T> => {
-      const callId = uuid();
-      try {
-        info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
-        const startedAt = Date.now();
-        const res = fn(...args);
-        info(`Completed: ${name}\t${callId}\t${Date.now() - startedAt}ms\t${JSON.stringify(res)}`);
-        return res;
-      } catch (e) {
-        if (e instanceof Error) {
-          info(`Error: ${name}\t${callId}\t${e.message}`, e.stack);
-        } else {
-          info(`Error: ${name}\t${callId}\t${e}`, e);
-        }
-        throw e;
-      }
+      },
     };
+
+    return new Proxy(fn, handler) as T;
   };
 
   return { error, info, logger };
