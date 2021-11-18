@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import { Main as Logger } from "../logger";
 import * as utils from "../utils";
 
@@ -52,15 +52,19 @@ export function Main(cnf: Cnf, deps: Deps) {
       }
     };
 
-    return (...args: FnParameters) => exec(args, 1);
+    return ((...args: FnParameters) => exec(args, 1)) as F;
   };
 
-  const instance = axios.create(conf);
+  const instance: AxiosInstance & {
+    origin?: typeof axios;
+  } = axios.create(conf);
+
+  instance.origin = axios;
 
   if (loggers) {
     for (const x of loggers) {
       const method = logger.logger(
-        instance.get,
+        instance[x],
         `axios.${x}`,
         true,
         (res: any) => res.data,
@@ -76,8 +80,6 @@ export function Main(cnf: Cnf, deps: Deps) {
       instance[x] = retryAble(instance[x], retryTimes, retryIntervalMS);
     }
   }
-
-  instance.origin = { ...axios };
 
   return instance;
 }
