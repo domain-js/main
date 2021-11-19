@@ -1,5 +1,5 @@
-const async = require("async");
-const Helper = require("..");
+import * as async from "async";
+import { Main as Helper } from "..";
 
 const errors = {
   notAllowed: jest.fn((m) => Error(`禁止访问: ${m}`)),
