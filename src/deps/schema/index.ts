@@ -1,23 +1,28 @@
-const util = require("util");
-const Ajv = require("ajv").default;
-const addFormats = require("ajv-formats").default;
+import * as util from "util";
+import Ajv, { Schema } from "ajv";
+import addFormats from "ajv-formats";
 
-function Main(cnf) {
-  const ajv = new Ajv(cnf.schema);
+export function Main(cnf: { schema?: ConstructorParameters<typeof Ajv>[0] }) {
+  const ajv = new Ajv(cnf.schema || {});
   addFormats(ajv);
 
-  const compile = (schema) => ajv.compile(schema);
+  const compile = (x: Schema) => ajv.compile(x);
 
   /**
    * 将函数处理为自动校验参数合法性
    */
-  const auto = (fn, schema, errorFn, extra) => {
+  function auto<F extends(...args: any[]) => any>(
+    fn: F,
+    schema: Schema[],
+    errorFn: Function,
+    extra: any,
+  ) {
     if (!Array.isArray(schema)) {
       throw Error(`方法参数定义必须是一个数组 ${util.format(schema)}`);
     }
-    const validators = schema.map((x) => compile(x));
+    const validators = schema.map((x: Schema) => ajv.compile(x));
 
-    return (...args) => {
+    return (...args: Parameters<F>): ReturnType<F> => {
       for (let i = 0; i < schema.length; i += 1) {
         const valid = validators[i](args[i]);
         if (!valid) {
@@ -26,19 +31,15 @@ function Main(cnf) {
       }
       return fn(...args);
     };
-  };
+  }
 
   /**
    * 检测数据是否符合 schema 设定
    */
-  const validate = (schema, data) => {
+  const validate = (schema: Schema, data: any) => {
     if (ajv.validate(schema, data)) return true;
     throw ajv.errors;
   };
 
   return Object.freeze({ auto, validate, compile, ajv });
 }
-
-Main.Deps = [];
-
-module.exports = Main;

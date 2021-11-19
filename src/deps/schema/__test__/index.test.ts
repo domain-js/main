@@ -1,4 +1,4 @@
-const Schema = require("..");
+import { Main as Schema } from "..";
 
 describe("@domain.js/schema", () => {
   describe("auto", () => {
@@ -16,9 +16,9 @@ describe("@domain.js/schema", () => {
         1,
         [
           {
-            dataPath: "",
+            instancePath: "",
             keyword: "type",
-            message: "should be string",
+            message: "must be string",
             params: { type: "string" },
             schemaPath: "#/type",
           },
@@ -30,7 +30,9 @@ describe("@domain.js/schema", () => {
 
     it("case2, schemas type isnt array", () => {
       const fn = jest.fn((x) => x);
-      expect(() => schema.auto(fn, { type: "string" }, errorFn, { foo: "bar" })).toThrow("参数");
+      expect(() =>
+        schema.auto(fn, { type: "string" } as unknown as any[], errorFn, { foo: "bar" }),
+      ).toThrow("参数");
     });
   });
 
@@ -41,7 +43,7 @@ describe("@domain.js/schema", () => {
       expect(schema.validate({ type: "string" }, "hello")).toBe(true);
       expect(schema.validate({ type: "string" }, "")).toBe(true);
       expect(() => schema.validate({ type: "string" }, 123)).toThrow();
-      expect(() => schema.validate({ type: "string" })).toThrow();
+      expect(() => schema.validate({ type: "string" }, undefined)).toThrow();
     });
 
     it("case2, format", () => {
