@@ -1,5 +1,7 @@
 import { Main as Cron } from "..";
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 describe("cron", () => {
   const cnf = {};
   const cia = {
@@ -11,8 +13,6 @@ describe("cron", () => {
   const deps = {
     cia,
   };
-
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const cron = Cron(cnf, deps);
   describe("regist", () => {
@@ -86,8 +86,6 @@ describe("cron special", () => {
   const deps = {
     cia,
   };
-
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   describe("linux style schedule", () => {
     const cron = Cron(cnf, deps);
