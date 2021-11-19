@@ -1,10 +1,10 @@
 import restify from "restify";
-import { Main as RouterMain } from "./router";
-import { Main as Utils } from "./utils";
+import { Router } from "./router";
+import { Utils } from "./utils";
 import { Cnf, Domain, Profile, HttpCodes } from "./defines";
 
 interface Deps {
-  routers(r: ReturnType<ReturnType<ReturnType<typeof RouterMain>>>): void;
+  routers(r: ReturnType<typeof Router>): void;
   domain: Domain;
   httpCodes: HttpCodes;
   swaggerDocJson?: any;
@@ -13,7 +13,6 @@ interface Deps {
 
 export function Main(cnf: Cnf, deps: Deps) {
   const utils = Utils(cnf);
-  const Router = RouterMain(utils);
 
   const { routers, domain, httpCodes, swaggerDocJson, makeProfileHook } = deps;
 
@@ -26,13 +25,23 @@ export function Main(cnf: Cnf, deps: Deps) {
     }),
   );
 
-  const router = Router(server, httpCodes, makeProfileHook)(domain, cnf.apisPath, [
-    cnf.swaggerApiPath,
-    swaggerDocJson,
-  ]);
+  const router = Router({
+    utils,
+    server,
+    httpCodes,
+    makeProfileHook,
+    domain,
+    apisRoute: cnf.apisRoute,
+    swagger: [cnf.swaggerApiPath, swaggerDocJson],
+  });
   routers(router);
 
-  server.listen(cnf.port || 8088, cnf.host || "127.0.0.1", () => {
-    console.log("%s listening at %s", server.name, server.url);
-  });
+  // Http server start
+  return () => {
+    server.listen(cnf.port || 8088, cnf.host || "127.0.0.1", () => {
+      console.log("%s listening at %s", server.name, server.url);
+    });
+
+    return server;
+  };
 }

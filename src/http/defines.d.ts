@@ -1,9 +1,11 @@
+import { any, anyLimit } from "async";
+
 export interface Cnf {
   proxyIps?: string;
   port?: number;
   host?: string;
   bodyMaxBytes?: number;
-  apisPath?: string;
+  apisRoute?: string;
   swaggerApiPath?: string;
   [propName: string]: any;
 }
@@ -36,7 +38,7 @@ export interface HttpCodes {
 }
 
 interface _Domain {
-  [propName: Exclude<string, "_getSchemaByPath">]: (profile: Profile, params: any) => any | _Domain;
+  [propName: string]: (profile: Profile, params: any) => any | _Domain;
 }
 
 export type Domain = _Domain & {

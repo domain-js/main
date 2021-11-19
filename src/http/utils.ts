@@ -1,17 +1,17 @@
-import os from "os";
-import fs from "fs";
-import crypto from "crypto";
+import * as os from "os";
+import * as fs from "fs";
+import * as crypto from "crypto";
 import * as _ from "lodash";
-import xlsx from "xlsx";
+import * as xlsx from "xlsx";
 import { stringify, PlainObject } from "csv-stringify";
-import restify from "restify";
+import * as restify from "restify";
 import { Cnf, Profile } from "./defines";
 
 const str2arr = ["_includes", "dimensions", "metrics", "_attrs"];
 const enc = encodeURI;
 const TMPDIR = os.tmpdir();
 
-export function Main(cnf: Cnf) {
+export function Utils(cnf: Cnf) {
   const proxyIps = new Set((cnf.proxyIps || "127.0.0.1").split(","));
 
   const utils = {
@@ -21,7 +21,7 @@ export function Main(cnf: Cnf) {
     /** 真实的连接请求端ip */
     remoteIp(req: restify.Request) {
       const { socket } = req;
-      return socket && socket.remoteAddress;
+      return socket.remoteAddress || "";
     },
 
     /**
@@ -66,7 +66,7 @@ export function Main(cnf: Cnf) {
         if (signature) {
           obj.sign = {
             signature,
-            uri: req.url,
+            uri: req.url || "/",
             key: req.headers["x-auth-key"] as string,
             timestamp: Number(req.headers["x-auth-timestamp"] as string) | 0,
             signMethod: req.headers["x-auth-sign-method"] as string,
@@ -168,7 +168,7 @@ export function Main(cnf: Cnf) {
           },
         ];
       }
-      const parameters = [];
+      const parameters: any[] = [];
       if (!_.has(schema, "properties")) {
         return parameters;
       }
