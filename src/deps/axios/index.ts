@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { Main as Logger } from "../logger";
-import * as utils from "../utils";
+import * as utils from "../../utils";
 
 type VERBS = "post" | "get" | "put" | "delete";
 interface Cnf {
@@ -30,7 +30,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     })().join("\t");
 
   if (!cnf.axios) cnf.axios = {};
-  const { loggers, retrys, retryTimes, retryIntervalMS, conf } = cnf.axios;
+  const { loggers, retrys, retryTimes = 3, retryIntervalMS = 3000, conf } = cnf.axios;
   const {
     utils: { sleep },
     logger,

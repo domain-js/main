@@ -5,9 +5,11 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "rootDir": "./src/"
   },
-  "include": [
-    "./src/*.ts"
+  "exclude": [
+    "./src/**/*.test.ts",
+    "./src/**/samples/*",
   ]
 }

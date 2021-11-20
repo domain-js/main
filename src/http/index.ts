@@ -1,4 +1,4 @@
-import restify from "restify";
+import * as restify from "restify";
 import { Router } from "./router";
 import { Utils } from "./utils";
 import { Cnf, Domain, Profile, HttpCodes } from "./defines";
