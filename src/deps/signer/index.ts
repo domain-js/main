@@ -1,18 +1,26 @@
-const crypto = require("crypto");
+import * as crypto from "crypto";
 
-function Main() {
-  const generator = (_opt, secret) => {
-    const opt = { ..._opt, signMethod: "HmacSHA256", signVersion: "1" };
+interface Opt {
+  uri: string;
+  key: string;
+  timestamp: number;
+  signMethod: "HmacSHA256";
+  signVersion: "1";
+  method: string;
+}
+
+export function Main() {
+  const generator = (opt: Opt, secret: string) => {
     const string = Object.keys(opt)
-      .map((k) => `${k}=${encodeURIComponent(opt[k])}`)
+      .map((k) => `${k}=${encodeURIComponent(opt[k as keyof Opt])}`)
       .sort()
       .join("&");
     const h = crypto.createHmac("sha256", secret);
     return h.update(string).digest("base64");
   };
 
-  const request = (uri, method, key, secret) => {
-    const opt = {
+  const request = (uri: string, method: string, key: string, secret: string) => {
+    const opt: Opt = {
       uri,
       key,
       timestamp: (Date.now() / 1000) | 0,
@@ -36,6 +44,4 @@ function Main() {
   return { generator, request };
 }
 
-Main.Deps = [];
-
-module.exports = Main;
+export const Deps = [];

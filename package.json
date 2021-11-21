@@ -23,6 +23,7 @@
     "@types/restify": "^8.5.4",
     "@types/restify-errors": "^4.3.4",
     "@types/uuid": "^8.3.3",
+    "@types/validator": "^13.7.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "babel-eslint": "^10.1.0",
@@ -69,6 +70,7 @@
     "restify-errors": "^8.0.2",
     "sequelize": "^6.9.0",
     "swagger-ui-restify": "^3.0.8",
+    "ts-node": "^10.4.0",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.4"
   }
