@@ -9,7 +9,8 @@
     "test:watch": "export NODE_ENV=test && jest ./src --watch",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "lint-staged:js": "eslint --ext .js,.ts"
+    "lint-staged:js": "eslint --ext .js,.ts",
+    "loadDeps": "ts-node src/cli/index.ts loadDeps ./ ts"
   },
   "author": "Redstone Zhao",
   "license": "MIT",

@@ -1,4 +1,4 @@
-export function Main(cnf: any) {
+export function Main() {
   // TODO
   console.log("now: %s", new Date());
 }
