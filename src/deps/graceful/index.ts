@@ -68,6 +68,10 @@ function Graceful(info: Deps["logger"]["info"]) {
   process.on("SIGTERM", exitHandle);
   process.on("SIGINT", exitHandle);
 
+  /**
+   * addListen function be called when process exit
+   * @param listenner
+   */
   const exit = (listenner: Function) => {
     callbacks.push(listenner);
   };

@@ -7,12 +7,7 @@ interface Cnf {
 }
 
 interface Deps {
-  redis: {
-    hget: Redis["hget"];
-    hset: Redis["hset"];
-    hdel: Redis["hdel"];
-    hincrby: Redis["hincrby"];
-  };
+  redis: Pick<Redis, "hget" | "hset" | "hdel" | "hincrby">;
 }
 
 export function Main(cnf: Cnf, deps: Deps) {

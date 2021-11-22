@@ -31,7 +31,7 @@ export function Main(cnf: Cnf) {
 
   const ignores = new Set(ignoreErrors);
 
-  const error = (e: Err, extra?: any) => {
+  const error = (e: any, extra?: any) => {
     if (!e) {
       console.trace("Logger.error but error is null or undefined");
       return;
