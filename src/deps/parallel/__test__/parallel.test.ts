@@ -1,5 +1,4 @@
-const async = require("async");
-const Parallel = require("..");
+import { Main as Parallel } from "..";
 
 describe("Parallel", () => {
   const defaultErrorFn = jest.fn(() => Error("并发控制"));
@@ -9,16 +8,18 @@ describe("Parallel", () => {
   };
   const logger = {
     info: jest.fn(),
+    error: jest.fn(),
   };
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const redis = {
     del: jest.fn(),
+    get: jest.fn(),
     expire: jest.fn(),
     exists: jest.fn(),
     set: jest.fn(),
   };
 
-  const deps = { async, logger, graceful, U: { sleep }, redis };
+  const deps = { logger, graceful, utils: { sleep }, redis };
 
   const fn = jest.fn(async () => {
     await sleep(20);
@@ -170,7 +171,7 @@ describe("Parallel", () => {
   it("case7, throw error when fn exected, minMS isnt 0", async () => {
     const parallel = Parallel(cnf, deps);
     redis.set.mockResolvedValueOnce(1);
-    const fn1 = parallel(fn, { path: "test", minMS: 100 });
+    const fn1 = parallel(fn, { path: "test", minMS: 10 * 1000 });
     fn.mockRejectedValueOnce(Error("出错了"));
     // 不改变函数原有行为
     await expect(fn1()).rejects.toThrow("出错了");
@@ -187,7 +188,7 @@ describe("Parallel", () => {
     expect(redis.expire.mock.calls.length).toBe(1);
     const [KEY1, life] = redis.expire.mock.calls.pop();
     expect(KEY1).toBe("parallel::test");
-    expect(life > 80 <= 100).toBe(true);
+    expect(life >= 9 && life <= 10).toBe(true);
 
     // 等待100ms后也不会执行删除，因为前面已经执行了特定时长的有效期
     await sleep(110);
@@ -197,7 +198,7 @@ describe("Parallel", () => {
   it("case8, noraml, minMS isnt 0", async () => {
     const parallel = Parallel(cnf, deps);
     redis.set.mockResolvedValueOnce(1);
-    const fn1 = parallel(fn, { path: "test", minMS: 100 });
+    const fn1 = parallel(fn, { path: "test", minMS: 10 * 1000 });
     expect(await fn1()).toBe("ok");
     expect(fn.mock.calls.length).toBe(1);
     expect(fn.mock.calls.pop()).toEqual([]);
@@ -212,7 +213,7 @@ describe("Parallel", () => {
     expect(redis.expire.mock.calls.length).toBe(1);
     const [KEY1, life] = redis.expire.mock.calls.pop();
     expect(KEY1).toBe("parallel::test");
-    expect(life > 80 <= 100).toBe(true);
+    expect(life >= 9 && life <= 10).toBe(true);
 
     // 等待100ms后也不会执行删除，因为前面已经执行了特定时长的有效期
     await sleep(110);
@@ -226,13 +227,13 @@ describe("Parallel", () => {
     const fn1 = parallel(fn, { path: "test", keyFn });
     keyFn.mockReturnValue("test-key");
 
-    expect(await fn1("key")).toBe("ok");
+    expect(await fn1()).toBe("ok");
     expect(fn.mock.calls.length).toBe(1);
-    expect(fn.mock.calls.pop()).toEqual(["key"]);
+    expect(fn.mock.calls.pop()).toEqual([]);
 
     // 正确调用了keyFn
     expect(keyFn.mock.calls.length).toBe(1);
-    expect(keyFn.mock.calls.pop()).toEqual(["test", "key"]);
+    expect(keyFn.mock.calls.pop()).toEqual(["test"]);
 
     // 对redis操作的这几个验证至关重要
     expect(redis.set.mock.calls.length).toBe(1);

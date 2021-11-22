@@ -1,6 +1,5 @@
 import * as async from "async";
 import { Redis } from "ioredis";
-import { OptimisticLockError } from "sequelize/types";
 import { Main as Logger } from "../logger";
 import { Main as Graceful } from "../graceful";
 import * as utils from "../../utils";
@@ -8,7 +7,6 @@ import * as utils from "../../utils";
 interface Cnf {
   parallel: {
     key: string;
-    clearTimeout: number;
     defaultErrorFn(path: string, minMS?: number): void;
   };
 }
