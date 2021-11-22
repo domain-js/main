@@ -14,12 +14,6 @@ interface Cnf {
   };
 }
 
-interface Err extends Error {
-  code?: string | number;
-  data?: any;
-  [propName: string]: any;
-}
-
 export function Main(cnf: Cnf) {
   const {
     logger: { errorLogPath, infoLogPath, ignoreErrors, clientId },
