@@ -1,9 +1,28 @@
-function Utils(cnf, deps) {
+import * as _ from "lodash";
+import * as mysql from "mysql2";
+import * as Sequelize from "sequelize";
+import * as moment from "moment";
+import { ModelExtraAtts, Include, TModel, Params } from "./defines";
+
+interface Cnf {
+  rest: {
+    relativeMaxRangeDays?: number;
+  };
+}
+
+interface Deps {
+  errors: {
+    notAllowed: typeof Error;
+    resourceDuplicateAdd: typeof Error;
+  };
+}
+
+export function Utils(cnf: Cnf, deps: Deps) {
   const {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
 
-  const { mysql, errors, _, moment, Sequelize } = deps;
+  const { errors } = deps;
 
   /**
    * 相对多少天的时间
@@ -12,7 +31,7 @@ function Utils(cnf, deps) {
    *
    * @return Date
    */
-  const relativeDays = (days, isStart = true) => {
+  const relativeDays = (days: number, isStart = true) => {
     const now = Date.now();
     const ms = now + days * 86400000;
 
@@ -21,10 +40,10 @@ function Utils(cnf, deps) {
     return new Date(ms + offset);
   };
 
-  const NUMBER_TYPES = new Set(["INTEGER", "FLOAT"]);
-  const pickParams = (params, cols, Model, isAdmin) => {
-    const attr = {};
-    const { rawAttributes, onlyAdminCols } = Model;
+  const pickParams = (params: any, cols: string[], Model: TModel, isAdmin: boolean) => {
+    const attr: { [propName: string]: any } = {};
+
+    const { rawAttributes, onlyAdminCols = [] } = Model;
 
     _.each(cols, (x) => {
       if (!_.has(params, x)) return;
@@ -36,9 +55,6 @@ function Utils(cnf, deps) {
       if (onlyAdminCols && !isAdmin && _.includes(onlyAdminCols, x)) return;
 
       let value = params[x];
-
-      // 如果是数字类型的则数字化
-      if (NUMBER_TYPES.has(C.type.key) && value != null) value = +value;
 
       // 如果字段允许为空，且默认值为 null 则在等于空字符串的时候赋值为 null
       if ((value === "" || value === null || value === undefined) && _.has(C, "defaultValue")) {
@@ -52,8 +68,12 @@ function Utils(cnf, deps) {
   };
 
   // 处理排序参数
-  const sort = (params, conf, includes) => {
-    const value = params._sort;
+  const sort = (
+    params: any,
+    conf: ModelExtraAtts["sort"],
+    includes?: ModelExtraAtts["includes"],
+  ) => {
+    const value: string = params._sort;
     if (!conf) return undefined;
     if (!(value || conf.default)) return undefined;
 
@@ -112,13 +132,18 @@ function Utils(cnf, deps) {
   ]
 ]
 */
-  const searchOpt = (Model, searchStr, qstr, as) => {
+  const searchOpt = (
+    Model: TModel,
+    searchStr: string,
+    qstr?: string,
+    as?: string,
+  ): string[][] | undefined => {
     if (!qstr) return undefined;
     if (!_.isString(qstr)) return undefined;
     const q = qstr.trim() ? _.split(qstr.trim(), " ", 5) : null;
     if (!q) return undefined;
     const searchs = searchStr ? _.split(searchStr, ",") : null;
-    const ors = [];
+    const ors: string[][] = [];
     if (!Model.searchCols) return undefined;
     _.each(Model.searchCols, (conf, col) => {
       // 如果设置了搜索的字段，并且当前字读不在设置的搜索字段内，则直接返回
@@ -140,6 +165,7 @@ function Utils(cnf, deps) {
         }),
       );
     });
+
     return ors;
   };
 
@@ -147,11 +173,11 @@ function Utils(cnf, deps) {
   // 将单个或多个 searchOpt 返回的数组正确的合并成 where 子句, 字符串类型的
   // 这个函数的目的是为了正确的使每个关键词之间的关系是 AND 的关系
   // 单个关键词在不同的搜索字段之间是 OR 的关系
-  const mergeSearchOrs = (orss) => {
-    const ands = [];
-    _.each(orss, (_orss) => {
-      _.each(_orss, (ors) => {
-        _.each(ors, (_or, index) => {
+  const mergeSearchOrs = (orss: string[][][]) => {
+    const ands: string[][] = [];
+    _.each(orss, (_orss: string[][]) => {
+      _.each(_orss, (ors: string[]) => {
+        _.each(ors, (_or: string, index: number) => {
           if (!ands[index]) ands[index] = [];
           ands[index].push(_or);
         });
@@ -165,7 +191,7 @@ function Utils(cnf, deps) {
   // 返回
   // [Model1, Model2]
   // 或者 undefined
-  const modelInclude = (params, includes) => {
+  const modelInclude = (params: any, includes?: ModelExtraAtts["includes"]) => {
     if (!includes) return undefined;
     if (!Array.isArray(params._includes)) return undefined;
     const ret = _.filter(params._includes, (x) => includes[x]);
@@ -180,7 +206,7 @@ function Utils(cnf, deps) {
     maxResultsLimit: 100000,
   });
 
-  const pageParams = (pagination, params) => {
+  const pageParams = (pagination: ModelExtraAtts["pagination"], params: Params) => {
     const _pagination = { ...DEFAULT_PAGE_PARAMS, ...pagination };
     const startIndex = Math.max(params._startIndex | 0, 0);
     const maxResults = Math.max(params._maxResults | 0 || _pagination.maxResults, 1);
@@ -192,10 +218,16 @@ function Utils(cnf, deps) {
 
   const RELATIVE_RANGE_ERROR = errors.notAllowed(`相对时间跨度最多 ${RELATIVE_MAX_RANGE} 天`);
   // findOptFilter 的处理
-  const findOptFilter = (params, name, where, Op, col = name) => {
-    let value;
+  const findOptFilter = (
+    params: Params,
+    name: string,
+    where: any,
+    Op: typeof Sequelize.Op,
+    col: string = name,
+  ) => {
+    let value: any;
     if (!params) return;
-    if (!_.isObject(params)) return;
+    if (typeof params !== "object") return;
 
     // 处理相对时间过滤
     if (_.isString(params[`${name}_relative`])) {
@@ -302,7 +334,7 @@ function Utils(cnf, deps) {
     if (_.isString(params[`${name}_likes`])) {
       const likes = params[`${name}_likes`].trim().split(",");
       if (!where[col]) where[col] = {};
-      where[col][Op.or] = likes.map((x) => {
+      where[col][Op.or] = likes.map((x: string) => {
         value = x.trim().replace(/\*/g, "%");
         return { [Op.like]: value };
       });
@@ -316,7 +348,7 @@ function Utils(cnf, deps) {
     }
 
     // 处理大于，小于, 大于等于，小于等于的判断
-    _.each(["gt", "gte", "lt", "lte"], (x) => {
+    _.each(["gt", "gte", "lt", "lte"], (x: "gt" | "gte" | "lt" | "lte") => {
       const c = `${name}_${x}`;
       if (!_.isString(params[c]) && !_.isNumber(params[c])) return;
       value = _.isString(params[c]) ? params[c].trim() : params[c];
@@ -328,7 +360,7 @@ function Utils(cnf, deps) {
     if (_.isString(params[`${name}_ins`]) || _.isNumber(params[`${name}_ins`])) {
       if (!where[Op.and]) where[Op.and] = [];
       where[Op.and].push(
-        Sequelize.where(
+        (Sequelize as any).where(
           Sequelize.fn("FIND_IN_SET", params[`${name}_ins`], Sequelize.col(name)),
           Op.gte,
           1,
@@ -341,7 +373,11 @@ function Utils(cnf, deps) {
       if (!where[Op.and]) where[Op.and] = [];
       for (const v of params[`${name}_ins_and`].split(",")) {
         where[Op.and].push(
-          Sequelize.where(Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)), Op.gte, 1),
+          (Sequelize as any).where(
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Op.gte,
+            1,
+          ),
         );
       }
     }
@@ -350,11 +386,13 @@ function Utils(cnf, deps) {
     if (_.isString(params[`${name}_ins_or`])) {
       if (!where[Op.and]) where[Op.and] = [];
       where[Op.and].push({
-        [Op.or]: params[`${name}_ins_or`]
-          .split(",")
-          .map((v) =>
-            Sequelize.where(Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)), Op.gte, 1),
+        [Op.or]: params[`${name}_ins_or`].split(",").map((v: string) =>
+          Sequelize.where(
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Op.gte,
+            1 as any, // Sequelize 的定义文件可能有问题，这里类型无法匹配，但是功能是正常的
           ),
+        ),
       });
     }
 
@@ -363,21 +401,21 @@ function Utils(cnf, deps) {
       if (!where[Op.and]) where[Op.and] = [];
       for (const v of params[`${name}_ins_not`].split(",")) {
         where[Op.and].push(
-          Sequelize.where(Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)), Op.lt, 1),
+          Sequelize.where(
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Op.lt,
+            1 as any,
+          ),
         );
       }
     }
   };
 
   // 返回列表查询的条件
-  const findAllOpts = (Model, params) => {
-    const {
-      sequelize: {
-        Sequelize: { Op },
-      },
-    } = Model;
-    const where = {};
-    const searchOrs = [];
+  const findAllOpts = (Model: TModel, params: Params) => {
+    const { Op } = Sequelize;
+    const where: Record<string, any> = {};
+    const searchOrs: string[][][] = [];
     const includes = modelInclude(params, Model.includes);
     _.each(Model.filterAttrs || _.keys(Model.rawAttributes), (name) => {
       findOptFilter(params, name, where, Op);
@@ -387,13 +425,14 @@ function Utils(cnf, deps) {
     }
 
     // 将搜索条件添加到主条件上
-    searchOrs.push(searchOpt(Model, params._searchs, params.q));
+    const searchOptRes = searchOpt(Model, params._searchs, params.q);
+    if (searchOptRes) searchOrs.push(searchOptRes);
 
     // 处理关联资源的过滤条件
     // 以及关联资源允许返回的字段
     if (includes) {
-      _.each(includes, (x) => {
-        const includeWhere = {};
+      _.each(includes, (x: Include & { where?: any; attributes?: string[] }) => {
+        const includeWhere: any = {};
         const filterAttrs = x.model.filterAttrs || _.keys(x.model.rawAttributes);
         _.each(filterAttrs, (name) => {
           findOptFilter(params, `${x.as}.${name}`, includeWhere, Op, name);
@@ -404,7 +443,8 @@ function Utils(cnf, deps) {
         }
 
         // 将搜索条件添加到 include 的 where 条件上
-        searchOrs.push(searchOpt(x.model, params._searchs, params.q, x.as));
+        const searchOptResII = searchOpt(x.model, params._searchs, params.q, x.as);
+        if (searchOptResII) searchOrs.push(searchOptResII);
 
         x.where = includeWhere;
 
@@ -413,16 +453,16 @@ function Utils(cnf, deps) {
       });
     }
 
-    const ret = {
+    const ret: any = {
       include: includes,
       order: sort(params, Model.sort, Model.includes),
     };
     // 将 searchOrs 赋到 where 上
-    const _searchOrs = _.filter(_.compact(searchOrs), (x) => x.length);
+    const _searchOrs = _.filter(_.compact(searchOrs), (x) => x.length) as string[][][];
 
     if (_.size(where)) {
       if (_searchOrs.length) {
-        ret.where = Sequelize.and(where, Sequelize.literal(mergeSearchOrs(_searchOrs)));
+        ret.where = (Sequelize as any).and(where, Sequelize.literal(mergeSearchOrs(_searchOrs)));
       } else {
         ret.where = where;
       }
@@ -449,5 +489,3 @@ function Utils(cnf, deps) {
     pageParams,
   });
 }
-
-module.exports = Utils;

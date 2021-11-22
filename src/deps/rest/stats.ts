@@ -1,6 +1,9 @@
-function Main(cnf, deps, utils) {
-  const { _ } = deps;
+import * as _ from "lodash";
+import * as Sequelize from "sequelize";
+import { Params, ModelExtraAtts, TModel } from "./defines";
+import { Utils } from "./utils";
 
+export function Stats(cnf: {}, deps: {}, utils: ReturnType<typeof Utils>) {
   const defaultPagination = {
     maxResults: 10,
     maxStartIndex: 10000,
@@ -8,26 +11,25 @@ function Main(cnf, deps, utils) {
   };
 
   // 获取统计的条目数
-  const statsCount = async (Model, opts, dims) => {
+  const statsCount = async (Model: TModel, opts: any, dims: [string, string][]) => {
     if (!dims) return 1;
     if (!dims.length) return 1;
-    const {
-      sequelize: { Sequelize },
-    } = Model;
-    const option = { raw: true };
+    const option: Parameters<typeof Model.findOne>[0] = { raw: true };
     if (opts.where) option.where = opts.where;
     if (opts.include) option.include = opts.include;
     const distincts = _.map(dims, (x) => x[0]);
-    option.attributes = [Sequelize.literal(`COUNT(DISTINCT ${distincts.join(", ")}) AS count`)];
-    const res = await Model.findOne(option);
+    option.attributes = [
+      Sequelize.literal(`COUNT(DISTINCT ${distincts.join(", ")}) AS count`) as any,
+    ];
+    const res = (await (Model as any).findOne(option)) as any;
 
     return (res && res.count) || 0 | 0;
   };
 
-  const getDimensions = (Model, dimensions, _dims) => {
-    const dims = [];
+  const getDimensions = (Model: TModel, dimensions: string[], _dims?: Record<string, string>) => {
+    const dims: [string, string][] = [];
 
-    if (!dimensions) return dims;
+    if (!dimensions || !Model.stats || !Model.stats.dimensions) return dims;
 
     // 如果 dimensions 未定义则直接退出
     if (!Array.isArray(dimensions)) throw Error("维度未定义");
@@ -35,7 +37,9 @@ function Main(cnf, deps, utils) {
     // 循环遍历维度设置
     _.each(dimensions, (dim) => {
       // Model 静态的配置
-      const key = Model.stats.dimensions[dim] || (_dims && _dims[dim]);
+      let key: string | undefined;
+      if (Model.stats && Model.stats.dimensions) key = Model.stats.dimensions[dim];
+      if (!key) key = _dims && _dims[dim];
       // 如果不在允许的范围内，则直接报错
       if (!key) throw Error("Dimensions dont allowed");
       dims.push([key, dim]);
@@ -44,15 +48,15 @@ function Main(cnf, deps, utils) {
     return dims;
   };
 
-  const group = (dims) => {
+  const group = (dims?: [string, string][]) => {
     if (!dims) return undefined;
     if (!_.isArray(dims)) return undefined;
     if (!dims.length) return undefined;
     return _.map(dims, (x) => x[1]);
   };
 
-  const getMetrics = (Model, metrics, _mets) => {
-    const mets = [];
+  const getMetrics = (Model: TModel, metrics: string[], _mets: Record<string, string>) => {
+    const mets: [string, string][] = [];
 
     // 如果设置了，但是不为字符串，直接返回错误
     if (!Array.isArray(metrics)) throw Error("指标未定义");
@@ -60,7 +64,9 @@ function Main(cnf, deps, utils) {
     // 循环遍历所有的指标
     _.each(metrics, (met) => {
       // 处理静态的配置
-      const key = Model.stats.metrics[met] || (_mets && _mets[met]);
+      let key: string | undefined;
+      if (Model.stats && Model.stats.metrics) key = Model.stats.metrics[met];
+      if (!key) key = _mets && _mets[met];
       // 如果指标不在允许的范围内，则直接报错
       if (!key) throw Error("Metrics dont allowed");
       mets.push([key, met]);
@@ -69,17 +75,13 @@ function Main(cnf, deps, utils) {
     return mets;
   };
 
-  const getSort = (Model, params) => {
-    const {
-      sequelize: { Sequelize },
-    } = Model;
+  const getSort = (Model: TModel, params: Params) => {
     const sort = params._sort;
-    let allowSort = [];
-
     if (!sort) return undefined;
 
-    const isDesc = sort[0] === "-";
+    let allowSort: string[] = [];
 
+    const isDesc = sort[0] === "-";
     const direction = isDesc ? "DESC" : "ASC";
     const order = isDesc ? sort.substring(1) : sort;
 
@@ -94,16 +96,22 @@ function Main(cnf, deps, utils) {
     return [[Sequelize.literal(order), direction]];
   };
 
-  const pageParams = (Model, params) => {
-    const pagination = Model.stats.pagination || defaultPagination;
+  const pageParams = (Model: TModel, params: Params) => {
+    const pagination = Model.stats?.pagination || defaultPagination;
     return utils.pageParams(pagination, params);
   };
 
-  const statistics = async (Model, params, where, conf) => {
+  const statistics = async (
+    Model: TModel,
+    params: Params,
+    where: any,
+    conf?: ModelExtraAtts["stats"],
+  ) => {
+    if (!conf) throw Error("Model.stats undefined");
     const { dimensions, metrics, _ignoreTotal } = params;
-    const option = {};
-    const dims = getDimensions(Model, dimensions, conf && conf.dimensions);
-    const mets = getMetrics(Model, metrics, conf && conf.metrics);
+    const option: Sequelize.FindOptions<typeof Model["rawAttributes"]> = {};
+    const dims = getDimensions(Model, dimensions, conf.dimensions);
+    const mets = getMetrics(Model, metrics, conf.metrics);
     const limit = pageParams(Model, params);
     const listOpts = utils.findAllOpts(Model, params);
     const ands = [];
@@ -117,7 +125,7 @@ function Main(cnf, deps, utils) {
       }
     }
     Object.assign(option, {
-      attributes: [].concat(dims || [], mets),
+      attributes: ([].concat as any)(dims || [], mets),
       group: group(dims),
       order: getSort(Model, params),
       offset: limit.offset,
@@ -125,7 +133,7 @@ function Main(cnf, deps, utils) {
       raw: true,
     });
     if (ands.length) {
-      option.where = Model.sequelize.and(...ands);
+      option.where = (Model as any).sequelize.and(...ands);
     }
 
     if (listOpts.include) {
@@ -139,7 +147,7 @@ function Main(cnf, deps, utils) {
     opt.raw = true;
     let count = 0;
     if (_ignoreTotal !== "yes") count = await statsCount(Model, opt, dims);
-    const rows = await Model.findAll(opt);
+    const rows = await (Model.findAll as any)(opt);
     for (const x of rows) {
       for (const met of metrics) {
         x[met] = x[met] ? Number(x[met]) : 0;
@@ -150,5 +158,3 @@ function Main(cnf, deps, utils) {
 
   return statistics;
 }
-
-module.exports = Main;

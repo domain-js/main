@@ -66,6 +66,8 @@
     "ioredis": "^4.28.0",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
+    "moment": "^2.29.1",
+    "mysql2": "^2.3.3",
     "restify": "^8.6.0",
     "restify-errors": "^8.0.2",
     "sequelize": "^6.9.0",
