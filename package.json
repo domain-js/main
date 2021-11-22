@@ -55,7 +55,6 @@
     ]
   },
   "dependencies": {
-    "@open-node/graceful": "^0.4.0",
     "ajv": "^8.8.1",
     "ajv-formats": "^2.1.1",
     "async": "^3.2.2",

@@ -8,8 +8,6 @@
     "strict": true,
     "rootDir": "./src/"
   },
-  "exclude": [
-    "./src/**/*.test.ts",
-    "./src/**/samples/*",
-  ]
+  "include": ["./"],
+  "exclude": ["./src/**/*.test.ts", "./src/**/samples/*", "node_modules", "dist"]
 }

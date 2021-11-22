@@ -17,15 +17,6 @@ interface Deps {
   swagger?: [any, any];
 }
 
-type RouterVerbFn = (
-  routePath: string,
-  ctlAct: string,
-  code?: number,
-  isList?: boolean,
-  handler?: Function,
-  resHandler?: Function,
-) => void;
-
 export function Router(deps: Deps) {
   const {
     domain,
