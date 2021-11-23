@@ -1,20 +1,21 @@
-const _ = require("lodash");
-const Sequelize = require("sequelize");
-const Rest = require("..");
+import * as _ from "lodash";
+import { Main as Rest } from "..";
 
-const errors = {};
+const errors = {
+  notAllowed: jest.fn(),
+  resourceDuplicateAdd: jest.fn(),
+};
 
 describe("helper.list", () => {
   const utils = {
     findAllOpts: jest.fn(),
   };
 
-  const { list } = Rest({}, { _, errors, Sequelize }, utils);
+  const { list } = Rest({ rest: {} }, { errors }, utils as any);
   it("case1", async () => {
     const Model = {
       count: jest.fn(),
       findAll: jest.fn(),
-      sequelize: { Sequelize },
       rawAttributes: {},
     };
     Model.count.mockResolvedValueOnce(0);
@@ -25,7 +26,7 @@ describe("helper.list", () => {
       order: [],
     });
     const params = {};
-    expect(await list(Model, params)).toEqual({ rows: [], count: 0 });
+    expect(await list(Model as any, params)).toEqual({ rows: [], count: 0 });
 
     expect(Model.count.mock.calls.length).toBe(1);
     expect(Model.count.mock.calls.pop()).toEqual([
@@ -52,7 +53,6 @@ describe("helper.list", () => {
     const Model = {
       count: jest.fn(),
       findAll: jest.fn(),
-      sequelize: { Sequelize },
       rawAttributes: {},
     };
     Model.count.mockResolvedValueOnce(0);
@@ -66,7 +66,7 @@ describe("helper.list", () => {
       _ignoreTotal: "yes",
     };
     const allowAttrs = ["id", "name"];
-    expect(await list(Model, params, allowAttrs)).toEqual({
+    expect(await list(Model as any, params, allowAttrs)).toEqual({
       rows: [{ id: 1, name: "redstone" }],
       count: 0,
     });

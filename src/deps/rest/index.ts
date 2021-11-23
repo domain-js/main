@@ -9,8 +9,9 @@ export { Before } from "./Before";
 type Cnf = Parameters<typeof Utils>[0] & Parameters<typeof Stats>[0];
 type Deps = Parameters<typeof Utils>[1] & Parameters<typeof Stats>[1];
 
+type UserId = string | number;
 interface CreatorAndClientIp {
-  creatorId: number;
+  creatorId: UserId;
   clientIp: string;
 }
 
@@ -22,10 +23,10 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     Model: TModel,
     model: Sequelize.Model,
     params: Params,
-    isAdmin: boolean,
-    _cols: string[],
+    isAdmin = false,
+    _cols?: string[],
   ) => {
-    const cols = _cols || Model.editableCols || Model.writableCols;
+    const cols = _cols || Model.editableCols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
     // 避免id 被篡改，强制删除id属性
@@ -39,11 +40,11 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   const add = async (
     Model: TModel,
     params: Params,
-    isAdmin: boolean,
-    _cols: string[],
+    isAdmin = false,
+    _cols: string[] | undefined,
     { creatorId, clientIp }: CreatorAndClientIp,
   ) => {
-    const cols = _cols || Model.writableCols;
+    const cols = _cols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
     if (Model.rawAttributes.creatorId) attr.creatorId = creatorId;
@@ -69,9 +70,9 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   };
 
   const TRASH_OPT = Object.freeze({ fields: ["isDeleted", "deletorId"] });
-  const remove = async (model: Sequelize.Model, deletorId: number) => {
+  const remove = async (model: Sequelize.Model, deletorId: UserId) => {
     // 未开启回收站，直接删除
-    if ((model as any).isDeleted) return model.destroy();
+    if (!(model as any).isDeleted) return model.destroy();
     // 这里不做字段是否存在的判断，无所谓
     (model as any).deletorId = deletorId;
     (model as any).isDeleted = "yes";

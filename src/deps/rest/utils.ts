@@ -12,8 +12,8 @@ interface Cnf {
 
 interface Deps {
   errors: {
-    notAllowed: typeof Error;
-    resourceDuplicateAdd: typeof Error;
+    notAllowed: (...args: any[]) => Error;
+    resourceDuplicateAdd: (...args: any[]) => Error;
   };
 }
 

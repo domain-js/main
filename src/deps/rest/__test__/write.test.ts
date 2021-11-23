@@ -1,18 +1,20 @@
-const _ = require("lodash");
-const Rest = require("..");
+import { Main as Rest } from "..";
 
 const utils = {
   pickParams: jest.fn(),
 };
 
 const errors = {
+  notAllowed() {
+    return new Error("重复添加资源");
+  },
   resourceDuplicateAdd() {
-    return Error("重复添加资源");
+    return new Error("重复添加资源");
   },
 };
 
 describe("rest.write", () => {
-  const helper = Rest({}, { _, errors }, utils);
+  const helper = Rest({ rest: {} }, { errors }, utils as any);
   describe("modify", () => {
     it("case1", async () => {
       const Model = {
@@ -25,12 +27,12 @@ describe("rest.write", () => {
       };
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       model.save.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
-      expect(await helper.modify(Model, model, params, isAdmin, _cols)).toBe(model);
-      expect(model.name).toBe("Redstone Zhao");
-      expect(model.age).toBe(25);
+      expect(await helper.modify(Model as any, model as any, params, isAdmin, _cols)).toBe(model);
+      expect((model as any).name).toBe("Redstone Zhao");
+      expect((model as any).age).toBe(25);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([
@@ -51,16 +53,16 @@ describe("rest.write", () => {
       };
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       model.save.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({
         id: 2345,
         name: "Redstone Zhao",
         age: 25,
       });
-      expect(await helper.modify(Model, model, params, isAdmin, _cols)).toBe(model);
-      expect(model.name).toBe("Redstone Zhao");
-      expect(model.age).toBe(25);
+      expect(await helper.modify(Model as any, model as any, params, isAdmin, _cols)).toBe(model);
+      expect((model as any).name).toBe("Redstone Zhao");
+      expect((model as any).age).toBe(25);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
@@ -83,12 +85,12 @@ describe("rest.write", () => {
       const clientIp = "clientIp";
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       Model.create.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
-      expect(await helper.add(Model, params, isAdmin, _cols, { creatorId, clientIp })).toEqual(
-        model,
-      );
+      expect(
+        await helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
+      ).toEqual(model);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
@@ -112,12 +114,12 @@ describe("rest.write", () => {
       const clientIp = "clientIp";
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       Model.create.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
-      expect(await helper.add(Model, params, isAdmin, _cols, { creatorId, clientIp })).toEqual(
-        model,
-      );
+      expect(
+        await helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
+      ).toEqual(model);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
@@ -150,12 +152,12 @@ describe("rest.write", () => {
       const clientIp = "clientIp";
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       Model.create.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
-      expect(await helper.add(Model, params, isAdmin, _cols, { creatorId, clientIp })).toEqual(
-        model,
-      );
+      expect(
+        await helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
+      ).toEqual(model);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
@@ -197,13 +199,13 @@ describe("rest.write", () => {
       const clientIp = "clientIp";
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       model.save.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
       Model.findOne.mockResolvedValueOnce(model);
-      expect(await helper.add(Model, params, isAdmin, _cols, { creatorId, clientIp })).toEqual(
-        model,
-      );
+      expect(
+        await helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
+      ).toEqual(model);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
       expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
@@ -237,11 +239,11 @@ describe("rest.write", () => {
       const clientIp = "clientIp";
       const params = {};
       const isAdmin = false;
-      const _cols = null;
+      const _cols = undefined;
       Model.findOne.mockReturnValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
       await expect(
-        helper.add(Model, params, isAdmin, _cols, { creatorId, clientIp }),
+        helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
       ).rejects.toThrow("重复");
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
@@ -265,7 +267,7 @@ describe("rest.write", () => {
       };
 
       model.destroy.mockResolvedValueOnce(model);
-      expect(await helper.remove(model, "creatorId")).toEqual(model);
+      expect(await helper.remove(model as any, "creatorId")).toEqual(model);
     });
 
     it("case2", async () => {
@@ -275,7 +277,7 @@ describe("rest.write", () => {
       };
 
       model.save.mockResolvedValueOnce(model);
-      expect(await helper.remove(model, "creatorId")).toMatchObject({
+      expect(await helper.remove(model as any, "creatorId")).toMatchObject({
         isDeleted: "yes",
         deletorId: "creatorId",
       });
