@@ -17,7 +17,7 @@ export function exec<
 >(
   Main: MainFn,
   Before: BeforeFn = ((...args: Args) => args) as unknown as BeforeFn,
-  After: AfterFn | undefined,
+  After: AfterFn | undefined = undefined,
   _args: Args = [] as unknown as Args,
 ): ReturnType<MainFn> {
   const args = Before(..._args);

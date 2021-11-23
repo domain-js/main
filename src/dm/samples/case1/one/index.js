@@ -9,8 +9,6 @@ function Main(cnf, deps) {
   return { sayHi };
 }
 
-Main.Before = Before;
-Main.After = After;
-Main.Deps = ["two", "three"];
+const Deps = ["two", "three"];
 
-module.exports = Main;
+module.exports = { Main, Before, After, Deps };

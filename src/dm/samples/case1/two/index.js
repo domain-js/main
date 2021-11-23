@@ -5,4 +5,4 @@ function Main(cnf, deps, _name, time) {
   return { sayHi };
 }
 
-module.exports = Main;
+module.exports = { Main };

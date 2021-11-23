@@ -1,5 +1,6 @@
-const _ = require("lodash");
-const { DM } = require("..");
+import * as _ from "lodash";
+import * as dm from "..";
+
 const case1 = require("../samples/case1");
 const case2 = require("../samples/case2-incorrect");
 const case3 = require("../samples/case3-incorrect");
@@ -9,7 +10,6 @@ const case6 = require("../samples/case6-incorrect");
 describe("Dependency Injection Manager.", () => {
   describe("exec", () => {
     it("case1, no hooks", () => {
-      const dm = DM(_);
       const Main = jest.fn();
       Main.mockReturnValueOnce({
         sayHi() {
@@ -23,7 +23,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case2, before hook only", () => {
-      const dm = DM(_);
       const Main = jest.fn();
       const Before = jest.fn();
       Main.mockReturnValueOnce({
@@ -43,7 +42,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case3, after hook only", () => {
-      const dm = DM(_);
       const Main = jest.fn();
       const After = jest.fn();
       Main.mockReturnValueOnce({
@@ -62,7 +60,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case4, before And after hook both exists", () => {
-      const dm = DM(_);
       const Main = jest.fn();
       const Before = jest.fn();
       const After = jest.fn();
@@ -88,17 +85,15 @@ describe("Dependency Injection Manager.", () => {
 
   describe("auto", () => {
     it("case1", () => {
-      const dm = DM(_);
       const deps = {};
       dm.auto(case1, deps, [{}, deps]);
 
-      expect(deps.one.sayHi()).toBe("hi from one");
-      expect(deps.two.sayHi()).toBe("hi from two");
-      expect(deps.three.sayHi()).toBe("hi from three");
+      expect((deps as any).one.sayHi()).toBe("hi from one");
+      expect((deps as any).two.sayHi()).toBe("hi from two");
+      expect((deps as any).three.sayHi()).toBe("hi from three");
     });
 
     it("case1-incorrect", () => {
-      const dm = DM(_);
       const deps = { one: "hello" };
       expect(() => {
         dm.auto(case1, deps, [{}, deps]);
@@ -106,7 +101,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case1-incorrect After isnot function", () => {
-      const dm = DM(_);
       const deps = {};
       case1.one.After = 1000;
       expect(() => {
@@ -115,7 +109,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case2-incorrect", () => {
-      const dm = DM(_);
       const deps = {};
       expect(() => {
         dm.auto(case2, deps, [{}, deps]);
@@ -123,7 +116,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case3-incorrect", () => {
-      const dm = DM(_);
       const deps = {};
       expect(() => {
         dm.auto(case3, deps, [{}, deps]);
@@ -131,7 +123,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case6, module must be funciton", () => {
-      const dm = DM(_);
       const deps = {};
       expect(() => {
         dm.auto(case5, deps, [{}, deps]);
@@ -139,7 +130,6 @@ describe("Dependency Injection Manager.", () => {
     });
 
     it("case7, module hooks must be funciton", () => {
-      const dm = DM(_);
       const deps = {};
       expect(() => {
         dm.auto(case6, deps, [{}, deps]);

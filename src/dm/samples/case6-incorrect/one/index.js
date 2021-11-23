@@ -7,7 +7,4 @@ const Main = () => ({
   },
 });
 
-Main.Before = Before;
-Main.After = After;
-
-module.exports = Main;
+module.exports = { Main, Before, After };

@@ -1,6 +1,9 @@
 import * as DM from "./dm";
-
 import Deps = require("./deps/defines");
+
+export { Main as Http } from "./http";
+export * as DM from "./dm";
+export * as utils from "./utils";
 
 type TDeps = typeof Deps;
 type Merge<T> = {

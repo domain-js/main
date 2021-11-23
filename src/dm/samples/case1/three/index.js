@@ -5,6 +5,6 @@ function Main(cnf, deps, _name, time) {
   return { sayHi };
 }
 
-Main.Deps = ["two"];
+const Deps = ["two"];
 
-module.exports = Main;
+module.exports = { Main, Deps };
