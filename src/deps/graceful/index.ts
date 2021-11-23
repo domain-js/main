@@ -118,7 +118,7 @@ function Graceful(info: Deps["logger"]["info"]) {
   };
 }
 
-export function Main(cnf: any, deps: Deps) {
+export function Main(cnf: {}, deps: Deps) {
   const { logger } = deps;
 
   return Graceful(logger.info);

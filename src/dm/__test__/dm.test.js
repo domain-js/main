@@ -1,5 +1,5 @@
 const _ = require("lodash");
-const { DM } = require("../dm.ts");
+const { DM } = require("..");
 const case1 = require("../samples/case1");
 const case2 = require("../samples/case2-incorrect");
 const case3 = require("../samples/case3-incorrect");

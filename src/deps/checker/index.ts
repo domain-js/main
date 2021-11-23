@@ -6,7 +6,7 @@ interface Deps {
   };
 }
 
-export function Main(_: any, deps: Deps) {
+export function Main(cnf: {}, deps: Deps) {
   const { errors } = deps;
 
   /** 检测两个值是否相等 */

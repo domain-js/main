@@ -1,8 +1,6 @@
-import _ = require("lodash");
-import { DM } from "../dm";
+import * as dm from "..";
 
 describe("dm unit test by typescript", () => {
-  const dm = DM(_);
   type Gender = "male" | "female";
   interface MainInterface {
     get: () => { name: string; gender: Gender };
@@ -79,18 +77,19 @@ describe("dm unit test by typescript", () => {
 
   describe("auto", () => {
     it("case2.1", () => {
-      const test2 = Object.assign(
-        (name: string, gender: Gender, age: number) =>
-          `Name: ${name}, Gender: ${gender}, Age: ${age} years.`,
-        {
-          Before: (name: string, gender: Gender): [string, Gender, number] => [name, gender, 30],
+      const test2 = {
+        Main(name: string, gender: Gender, age: number) {
+          return `Name: ${name}, Gender: ${gender}, Age: ${age} years.`;
         },
-      );
+        Before(name: string, gender: Gender): [string, Gender, number] {
+          return [name, gender, 30];
+        },
+      };
       const modules = {
         profile: { Main, Before, After },
         test1: { Main, Before, After },
         test2,
-        test3: { main: Main, Before, After },
+        test3: { Main, Before, After },
       };
 
       const deps = dm.auto(modules, {}, ["redstone", "male"]);

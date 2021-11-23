@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 
-interface Opt {
+export interface Opt {
   uri: string;
   key: string;
   timestamp: number;

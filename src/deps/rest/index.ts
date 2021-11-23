@@ -10,7 +10,7 @@ type Cnf = Parameters<typeof Utils>[0] & Parameters<typeof Stats>[0];
 type Deps = Parameters<typeof Utils>[1] & Parameters<typeof Stats>[1];
 
 type UserId = string | number;
-interface CreatorAndClientIp {
+export interface CreatorAndClientIp {
   creatorId: UserId;
   clientIp: string;
 }

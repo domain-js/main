@@ -2,7 +2,11 @@ import * as util from "util";
 import Ajv, { Schema } from "ajv";
 import addFormats from "ajv-formats";
 
-export function Main(cnf: { schema?: ConstructorParameters<typeof Ajv>[0] }) {
+interface Cnf {
+  schema?: ConstructorParameters<typeof Ajv>[0];
+}
+
+export function Main(cnf: Cnf) {
   const ajv = new Ajv(cnf.schema || {});
   addFormats(ajv);
 

@@ -29,7 +29,7 @@ interface Deps {
 }
 
 /* 统计相关属性 */
-interface Stats {
+export interface Stats {
   pendings: number;
   doings: number;
   errors: number;
