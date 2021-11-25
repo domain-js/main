@@ -10,11 +10,24 @@ type Merge<T> = {
   [k in keyof T]: T[k];
 };
 
-type Cnf = Merge<TDeps[keyof TDeps]["Main"] extends (arg: infer R, ...args: any[]) => any ? R : {}>;
-type Deps = {};
+/**
+ * Include from T those types that are assignable to U
+ */
+type Include<T, U> = T extends U ? T : never;
+type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
-export function Main(cnf: Cnf) {
-  const deps = {};
-  const modules = DM.auto(Deps, deps, [cnf, deps]);
-  return modules;
+export function Main<T extends Readonly<(keyof TDeps)[]>>(ms: T) {
+  /** 模块名称联合类型 */
+  type MS = RemoveReadonlyArray<T>;
+  type Cnf = Merge<
+    TDeps[Include<keyof TDeps, MS>]["Main"] extends (arg: infer R, ...args: any[]) => any ? R : {}
+  >;
+
+  return (cnf: Cnf) => {
+    const deps = {};
+    for (const x of ms) delete Deps[x];
+
+    const modules = DM.auto(Deps as Pick<TDeps, MS>, deps, [cnf, deps]);
+    return modules;
+  };
 }
