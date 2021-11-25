@@ -18,7 +18,7 @@ type Merge<T> = {
 type Include<T, U> = T extends U ? T : never;
 type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
-export function Main<T extends Readonly<(keyof TDeps)[]>>(ms: T) {
+export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
   /** 模块名称联合类型 */
   type MS = RemoveReadonlyArray<T>;
   type Cnf = Merge<
@@ -28,7 +28,7 @@ export function Main<T extends Readonly<(keyof TDeps)[]>>(ms: T) {
   return (cnf: Cnf) => {
     const deps = {};
 
-    const modules = DM.auto(_.pick(Deps, ms) as Pick<TDeps, MS>, deps, [cnf, deps]);
+    const modules = DM.auto(_.pick(Deps, features) as Pick<TDeps, MS>, deps, [cnf, deps]);
     return modules;
   };
 }
