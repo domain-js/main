@@ -9,5 +9,24 @@ describe("@domain.js/main index", () => {
       expect(typeof DM.exec).toBe("function");
       expect(typeof utils).toBe("object");
     });
+
+    it("case2", () => {
+      const features = ["aes"] as const;
+      const Start = Main(features);
+
+      const deps = Start({});
+      expect(typeof deps.aes.encrypt).toBe("function");
+      expect(typeof (deps as any).cache).toBe("undefined");
+      expect(typeof (deps as any).axios).toBe("undefined");
+      expect(typeof (deps as any).cia).toBe("undefined");
+    });
+
+    it("case3", () => {
+      const Start = Main(["aes", "cache"]);
+
+      expect(() => {
+        Start({});
+      }).toThrow("conflict");
+    });
   });
 });

@@ -1,4 +1,6 @@
+import * as _ from "lodash";
 import * as DM from "./dm";
+
 import Deps = require("./deps/defines");
 
 export { Main as Http } from "./http";
@@ -25,9 +27,8 @@ export function Main<T extends Readonly<(keyof TDeps)[]>>(ms: T) {
 
   return (cnf: Cnf) => {
     const deps = {};
-    for (const x of ms) delete Deps[x];
 
-    const modules = DM.auto(Deps as Pick<TDeps, MS>, deps, [cnf, deps]);
+    const modules = DM.auto(_.pick(Deps, ms) as Pick<TDeps, MS>, deps, [cnf, deps]);
     return modules;
   };
 }
