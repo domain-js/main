@@ -6,14 +6,29 @@ interface Cnf {
   schema?: ConstructorParameters<typeof Ajv>[0];
 }
 
+/**
+ * JSON schema validation module, based on Ajv: https://www.npmjs.com/package/ajv
+ * @param cnf Ajv initialization parameters
+ * @returns auto, validate, complie, ajv
+ */
 export function Main(cnf: Cnf) {
   const ajv = new Ajv(cnf.schema || {});
   addFormats(ajv);
 
-  const compile = (x: Schema) => ajv.compile(x);
+  /**
+   * Ajv complie function
+   * @param schema Definition of data format, Ajv specification
+   * @returns Verification function
+   */
+  const compile = (schema: Schema) => ajv.compile(schema);
 
   /**
-   * 将函数处理为自动校验参数合法性
+   * Automatically process functions as functions with parameter validate
+   * @param fn Function to be processed
+   * @param schema Format definition of function parameters, Ajv specification
+   * @param errorFn Error handling function
+   * @param extra Additional information passed to the error function
+   * @returns Processed function
    */
   function auto<F extends(...args: any[]) => any>(
     fn: F,
@@ -22,7 +37,7 @@ export function Main(cnf: Cnf) {
     extra: any,
   ) {
     if (!Array.isArray(schema)) {
-      throw Error(`方法参数定义必须是一个数组 ${util.format(schema)}`);
+      throw Error(`Method arguments must be an array: ${util.format(schema)}`);
     }
     const validators = schema.map((x: Schema) => ajv.compile(x));
 
@@ -38,12 +53,21 @@ export function Main(cnf: Cnf) {
   }
 
   /**
-   * 检测数据是否符合 schema 设定
+   * Verification functoin
+   * @param schema Definition of data format, Ajv specification
+   * @param data Data to be verified
+   * @returns ture or throw ajv.errors
    */
   const validate = (schema: Schema, data: any) => {
     if (ajv.validate(schema, data)) return true;
     throw ajv.errors;
   };
 
-  return Object.freeze({ auto, validate, compile, ajv });
+  return Object.freeze({
+    auto,
+    validate,
+    compile,
+    /** intance of Ajv */
+    ajv,
+  });
 }

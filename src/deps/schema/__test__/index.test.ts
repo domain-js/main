@@ -32,7 +32,7 @@ describe("@domain.js/schema", () => {
       const fn = jest.fn((x) => x);
       expect(() =>
         schema.auto(fn, { type: "string" } as unknown as any[], errorFn, { foo: "bar" }),
-      ).toThrow("参数");
+      ).toThrow("Method arguments must be an array");
     });
   });
 
