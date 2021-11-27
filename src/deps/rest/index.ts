@@ -11,14 +11,32 @@ type Deps = Parameters<typeof Utils>[1] & Parameters<typeof Stats>[1];
 
 type UserId = string | number;
 export interface CreatorAndClientIp {
+  /** ID of the resource creator */
   creatorId: UserId;
+  /** IP of the resource creator */
   clientIp: string;
 }
 
+/**
+ * Standard(CRUD) restful module, including list, add, edit, delete and statistics
+ * @param cnf Configuration information of initialization function
+ * @param deps Dependent object of the initialization function
+ * @param utils Tool function object
+ * @returns modify, add, remove, list, stats five methods
+ */
 export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   const { errors } = deps;
   const { findAllOpts, pickParams } = utils;
 
+  /**
+   * Restful modify(U of CRUD) for update a resource
+   * @param Model Model definition of resources
+   * @param model the resources will be updated
+   * @param params parameters for updating
+   * @param isAdmin Is it an administrator
+   * @param _cols Allow columns to be updated
+   * @returns The resource that has been updated
+   */
   const modify = (
     Model: TModel,
     model: Sequelize.Model,
