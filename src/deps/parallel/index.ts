@@ -6,19 +6,24 @@ import * as utils from "../../utils";
 
 interface Cnf {
   parallel: {
+    /** Record the redis key prefix of the concurrency control lock */
     key: string;
+    /** Default error handler function */
     defaultErrorFn(path: string, minMS?: number): void;
   };
 }
 
 interface Deps {
+  /** logger mudule */
   logger: {
     info: ReturnType<typeof Logger>["info"];
     error: ReturnType<typeof Logger>["error"];
   };
+  /** gracefule module */
   graceful: {
     exit: ReturnType<typeof Graceful>["exit"];
   };
+  /** redis instance */
   redis: Pick<Redis, "get" | "set" | "del" | "expire" | "exists">;
 }
 
@@ -37,6 +42,12 @@ export interface Option {
   neverReturn?: boolean;
 }
 
+/**
+ * Parallel control module
+ * @param cnf Module initialization configuration parameters
+ * @param deps Module initialization dependency
+ * @returns Parallel control function
+ */
 export function Main(cnf: Cnf, deps: Deps) {
   const {
     parallel: { key: KEY, defaultErrorFn },
@@ -79,7 +90,12 @@ export function Main(cnf: Cnf, deps: Deps) {
     }
   }, logger.error);
 
-  /* 将 method 函数处理为有并发控制功能的函数 */
+  /**
+   * Parallel control function
+   * @param method Functions that need to control parallel execution
+   * @param opt Parallel control parameters
+   * @returns Functions with parallel control capability
+   */
   function control<F extends(...args: any[]) => any>(method: F, opt: Option) {
     const {
       path,
