@@ -55,6 +55,15 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     return model.save();
   };
 
+  /**
+   * Restful add(C of CRUD) for create a resource
+   * @param Model Model definition of resources
+   * @param params parameters for updating
+   * @param isAdmin Is it an administrator
+   * @param _cols Allow columns to be set
+   * @param creatorAndClientIp creatorId and clientIp
+   * @returns The resource that has been created
+   */
   const add = async (
     Model: TModel,
     params: Params,
@@ -88,6 +97,12 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   };
 
   const TRASH_OPT = Object.freeze({ fields: ["isDeleted", "deletorId"] });
+  /**
+   * Restful remove (D of CRUD) for delete a resource
+   * @param model the resources will be removed
+   * @param deletorId Operator Id
+   * @returns void OR Resources put in the recycle bin
+   */
   const remove = async (model: Sequelize.Model, deletorId: UserId) => {
     // 未开启回收站，直接删除
     if (!(model as any).isDeleted) return model.destroy();
@@ -100,6 +115,14 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
 
   // count条件所需属性
   const COUNT_OPT = Object.freeze(["where", "include"]);
+  /**
+   * Restful list (R of CRUD) for list resource
+   * @param Model Model definition of resources
+   * @param params parameters for updating
+   * @param allowAttrs Allow columns to be returned
+   * @param toJSON Whether to directly return JSON formatted objects
+   * @returns findAll resource result, object propoties has count, rows
+   */
   const list = async (Model: TModel, params: Params, allowAttrs?: string[], toJSON?: boolean) => {
     const opt = findAllOpts(Model, params);
     const { _ignoreTotal } = params;
@@ -109,7 +132,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     if (_ignoreTotal !== "yes") count = await (Model as any).count(_.pick(opt, COUNT_OPT));
 
     if (Array.isArray(allowAttrs) && allowAttrs.length) opt.attributes = allowAttrs;
-    const rows = await (Model as any).findAll(opt);
+    const rows = (await (Model as any).findAll(opt)) as any[];
     if (toJSON) {
       for (let i = 0; i < rows.length; i += 1) {
         rows[i] = rows[i].toJSON();

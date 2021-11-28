@@ -101,10 +101,18 @@ export function Stats(cnf: {}, deps: {}, utils: ReturnType<typeof Utils>) {
     return utils.pageParams(pagination, params);
   };
 
+  /**
+   * Restful stats method
+   * @param Model Model definition of resources
+   * @param params parameters for updating
+   * @param where Initial where condition
+   * @param conf Model stats conf
+   * @returns Stats result object has two propoties, count and rows
+   */
   const statistics = async (
     Model: TModel,
     params: Params,
-    where: any,
+    where?: any,
     conf?: ModelExtraAtts["stats"],
   ) => {
     if (!conf) throw Error("Model.stats undefined");
