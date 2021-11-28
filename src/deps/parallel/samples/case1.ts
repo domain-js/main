@@ -1,6 +1,5 @@
-const async = require("async");
-const Redis = require("ioredis");
-const Parallel = require("..");
+import * as Redis from "ioredis";
+import { Main as Parallel } from "..";
 
 const cnf = {
   parallel: {
@@ -9,25 +8,22 @@ const cnf = {
   },
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const redis = new Redis();
 const graceful = {
-  exit(fn) {
+  exit(fn: Function) {
     console.log(fn);
   },
 };
 
 const deps = {
-  async,
   logger: console,
   graceful,
-  U: { sleep },
   redis,
 };
 
 const obj = {
   fn1() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       console.log("running start at: %s", new Date());
       setTimeout(() => {
         resolve(Date.now());

@@ -19,9 +19,6 @@ interface Deps {
   graceful: {
     exit: ReturnType<typeof Graceful>["exit"];
   };
-  utils: {
-    sleep: typeof utils.sleep;
-  };
   redis: Pick<Redis, "get" | "set" | "del" | "expire" | "exists">;
 }
 
@@ -45,12 +42,8 @@ export function Main(cnf: Cnf, deps: Deps) {
     parallel: { key: KEY, defaultErrorFn },
   } = cnf;
 
-  const {
-    logger,
-    graceful,
-    utils: { sleep },
-    redis,
-  } = deps;
+  const { logger, graceful, redis } = deps;
+  const { sleep } = utils;
   // 存放当前处于执行中的 key
   const doings = new Set<string>();
 
@@ -150,4 +143,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return control;
 }
 
-export const Deps = ["logger", "graceful", "redis", "utils"];
+export const Deps = ["logger", "graceful", "redis"];
