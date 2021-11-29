@@ -10,6 +10,10 @@ interface Cnf {
     key: string;
     /** Default error handler function */
     defaultErrorFn(path: string, minMS?: number): void;
+    /** How long does the reset lock expire (millisecond), default is 100 * 1000 (100 seconds) */
+    resetExpireIntervalMS?: number;
+    /** Maximum validity period of lock in redis storage (seconds), default is 300 */
+    maxExpireSeconds?: number;
   };
 }
 
@@ -50,7 +54,12 @@ export interface Option {
  */
 export function Main(cnf: Cnf, deps: Deps) {
   const {
-    parallel: { key: KEY, defaultErrorFn },
+    parallel: {
+      key: KEY,
+      defaultErrorFn,
+      maxExpireSeconds = 300,
+      resetExpireIntervalMS = 100 * 1000,
+    },
   } = cnf;
 
   const { logger, graceful, redis } = deps;
@@ -73,17 +82,14 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   const delay = async () => {
     if (!doings.size) return;
-    logger.info("start parallel delay keys: %o", doings);
     await async.eachLimit([...doings], 10, async (key) => {
-      // 延长 300 秒
-      await redis.expire(key, 300);
+      await redis.expire(key, maxExpireSeconds);
     });
-    logger.info("end parallel delay keys: %o", doings);
   };
 
   async.forever(async () => {
     try {
-      await sleep(100 * 1000);
+      await sleep(resetExpireIntervalMS);
       await delay();
     } catch (e) {
       logger.error(e);

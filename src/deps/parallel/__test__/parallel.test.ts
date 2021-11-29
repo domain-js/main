@@ -1,8 +1,9 @@
+import { sleep } from "../../../utils";
 import { Main as Parallel } from "..";
 
 describe("Parallel", () => {
   const defaultErrorFn = jest.fn(() => Error("并发控制"));
-  const cnf = { parallel: { key: "parallel", defaultErrorFn } };
+  const cnf: Parameters<typeof Parallel>[0] = { parallel: { key: "parallel", defaultErrorFn } };
   const graceful = {
     exit: jest.fn(),
   };
@@ -10,7 +11,6 @@ describe("Parallel", () => {
     info: jest.fn(),
     error: jest.fn(),
   };
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const redis = {
     del: jest.fn(),
     get: jest.fn(),
@@ -221,6 +221,32 @@ describe("Parallel", () => {
   });
 
   it("case9, noraml, keyFn exists", async () => {
+    const parallel = Parallel(cnf, deps);
+    const keyFn = jest.fn();
+    redis.set.mockResolvedValueOnce(1);
+    const fn1 = parallel(fn, { path: "test", keyFn });
+    keyFn.mockReturnValue("test-key");
+
+    expect(await fn1()).toBe("ok");
+    expect(fn.mock.calls.length).toBe(1);
+    expect(fn.mock.calls.pop()).toEqual([]);
+
+    // 正确调用了keyFn
+    expect(keyFn.mock.calls.length).toBe(1);
+    expect(keyFn.mock.calls.pop()).toEqual(["test"]);
+
+    // 对redis操作的这几个验证至关重要
+    expect(redis.set.mock.calls.length).toBe(1);
+    const [KEY, time] = redis.set.mock.calls.pop();
+    expect(KEY).toBe("parallel::test-key");
+    expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+
+    expect(redis.del.mock.calls.length).toBe(1);
+    expect(redis.del.mock.calls.pop()).toEqual(["parallel::test-key"]);
+  });
+
+  it("delay", async () => {
+    cnf.parallel.resetExpireIntervalMS = 100;
     const parallel = Parallel(cnf, deps);
     const keyFn = jest.fn();
     redis.set.mockResolvedValueOnce(1);
