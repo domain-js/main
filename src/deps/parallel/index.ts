@@ -112,7 +112,7 @@ export function Main(cnf: Cnf, deps: Deps) {
       neverReturn = false,
     } = opt;
 
-    const error = (errorFn || defaultErrorFn)(path, minMS);
+    const error = errorFn(path, minMS);
 
     const end = async (key: string, startAt: number) => {
       const timing = Date.now() - startAt; // 执行总用时毫秒数
