@@ -9,6 +9,14 @@ interface ModuleInterface {
 
 type ModuleFn = (((...args: any[]) => any) | {}) & ModuleInterface;
 
+/**
+ * Initialize a module
+ * @param Main The function is module main function
+ * @param Before The function is module before hook
+ * @param After The function is module after hook
+ * @param _args The array is module function arguments
+ * @returns Main function returns
+ */
 export function exec<
   Args extends any[],
   BeforeFn extends(...args: Args) => any[],
@@ -28,6 +36,13 @@ export function exec<
   return main;
 }
 
+/**
+ * Automatically initialize a series of modules
+ * @param modules The Object that key is name of module, value is module
+ * @param deps This object is used to receive the object after module initialization
+ * @param args This array is used to initialize each module
+ * @returns Objects after initialization of all modules merged into deps
+ */
 export function auto<
   Modules extends { [k in string]: ModuleFn },
   Deps extends object,
