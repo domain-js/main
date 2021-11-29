@@ -7,18 +7,21 @@ const RAND_STR_DICT = {
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&’()*+,-./:;<=>?@[]^_`{|}~",
 };
 
-/** 计算给定字符串的md5值 */
+/**
+ * Calculates the MD5 value of the given string
+ * @param str string or An object that contains a toString method that returns a string
+ * @returns hex md5 string
+ */
 export const md5 = (str: { toString: () => string }) => {
   const hash = crypto.createHash("md5");
   return hash.update(str.toString()).digest().toString("hex");
 };
 
 /**
- 生成随机字符串,
- @type: "strong" 强壮型 包括特殊字符
- @type: "normal" 普通型 不包括特殊字符
- @type: string 随机串字典手动指定
-*/
+ * Return random string
+ * @param len string length
+ * @param type "strong" or "normal" or other string that custom character range string
+ */
 export function randStr(len: number, type: "strong"): string;
 export function randStr(len: number, type: "normal"): string;
 export function randStr(len: number, type: string): string;
@@ -36,19 +39,43 @@ export function randStr(len: number, type: string): string {
     .join("");
 }
 
-/** 将字符串里的换行，制表符替换为普通空格 */
+/**
+ * Replace line breaks and tabs in the string with ordinary spaces
+ * @param value string that will be replaced
+ * @returns has been replaced string
+ */
 export const nt2space = (value: string) => value.replace(/(\\[ntrfv]|\s)+/g, " ").trim();
 
-/** 首字符大写 */
+/**
+ * The first character of the string is capitalized
+ * @param value string
+ * @returns string
+ * @example ufrist("hello"); // Return a string is: "Hello"
+ * @see lcfirst
+ */
 export const ucfirst = (value: string) => value[0].toUpperCase() + value.substring(1);
 
-/** 首字符小写 */
+/**
+ * The first character of the string is lowercase
+ * @param value string
+ * @returns string
+ * @example ufrist("Hello"); // Return a string is: "hello"
+ * @see ucfirst
+ */
 export const lcfirst = (value: string) => value[0].toLowerCase() + value.substring(1);
 
-/** 睡眠等待 */
+/**
+ * Pause, waiting
+ * @param ms The time you want to wait, in milliseconds
+ * @returns None
+ */
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** 深度冻结一个对象，防止被不小心篡改 */
+/**
+ * Freeze a object and deepth
+ * @param object The object that will be freezed
+ * @returns freezed object
+ */
 export const deepFreeze = <T>(object: T) => {
   // Retrieve the property names defined on object
   const propNames = Object.getOwnPropertyNames(object);
@@ -72,18 +99,30 @@ type TryCatchLogFn = <
   fn: T,
   errorLog: L,
 ) => (...args: Parameters<T>) => Promise<void>;
-export const tryCatchLog: TryCatchLogFn =
-  (fn, errorLog) =>
-    async (...args) => {
-      try {
-        await fn(...args);
-      } catch (e) {
-        errorLog(e);
-      }
-    };
 
 /**
- 判断某个秒级时间戳是否已过期，基于当前时间
+ * Mask exceptions of functions
+ * @param fn The function will be mask exceptions
+ * @param errorLog Error handle function, when has happed throw exception
+ * @returns Wrapped function
+ */
+export const tryCatchLog: TryCatchLogFn = (fn, errorLog) => {
+  const wrapped = async (...args: Parameters<typeof fn>) => {
+    try {
+      await fn(...args);
+    } catch (e) {
+      errorLog(e);
+    }
+  };
+
+  return wrapped;
+};
+
+/**
+ * Determine whether a second timestamp has expired
+ * @param time timestamp
+ * @param life Effective time, seconds
+ * @returns true or false
  */
 export const inExpired = (time: number, life: number) => {
   const now = (Date.now() / 1000) | 0;
@@ -92,7 +131,13 @@ export const inExpired = (time: number, life: number) => {
 };
 
 type Params = { [K: string]: string };
-/** 修改指定url上添加一些参数 */
+/**
+ * Modify a URL address, add some attributes and delete some attributes
+ * @param address URL address
+ * @param adds The params will be expand to address
+ * @param removes The string list will be remove from address
+ * @returns Modified address
+ */
 export const modifiyURL = (address: string, adds?: Params, removes?: string[]) => {
   const obj = new URL(address);
 
