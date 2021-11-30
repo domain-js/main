@@ -94,5 +94,5 @@ export function auto<
     [k in keyof T]: ReturnType<T[k]["Main"]>;
   };
 
-  return deps as M<TM>;
+  return deps as M<TM> & Deps;
 }

@@ -1,6 +1,5 @@
 // domain-cli 自动生成
 import * as aes from "./aes";
-import * as axios from "./axios";
 import * as cache from "./cache";
 import * as checker from "./checker";
 import * as cia from "./cia";
@@ -11,6 +10,7 @@ import * as hash from "./hash";
 import * as logger from "./logger";
 import * as parallel from "./parallel";
 import * as redis from "./redis";
+import * as request from "./request";
 import * as rest from "./rest";
 import * as schema from "./schema";
 import * as sequelize from "./sequelize";
@@ -18,7 +18,6 @@ import * as signer from "./signer";
 
 export = {
   aes,
-  axios,
   cache,
   checker,
   cia,
@@ -29,6 +28,7 @@ export = {
   logger,
   parallel,
   redis,
+  request,
   rest,
   schema,
   sequelize,

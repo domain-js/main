@@ -2,25 +2,42 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { Main as Logger } from "../logger";
 import * as utils from "../../utils";
 
-type VERBS = "post" | "get" | "put" | "delete";
+type VERBS = "post" | "get" | "put" | "patch" | "delete";
 interface Cnf {
+  /** axios config */
   axios: {
-    loggers?: VERBS[];
-    retrys?: VERBS[];
+    /** auto record log methods list */
+    loggers?: string[];
+    /** auto retry methods list */
+    retrys?: string[];
+    /** retry max times */
     retryTimes?: number;
+    /** retry interval millisecond */
     retryIntervalMS?: number;
-    conf?: {};
+    /** axios.create the first argument */
+    conf?: Parameters<typeof axios.create>[0];
   };
 }
 
 interface Deps {
   logger: ReturnType<typeof Logger>;
-  utils: typeof utils;
+  utils: {
+    sleep: typeof utils.sleep;
+  };
 }
 
+/**
+ * axios module
+ * @link https://www.npmjs.com/package/axios
+ *
+ * @param cnf module initialize config
+ * @param deps module initalize dependents
+ * @returns returns of axios.create
+ */
 export function Main(cnf: Cnf, deps: Deps) {
   const axiosError = (e: AxiosError) =>
     (() => {
+      console.log("xxxxxxxxxxxxxxxxxxxxxx");
       if (!e.response) return ["no-response", e.message];
       const r = e.response;
       if (!r.data) return [r.status, r.statusText];
@@ -56,13 +73,15 @@ export function Main(cnf: Cnf, deps: Deps) {
   };
 
   const instance: AxiosInstance & {
+    /** Original Axios module */
     origin?: typeof axios;
   } = axios.create(conf);
 
   instance.origin = axios;
 
   if (loggers) {
-    for (const x of loggers) {
+    for (const x of loggers as VERBS[]) {
+      if (typeof instance[x] !== "function") continue;
       const method = logger.logger(
         instance[x],
         `axios.${x}`,
@@ -76,7 +95,8 @@ export function Main(cnf: Cnf, deps: Deps) {
   }
 
   if (retrys) {
-    for (const x of retrys) {
+    for (const x of retrys as VERBS[]) {
+      if (typeof instance[x] !== "function") continue;
       instance[x] = retryAble(instance[x], retryTimes, retryIntervalMS);
     }
   }

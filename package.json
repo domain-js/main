@@ -37,6 +37,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.21.4",
     "husky": "^7.0.0",
+    "ts-node": "^10.4.0",
     "jest": "^27.3.1",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.0",
@@ -55,25 +56,24 @@
     ]
   },
   "dependencies": {
+    "uuid": "^8.3.2",
     "ajv": "^8.8.1",
     "ajv-formats": "^2.1.1",
     "async": "^3.2.2",
     "axios": "^0.24.0",
     "cron-parser": "^4.1.0",
-    "crypto-js": "^4.1.1",
-    "csv-stringify": "^6.0.2",
     "human-interval": "^2.0.1",
     "ioredis": "^4.28.0",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
     "moment": "^2.29.1",
     "mysql2": "^2.3.3",
+    "sequelize": "^6.9.0",
     "restify": "^8.6.0",
     "restify-errors": "^8.0.2",
-    "sequelize": "^6.9.0",
     "swagger-ui-restify": "^3.0.8",
-    "ts-node": "^10.4.0",
-    "uuid": "^8.3.2",
+    "crypto-js": "^4.1.1",
+    "csv-stringify": "^6.0.2",
     "xlsx": "^0.17.4"
   }
 }

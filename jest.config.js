@@ -2,7 +2,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  forceExit: true,
+  // forceExit: true,
   collectCoverageFrom: [
     "src/utils/*.ts",
     "src/deps/**/*.ts",
