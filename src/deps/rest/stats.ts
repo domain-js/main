@@ -3,12 +3,18 @@ import * as Sequelize from "sequelize";
 import { Params, ModelExtraAtts, TModel } from "./defines";
 import { Utils } from "./utils";
 
-export function Stats(cnf: {}, deps: {}, utils: ReturnType<typeof Utils>) {
+interface Deps {
+  _: typeof _;
+  Sequelize: Pick<typeof Sequelize, "literal" | "and" | "fn">;
+}
+
+export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
   const defaultPagination = {
     maxResults: 10,
     maxStartIndex: 10000,
     maxResultsLimit: 5000,
   };
+  const { _, Sequelize } = deps;
 
   // 获取统计的条目数
   const statsCount = async (Model: TModel, opts: any, dims: [string, string][]) => {

@@ -1,19 +1,32 @@
 import * as util from "util";
-import Ajv, { Schema } from "ajv";
+import * as ajv from "ajv";
 import addFormats from "ajv-formats";
 
 interface Cnf {
-  schema?: ConstructorParameters<typeof Ajv>[0];
+  schema?: ConstructorParameters<typeof ajv.default>[0];
 }
+
+interface Deps {
+  ajv: {
+    default: typeof ajv.default;
+  };
+  ajvFormats: typeof addFormats;
+}
+
+type Schema = ajv.Schema;
 
 /**
  * JSON schema validation module, based on Ajv: https://www.npmjs.com/package/ajv
  * @param cnf Ajv initialization parameters
  * @returns auto, validate, complie, ajv
  */
-export function Main(cnf: Cnf) {
+export function Main(cnf: Cnf, deps: Deps) {
+  const {
+    ajv: { default: Ajv },
+    ajvFormats,
+  } = deps;
   const ajv = new Ajv(cnf.schema || {});
-  addFormats(ajv);
+  ajvFormats(ajv);
 
   /**
    * Ajv complie function
@@ -71,3 +84,5 @@ export function Main(cnf: Cnf) {
     ajv,
   });
 }
+
+export const Deps = ["ajv", "ajvFormats"];

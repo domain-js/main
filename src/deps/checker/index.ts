@@ -1,13 +1,16 @@
-import * as async from "async";
+import { someSeries } from "async";
 
 interface Deps {
+  async: {
+    someSeries: typeof someSeries;
+  };
   errors: {
     notAllowed(...args: any[]): Error;
   };
 }
 
 export function Main(cnf: {}, deps: Deps) {
-  const { errors } = deps;
+  const { async, errors } = deps;
 
   /** 检测两个值是否相等 */
   const equal = (v1: any, v2: any) => v1 === v2;
@@ -29,4 +32,4 @@ export function Main(cnf: {}, deps: Deps) {
   };
 }
 
-export const Deps = ["errors"];
+export const Deps = ["errors", "async"];

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as _ from "lodash";
-import { v4 as uuid } from "uuid";
+import { v4 } from "uuid";
 
 const date = (offset = 0) => new Date(Date.now() + (offset | 0)).toISOString();
 
@@ -14,10 +14,21 @@ interface Cnf {
   };
 }
 
-export function Main(cnf: Cnf) {
+interface Deps {
+  _: {
+    memoize: typeof _.memoize;
+  };
+  uuid: { v4: typeof v4 };
+}
+
+export function Main(cnf: Cnf, deps: Deps) {
   const {
     logger: { errorLogPath, infoLogPath, ignoreErrors, clientId },
   } = cnf;
+  const {
+    _,
+    uuid: { v4: uuid },
+  } = deps;
 
   const makeDir = _.memoize((dir) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);

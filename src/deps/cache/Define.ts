@@ -11,6 +11,8 @@ export interface CnfDef {
 }
 
 export interface DepsDef {
+  LRU: typeof LRU;
+  IORedis: typeof Redis;
   logger: {
     info(message: string, extra?: any): void;
     error(error: Error, extra?: any): void;

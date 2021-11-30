@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import * as async from "async";
-import { v4 as uuid } from "uuid";
+import { v4 } from "uuid";
 import Errors from "./errors";
 
 interface Cnf {
@@ -11,6 +11,11 @@ interface Cnf {
 }
 
 interface Deps {
+  _: typeof _;
+  async: typeof async;
+  uuid: {
+    v4: typeof v4;
+  };
   logger: {
     info: (...args: any[]) => void;
     error: (...args: any[]) => void;
@@ -72,6 +77,9 @@ interface Message {
 
 export function Main(cnf: Cnf, deps: Deps) {
   const {
+    _,
+    async,
+    uuid: { v4: uuid },
     logger,
     redis,
     graceful,
@@ -377,4 +385,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return { isExiting, isExited, checkReady, getStats, getUnlinks, regist, link, submit, setFn };
 }
 
-export const Deps = ["logger", "utils", "redis", "graceful"];
+export const Deps = ["_", "async", "logger", "utils", "redis", "graceful", "uuid"];

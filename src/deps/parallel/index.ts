@@ -1,4 +1,4 @@
-import * as async from "async";
+import { eachLimit, forever, whilst } from "async";
 import { Redis } from "ioredis";
 import { Main as Logger } from "../logger";
 import { Main as Graceful } from "../graceful";
@@ -29,6 +29,12 @@ interface Deps {
   };
   /** redis instance */
   redis: Pick<Redis, "get" | "set" | "del" | "expire" | "exists">;
+  /** async package */
+  async: {
+    eachLimit: typeof eachLimit;
+    whilst: typeof whilst;
+    forever: typeof forever;
+  };
 }
 
 export interface Option {
@@ -62,7 +68,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     },
   } = cnf;
 
-  const { logger, graceful, redis } = deps;
+  const { async, logger, graceful, redis } = deps;
   const { sleep } = utils;
   // 存放当前处于执行中的 key
   const doings = new Set<string>();
@@ -165,4 +171,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return control;
 }
 
-export const Deps = ["logger", "graceful", "redis"];
+export const Deps = ["async", "logger", "graceful", "redis"];

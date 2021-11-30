@@ -4,6 +4,10 @@ interface Cnf {
   redis: Redis.RedisOptions;
 }
 
+interface Deps {
+  IORedis: typeof Redis;
+}
+
 /**
  * @link https://www.npmjs.com/package/ioredis
  *
@@ -11,8 +15,11 @@ interface Cnf {
  * @param cnf
  * @returns An instance of ioredis
  */
-export function Main(cnf: Cnf) {
+export function Main(cnf: Cnf, deps: Deps) {
   const { redis } = cnf;
+  const { IORedis } = deps;
 
-  return new Redis(redis);
+  return new IORedis(redis);
 }
+
+export const Deps = ["IORedis"];

@@ -1,4 +1,3 @@
-import * as LRU from "lru-cache";
 import { Cache, CnfDef, DepsDef, PubSubDef } from "./Define";
 
 export { Before } from "./Before";
@@ -7,6 +6,7 @@ export { After } from "./After";
 export function Main(cnf: CnfDef, deps: DepsDef, pubsub?: PubSubDef): Cache {
   let hits = 0; // 击中次数
   let misseds = 0; // 未击中次数
+  const { LRU } = deps;
 
   const lru = new LRU<string, string>(cnf.cache);
   const isFunction = (arg: any) => typeof arg === "function";
@@ -54,4 +54,4 @@ export function Main(cnf: CnfDef, deps: DepsDef, pubsub?: PubSubDef): Cache {
   return cache;
 }
 
-export const Deps = ["logger"];
+export const Deps = ["logger", "LRU", "IORedis"];

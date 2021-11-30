@@ -7,7 +7,11 @@ import { Utils } from "./utils";
 export { Before } from "./Before";
 
 type Cnf = Parameters<typeof Utils>[0] & Parameters<typeof Stats>[0];
-type Deps = Parameters<typeof Utils>[1] & Parameters<typeof Stats>[1];
+type Deps = Parameters<typeof Utils>[1] &
+  Parameters<typeof Stats>[1] & {
+    _: typeof _;
+    Sequelize: Pick<typeof Sequelize, "literal" | "and" | "fn" | "Op">;
+  };
 
 type UserId = string | number;
 export interface CreatorAndClientIp {
@@ -144,4 +148,4 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   return { modify, add, remove, list, stats: Stats(cnf, deps, utils) };
 }
 
-export const Deps = ["errors"];
+export const Deps = ["errors", "_", "moment", "Sequelize"];

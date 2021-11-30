@@ -11,6 +11,8 @@ interface Cnf {
 }
 
 interface Deps {
+  moment: typeof moment;
+  Sequelize: Pick<typeof Sequelize, "where" | "fn" | "col" | "literal" | "Op">;
   errors: {
     notAllowed: (...args: any[]) => Error;
     resourceDuplicateAdd: (...args: any[]) => Error;
@@ -22,7 +24,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
 
-  const { errors } = deps;
+  const { errors, moment, Sequelize } = deps;
 
   /**
    * 相对多少天的时间

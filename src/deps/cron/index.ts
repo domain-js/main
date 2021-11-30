@@ -1,4 +1,4 @@
-import * as parser from "cron-parser";
+import * as cronParser from "cron-parser";
 import human = require("human-interval");
 
 interface Cnf {
@@ -18,6 +18,8 @@ interface callbackArg {
 }
 
 interface Deps {
+  cronParser: typeof cronParser;
+  humanInterval: typeof human;
   cia: {
     regist: (name: string, validator: any, waiters: waiter[]) => void;
     submit: (name: string, times: number, callback: (arg: callbackArg) => void) => void;
@@ -40,7 +42,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   const { cron = {} } = cnf;
 
   const ciaTaskType = "cronJob";
-  const { cia } = deps;
+  const { cia, humanInterval: human, cronParser: parser } = deps;
   const { tz = "Asia/Shanghai" } = cron;
 
   // 注册信息
@@ -136,4 +138,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return { regist, start, getStats };
 }
 
-export const Deps = ["cia"];
+export const Deps = ["cia", "humanInterval", "cronParser"];

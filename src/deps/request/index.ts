@@ -20,6 +20,9 @@ interface Cnf {
 }
 
 interface Deps {
+  axios: {
+    create: typeof axios.create;
+  };
   logger: ReturnType<typeof Logger>;
   utils: {
     sleep: typeof utils.sleep;
@@ -49,6 +52,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   if (!cnf.axios) cnf.axios = {};
   const { loggers, retrys, retryTimes = 3, retryIntervalMS = 3000, conf } = cnf.axios;
   const {
+    axios,
     utils: { sleep },
     logger,
   } = deps;
@@ -104,4 +108,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return instance;
 }
 
-export const Deps = ["logger", "utils"];
+export const Deps = ["logger", "utils", "axios"];
