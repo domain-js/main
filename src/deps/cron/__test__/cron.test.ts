@@ -1,3 +1,5 @@
+import humanInterval = require("human-interval");
+import * as cronParser from "cron-parser";
 import { Main as Cron } from "..";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,6 +14,8 @@ describe("cron", () => {
 
   const deps = {
     cia,
+    humanInterval,
+    cronParser,
   };
 
   const cron = Cron(cnf, deps);
@@ -85,6 +89,8 @@ describe("cron special", () => {
 
   const deps = {
     cia,
+    humanInterval,
+    cronParser,
   };
 
   describe("linux style schedule", () => {
