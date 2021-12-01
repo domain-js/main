@@ -12,8 +12,8 @@ interface Cnf {
 
 interface Deps {
   _: typeof _;
-  mysql: typeof mysql;
-  moment: typeof moment;
+  mysql: Pick<typeof mysql, "escape">;
+  moment: typeof moment extends (...args: infer A) => infer B ? (...args: A) => B : never;
   Sequelize: Pick<typeof Sequelize, "where" | "fn" | "col" | "literal" | "Op">;
   errors: {
     notAllowed: (...args: any[]) => Error;

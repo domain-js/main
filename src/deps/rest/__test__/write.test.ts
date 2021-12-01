@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+import * as Sequelize from "sequelize";
 import { Main as Rest } from "..";
 
 const utils = {
@@ -14,7 +16,16 @@ const errors = {
 };
 
 describe("rest.write", () => {
-  const helper = Rest({ rest: {} }, { errors }, utils as any);
+  const deps = {
+    errors,
+    _,
+    mysql: {
+      escape: jest.fn(),
+    },
+    moment: jest.fn(),
+    Sequelize,
+  };
+  const helper = Rest({ rest: {} }, deps, utils as any);
   describe("modify", () => {
     it("case1", async () => {
       const Model = {
@@ -26,11 +37,9 @@ describe("rest.write", () => {
         save: jest.fn(),
       };
       const params = {};
-      const isAdmin = false;
-      const _cols = undefined;
       model.save.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
-      expect(await helper.modify(Model as any, model as any, params, isAdmin, _cols)).toBe(model);
+      expect(await helper.modify(Model as any, model as any, params)).toBe(model);
       expect((model as any).name).toBe("Redstone Zhao");
       expect((model as any).age).toBe(25);
 
@@ -44,9 +53,7 @@ describe("rest.write", () => {
     });
 
     it("case2, id cannot modify", async () => {
-      const Model = {
-        writableCols: ["name", "age"],
-      };
+      const Model = {};
       const model = {
         id: 234,
         save: jest.fn(),
@@ -65,7 +72,7 @@ describe("rest.write", () => {
       expect((model as any).age).toBe(25);
 
       expect(utils.pickParams.mock.calls.length).toBe(1);
-      expect(utils.pickParams.mock.calls.pop()).toEqual([params, ["name", "age"], Model, false]);
+      expect(utils.pickParams.mock.calls.pop()).toEqual([params, [], Model, false]);
     });
   });
 
@@ -113,7 +120,7 @@ describe("rest.write", () => {
       const creatorId = "creatorId";
       const clientIp = "clientIp";
       const params = {};
-      const isAdmin = false;
+      const isAdmin = undefined;
       const _cols = undefined;
       Model.create.mockResolvedValueOnce(model);
       utils.pickParams.mockReturnValueOnce({ name: "Redstone Zhao", age: 25 });
@@ -255,6 +262,39 @@ describe("rest.write", () => {
       expect(Model.findOne.mock.calls.pop()).toEqual([
         {
           where: { name: "Redstone Zhao" },
+        },
+      ]);
+    });
+
+    it("case6", async () => {
+      const Model = {
+        rawAttributes: { creatorId: {}, clientIp: {} },
+        create: jest.fn(),
+      };
+      const model = {
+        id: 234,
+        name: "Redstone Zhao",
+        age: 25,
+      };
+      const creatorId = "creatorId";
+      const clientIp = "clientIp";
+      const params = {};
+      const isAdmin = undefined;
+      const _cols = undefined;
+      Model.create.mockResolvedValueOnce(model);
+      utils.pickParams.mockReturnValueOnce({});
+      expect(
+        await helper.add(Model as any, params, isAdmin, _cols, { creatorId, clientIp }),
+      ).toEqual(model);
+
+      expect(utils.pickParams.mock.calls.length).toBe(1);
+      expect(utils.pickParams.mock.calls.pop()).toEqual([params, [], Model, false]);
+
+      expect(Model.create.mock.calls.length).toBe(1);
+      expect(Model.create.mock.calls.pop()).toEqual([
+        {
+          creatorId: "creatorId",
+          clientIp: "clientIp",
         },
       ]);
     });
