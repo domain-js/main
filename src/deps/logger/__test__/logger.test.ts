@@ -2,6 +2,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as _ from "lodash";
+import * as uuid from "uuid";
 import { Main } from "..";
 
 jest.mock("fs");
@@ -14,16 +15,17 @@ const errorLogPath = path.join(__dirname, "log");
 
 const cnf = { logger: { infoLogPath, clientId, errorLogPath } };
 
+const deps = { _, uuid };
 describe("Logger module", () => {
   it("instance method", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     expect(typeof logger.info).toBe("function");
     expect(typeof logger.error).toBe("function");
     expect(typeof logger.logger).toBe("function");
   });
 
   it("info method", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     logger.info("hello");
     expect(fs.appendFileSync).toHaveBeenCalledTimes(1);
     const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[0];
@@ -32,7 +34,7 @@ describe("Logger module", () => {
   });
 
   it("info method, has extra", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     logger.info("hello", "world");
     expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(2);
     const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[1];
@@ -42,7 +44,7 @@ describe("Logger module", () => {
   });
 
   it("error method", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     logger.error(Error("hello"), "world");
     expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(3);
     const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[2];
@@ -52,7 +54,7 @@ describe("Logger module", () => {
   });
 
   it("error method, has extra", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     logger.error(Error("nihao"));
     expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(4);
     const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[3];
@@ -62,7 +64,7 @@ describe("Logger module", () => {
   });
 
   it("error method, no stack, has extra", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     const error = Error("nihao");
     Object.assign(error, { code: "errorCode" });
     logger.error(error);
@@ -74,7 +76,7 @@ describe("Logger module", () => {
   });
 
   it("logger sync method, fn exec success", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     const fn = jest.fn();
     fn.mockReturnValueOnce(10);
     const fnLog = logger.logger(fn, "testing");
@@ -89,7 +91,7 @@ describe("Logger module", () => {
   });
 
   it("logger sync method, fn exec faild", () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     const calls: any[] = [];
     const fn = (...args: any[]) => {
       calls.push(args);
@@ -105,7 +107,7 @@ describe("Logger module", () => {
   });
 
   it("logger async method, fn exec success", async () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     const calls: any[] = [];
     const ret = "I am function return value";
     const fn = async (...args: any[]) => {
@@ -127,7 +129,7 @@ describe("Logger module", () => {
   });
 
   it("logger async method, fn exec faild", async () => {
-    const logger = Main(cnf);
+    const logger = Main(cnf, deps);
     const calls: any[] = [];
     const fn = async (...args: any[]) => {
       calls.push(args);
@@ -147,7 +149,7 @@ describe("Logger module", () => {
   });
 
   it("ignore error", async () => {
-    const logger = Main({ logger: { ...cnf.logger, ignoreErrors: ["ignored"] } });
+    const logger = Main({ logger: { ...cnf.logger, ignoreErrors: ["ignored"] } }, deps);
     const error = Error("wrong");
     Object.assign(error, { code: "ignored" });
     logger.error(error);

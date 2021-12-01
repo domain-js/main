@@ -132,3 +132,5 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   return { error, info, logger };
 }
+
+export const Deps = ["_", "uuid"];
