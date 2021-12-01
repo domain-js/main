@@ -1,5 +1,4 @@
 import * as Sequelize from "sequelize";
-import * as moment from "moment";
 
 interface Cnf {
   sequelize: {

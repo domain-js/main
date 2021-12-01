@@ -43,8 +43,11 @@ describe("Sequelize", () => {
         db1,
       },
     };
+    const deps = {
+      Sequelize,
+    };
 
-    const dbs = Main(cnf);
+    const dbs = Main(cnf, deps);
     expect(Sequelize.Sequelize).toHaveBeenCalledTimes(1);
     expect(dbs.db1).toBe((Sequelize.Sequelize as any).mock.instances[0]);
     (dbs.db1.query as any).mockResolvedValueOnce([true, 2]);
