@@ -11,6 +11,8 @@ interface Cnf {
 }
 
 interface Deps {
+  _: typeof _;
+  mysql: typeof mysql;
   moment: typeof moment;
   Sequelize: Pick<typeof Sequelize, "where" | "fn" | "col" | "literal" | "Op">;
   errors: {

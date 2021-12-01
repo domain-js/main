@@ -1,3 +1,4 @@
+import * as LRU from "lru-cache";
 import { Main } from "..";
 
 const sleep = (ms: number) =>
@@ -11,18 +12,14 @@ describe("cache", () => {
       max: 2,
     },
   };
-  const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
-  };
 
-  const deps = { logger };
+  const deps = { LRU };
   describe("caching", () => {
     const fn = jest.fn(async (a: number, b: number) => {
       await sleep(300);
       return a + b;
     });
-    const cache = Main(cnf, deps);
+    const cache = Main(cnf, deps as any);
     it("case1", async () => {
       const fn1 = cache.caching(fn, 10 * 1000, (a: number, b: number): string => `fn-${a}-${b}`);
       // 第一次执行，没有cache，函数会真实的执行

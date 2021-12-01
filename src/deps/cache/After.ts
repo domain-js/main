@@ -1,11 +1,10 @@
-import * as LRU from "lru-cache";
 import { SetRequired } from "type-fest";
 import { CnfDef, DepsDef, PubSubDef, Cache } from "./Define";
 
 export const After = (
   lru: SetRequired<Partial<Cache>, "del">,
   cnf: CnfDef,
-  deps: DepsDef,
+  deps: Pick<DepsDef, "logger">,
   pubsub?: PubSubDef,
 ) => {
   const { cache = {} } = cnf;
