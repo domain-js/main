@@ -5,7 +5,7 @@ import * as utils from "../../utils";
 type VERBS = "post" | "get" | "put" | "patch" | "delete";
 interface Cnf {
   /** axios config */
-  axios: {
+  axios?: {
     /** auto record log methods list */
     loggers?: string[];
     /** auto retry methods list */
@@ -40,13 +40,12 @@ interface Deps {
 export function Main(cnf: Cnf, deps: Deps) {
   const axiosError = (e: AxiosError) =>
     (() => {
-      console.log("xxxxxxxxxxxxxxxxxxxxxx");
       if (!e.response) return ["no-response", e.message];
       const r = e.response;
       if (!r.data) return [r.status, r.statusText];
       const d = r.data;
       if (typeof d === "string") return [r.status, d];
-      return [d.code || r.status, d.message || d];
+      return [d.code || r.status, d.message || r.statusText];
     })().join("\t");
 
   if (!cnf.axios) cnf.axios = {};
