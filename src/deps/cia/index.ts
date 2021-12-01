@@ -11,8 +11,8 @@ interface Cnf {
 }
 
 interface Deps {
-  _: typeof _;
-  async: typeof async;
+  _: Pick<typeof _, "pick" | "map" | "isFunction">;
+  async: Pick<typeof async, "eachSeries" | "queue">;
   uuid: {
     v4: typeof v4;
   };
