@@ -1,8 +1,14 @@
+import * as ajv from "ajv";
+import addFormats from "ajv-formats";
 import { Main as Schema } from "..";
 
 describe("@domain.js/schema", () => {
   describe("auto", () => {
-    const schema = Schema({});
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({}, deps);
     const errorFn = jest.fn(Error);
 
     it("case1", () => {
@@ -37,7 +43,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("validate", () => {
-    const schema = Schema({});
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({}, deps);
 
     it("case1", () => {
       expect(schema.validate({ type: "string" }, "hello")).toBe(true);
@@ -53,7 +63,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("coerceTypes is true", () => {
-    const schema = Schema({ schema: { coerceTypes: true } });
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({ schema: { coerceTypes: true } }, deps);
     it("case1", () => {
       expect(schema.validate({ type: "integer" }, "1")).toBe(true);
       const data = { age: "20" };
@@ -65,7 +79,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("useDefaults is true", () => {
-    const schema = Schema({ schema: { coerceTypes: true, useDefaults: true } });
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({ schema: { coerceTypes: true, useDefaults: true } }, deps);
     it("case1", () => {
       expect(schema.validate({ type: "integer" }, "1")).toBe(true);
       const data = { age: "20" };
@@ -86,7 +104,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("removeAdditional is true", () => {
-    const schema = Schema({ schema: { removeAdditional: true } });
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({ schema: { removeAdditional: true } }, deps);
     const data = { age: 20, gender: "female" };
     it("case1", () => {
       expect(
@@ -107,7 +129,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("union types", () => {
-    const schema = Schema({});
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({}, deps);
     const data = { age: "20" };
     it("case1", () => {
       const schm = {
@@ -126,7 +152,11 @@ describe("@domain.js/schema", () => {
   });
 
   describe("compile", () => {
-    const schema = Schema({});
+    const deps = {
+      ajv,
+      ajvFormats: addFormats,
+    };
+    const schema = Schema({}, deps);
     const data = { age: 20 };
     it("case1", () => {
       const schm = {
