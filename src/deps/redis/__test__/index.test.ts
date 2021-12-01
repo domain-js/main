@@ -1,13 +1,14 @@
-import * as Redis from "ioredis";
 import { Main } from "..";
 
-jest.mock("ioredis");
-
-(Redis as any).mockImplementation(() => ({ get: jest.fn(), set: jest.fn() }));
-
 describe("Redis module", () => {
+  const IORedis = jest.fn();
   it("case1", async () => {
-    const redis = Main({ redis: {} });
+    const instance = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+    IORedis.mockImplementationOnce(() => instance);
+    const redis = Main({ redis: {} }, { IORedis: IORedis as any });
     (redis.get as any).mockResolvedValueOnce("hello world");
     expect(await redis.get("test")).toBe("hello world");
   });
