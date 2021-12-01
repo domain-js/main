@@ -1,3 +1,4 @@
+import * as async from "async";
 import * as Redis from "ioredis";
 import { Main as Parallel } from "..";
 
@@ -16,6 +17,7 @@ const graceful = {
 };
 
 const deps = {
+  async,
   logger: console,
   graceful,
   redis,

@@ -1,3 +1,4 @@
+import * as async from "async";
 import { sleep } from "../../../utils";
 import { Main as Parallel } from "..";
 
@@ -20,7 +21,7 @@ describe("Parallel", () => {
       set: jest.fn(),
     };
 
-    const deps = { logger, graceful, utils: { sleep }, redis };
+    const deps = { async, logger, graceful, utils: { sleep }, redis };
 
     const fn = jest.fn(async () => {
       await sleep(20);
@@ -265,7 +266,7 @@ describe("Parallel", () => {
       set: jest.fn(),
     };
 
-    const deps = { logger, graceful, utils: { sleep }, redis };
+    const deps = { async, logger, graceful, utils: { sleep }, redis };
 
     const fn = jest.fn(async () => {
       await sleep(20);
