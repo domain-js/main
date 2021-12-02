@@ -27,6 +27,7 @@ export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
   >;
 
   return (cnf: Cnf) => {
+    /** 这里之所以要浅拷贝，是为了避免多次初始化之间互相干扰 */
     const _deps = { ...deps } as typeof deps;
     const modules = DM.auto(
       _.pick(Deps, features) as Pick<TDeps, MS> /** 要启用的内部模块 */,
