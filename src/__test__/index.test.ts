@@ -17,7 +17,7 @@ describe("@domain.js/main index", () => {
       const deps = Start({});
       expect(typeof deps.aes.encrypt).toBe("function");
       expect(typeof (deps as any).cache).toBe("undefined");
-      expect(typeof (deps as any).axios).toBe("undefined");
+      expect(typeof (deps as any).request).toBe("undefined");
       expect(typeof (deps as any).cia).toBe("undefined");
     });
 

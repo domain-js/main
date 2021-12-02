@@ -27,7 +27,12 @@ export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
   >;
 
   return (cnf: Cnf) => {
-    const modules = DM.auto(_.pick(Deps, features) as Pick<TDeps, MS>, deps, [cnf, deps]);
+    const _deps = { ...deps } as typeof deps;
+    const modules = DM.auto(
+      _.pick(Deps, features) as Pick<TDeps, MS> /** 要启用的内部模块 */,
+      _deps /** 初始的模块依赖对象 */,
+      [cnf, _deps] /** 内部模块初始化参数 */,
+    );
 
     return modules;
   };
