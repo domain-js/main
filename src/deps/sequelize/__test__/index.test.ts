@@ -1,11 +1,6 @@
 import * as Sequelize from "sequelize";
 import { Main } from "..";
 
-jest.mock("sequelize");
-beforeEach(() => {
-  (Sequelize as any).mockClear();
-});
-
 describe("Sequelize", () => {
   it("case1", async () => {
     const db1 = {
@@ -43,14 +38,23 @@ describe("Sequelize", () => {
         db1,
       },
     };
+
+    const SequelizeMock = jest.fn();
     const deps = {
-      Sequelize,
+      Sequelize: {
+        Sequelize: SequelizeMock as unknown as typeof Sequelize.Sequelize,
+      },
     };
 
+    const sequelize = {
+      query: jest.fn(),
+    };
+    SequelizeMock.mockImplementationOnce(() => sequelize);
+
     const dbs = Main(cnf, deps);
-    expect(Sequelize.Sequelize).toHaveBeenCalledTimes(1);
-    expect(dbs.db1).toBe((Sequelize.Sequelize as any).mock.instances[0]);
-    (dbs.db1.query as any).mockResolvedValueOnce([true, 2]);
+    expect(SequelizeMock).toHaveBeenCalledTimes(1);
+    expect(dbs.db1).toBe(sequelize);
+    sequelize.query.mockResolvedValueOnce([true, 2]);
     const res = await dbs.db1.query("SELECT 1 + 1 as `Sum`");
     expect(res).toEqual([true, 2]);
   });
