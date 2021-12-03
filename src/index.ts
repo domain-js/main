@@ -19,7 +19,6 @@ type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
 export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
   const { _ } = deps;
-
   /** 模块名称联合类型 */
   type MS = RemoveReadonlyArray<T>;
   type Cnf = Merge<
