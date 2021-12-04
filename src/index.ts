@@ -3,6 +3,7 @@ import * as DM from "./dm";
 import Deps = require("./deps/defines");
 
 export { Main as Http } from "./http";
+export { Errors } from "./errors";
 export * as DM from "./dm";
 export * as utils from "./utils";
 
