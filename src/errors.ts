@@ -1,4 +1,4 @@
-import { Errors } from "./Errors";
+import { Errors } from "./Errors/index";
 
 const defines = [
   ["notFound", "Resource not found"],
