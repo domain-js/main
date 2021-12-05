@@ -1,10 +1,10 @@
-interface MyError {
+export interface MyError {
   message: string;
   code?: string | number;
   data?: any;
 }
 
-interface ErrorFn {
+export interface ErrorFn {
   (...args: any): MyError;
 }
 

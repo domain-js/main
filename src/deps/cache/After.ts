@@ -1,8 +1,8 @@
-import { SetRequired } from "type-fest";
+// import { SetRequired } from "type-fest";
 import { CnfDef, DepsDef, PubSubDef, Cache } from "./Define";
 
 export const After = (
-  lru: SetRequired<Partial<Cache>, "del">,
+  lru: Cache,
   cnf: CnfDef,
   deps: Pick<DepsDef, "logger">,
   pubsub?: PubSubDef,

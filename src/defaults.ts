@@ -10,9 +10,11 @@ import * as IORedis from "ioredis";
 import * as LRU from "lru-cache";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
+import * as moment from "moment";
+import * as utils from "./utils";
 
 /** npm packages injection */
-export interface MDeps {
+export interface Defaults {
   /**
    * The Lodash library exported as Node.js modules.
    * @link https://www.npmjs.com/package/lodash
@@ -80,9 +82,22 @@ export interface MDeps {
    * @link https://www.npmjs.com/package/sequelize
    */
   Sequelize: typeof Sequelize;
+  /**
+   * A JavaScript date library for parsing, validating, manipulating, and formatting dates.
+   */
+  moment: typeof moment;
+
+  /**
+   * utils tools function
+   */
+  utils: typeof utils;
+  /**
+   * alias utils tools function
+   */
+  U: typeof utils;
 }
 
-export const deps: MDeps = {
+export const defaults: Defaults = {
   _,
   uuid,
   ajv,
@@ -95,4 +110,7 @@ export const deps: MDeps = {
   LRU,
   mysql,
   Sequelize,
+  moment,
+  utils,
+  U: utils,
 };

@@ -1,5 +1,3 @@
-import { any, anyLimit } from "async";
-
 export interface Cnf {
   proxyIps?: string;
   port?: number;

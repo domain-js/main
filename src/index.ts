@@ -1,4 +1,4 @@
-import { deps } from "./npms";
+import { defaults, Defaults } from "./defaults";
 import * as DM from "./dm";
 import Deps = require("./deps/defines");
 
@@ -19,7 +19,7 @@ type Include<T, U> = T extends U ? T : never;
 type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
 export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
-  const { _ } = deps;
+  const { _ } = defaults;
   /** 模块名称联合类型 */
   type MS = RemoveReadonlyArray<T>;
   type Cnf = Merge<
@@ -28,7 +28,7 @@ export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
 
   return (cnf: Cnf) => {
     /** 这里之所以要浅拷贝，是为了避免多次初始化之间互相干扰 */
-    const _deps = { ...deps } as typeof deps;
+    const _deps = { ...defaults } as Defaults;
     const modules = DM.auto(
       _.pick(Deps, features) as Pick<TDeps, MS> /** 要启用的内部模块 */,
       _deps /** 初始的模块依赖对象 */,
