@@ -12,6 +12,7 @@ import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
 import * as moment from "moment";
 import * as utils from "./utils";
+import { errors } from "./basic-errors";
 
 /** npm packages injection */
 export interface Defaults {
@@ -95,6 +96,10 @@ export interface Defaults {
    * alias utils tools function
    */
   U: typeof utils;
+  /**
+   * basic errors
+   */
+  errors: typeof errors;
 }
 
 export const defaults: Defaults = {
@@ -113,4 +118,5 @@ export const defaults: Defaults = {
   moment,
   utils,
   U: utils,
+  errors,
 };
