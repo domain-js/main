@@ -6,6 +6,7 @@ export { Main as Http } from "./http";
 export { Errors } from "./Errors";
 export * as DM from "./dm";
 export * as utils from "./utils";
+export { Main as Cfg } from "./cfg";
 export const basicErrors = defaults.errors;
 
 type TDeps = typeof Deps;
