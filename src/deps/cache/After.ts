@@ -2,7 +2,7 @@
 import { CnfDef, DepsDef, PubSubDef, Cache } from "./Define";
 
 export const After = (
-  lru: Cache,
+  lru: Pick<Cache, "del">,
   cnf: CnfDef,
   deps: Pick<DepsDef, "logger">,
   pubsub?: PubSubDef,
