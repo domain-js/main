@@ -1,8 +1,9 @@
 {
   "name": "@domain.js/main",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "DDD framework",
   "main": "dist/index.js",
+  "bin": "dist/cli/index.js",
   "scripts": {
     "build": "tsc",
     "test": "export NODE_ENV=test && jest ./src --coverage",
