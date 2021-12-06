@@ -4,4 +4,4 @@ if [ ! -f "$(dirname "$0")/_/husky.sh" ]; then
 fi
 . "$(dirname "$0")/_/husky.sh"
 
-ts-node src/cli/index.ts loadDeps ./ ts && npm run lint-staged && npm run build 
+ts-node src/cli/index.ts loadDeps ./src/deps/ ts && npm run lint-staged && npm run build 

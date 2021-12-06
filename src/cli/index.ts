@@ -85,7 +85,7 @@ const checkHookExport = (_dir: string) => {
 const loadDeps = async (rootDir = process.cwd(), ext = "js") => {
   const isTS = ext === "ts";
   const modules = [];
-  const dir = path.resolve(rootDir, "src/deps/");
+  const dir = path.resolve(rootDir, "./");
   for (const x of fs.readdirSync(dir)) {
     // 忽略隐藏目录
     if (x[0] === ".") continue;
@@ -100,7 +100,7 @@ const loadDeps = async (rootDir = process.cwd(), ext = "js") => {
   }
 
   // 按字典排序，后续有变动的时候不容易冲突
-  const targetFile = path.resolve(rootDir, `src/deps/defines.${ext}`);
+  const targetFile = path.resolve(rootDir, `./defines.${ext}`);
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
@@ -116,7 +116,7 @@ const checkService = (_dir: string) => {
 const loadServices = async (rootDir = process.cwd(), ext = "js") => {
   const isTS = ext === "ts";
   const modules = [];
-  const dir = path.resolve(rootDir, "src/services/");
+  const dir = path.resolve(rootDir, "domain/services/");
   for (const x of fs.readdirSync(dir)) {
     // 忽略隐藏目录, 忽略私有目录
     if (x[0] === "." || x[0] === "_") continue;
@@ -131,7 +131,7 @@ const loadServices = async (rootDir = process.cwd(), ext = "js") => {
   }
 
   // 按字典排序，后续有变动的时候不容易冲突
-  const targetFile = path.resolve(rootDir, `src/services/defines.${ext}`);
+  const targetFile = path.resolve(rootDir, `domain/services/defines.${ext}`);
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
