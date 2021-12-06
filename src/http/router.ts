@@ -2,13 +2,14 @@ import * as _ from "lodash";
 import * as errors from "restify-errors";
 import * as restify from "restify";
 import { Utils } from "./utils";
-import { HttpCodes, Domain, Err, Profile } from "./defines";
+import { HttpCodes, Domain, Err, Profile, GetSchemaByPath } from "./defines";
 
 const swaggerUi = require("swagger-ui-restify");
 
 type Verb = "get" | "post" | "put" | "patch" | "del";
 interface Deps {
   domain: Domain;
+  getSchemaByPath: GetSchemaByPath;
   utils: ReturnType<typeof Utils>;
   server: restify.Server;
   httpCodes: HttpCodes;
@@ -21,6 +22,7 @@ export function Router(deps: Deps) {
   const {
     domain,
     apisRoute,
+    getSchemaByPath,
     utils,
     server,
     httpCodes = {},
@@ -83,7 +85,7 @@ export function Router(deps: Deps) {
 
       try {
         const { all } = req.query;
-        const schema = domain._getSchemaByPath(path);
+        const schema = getSchemaByPath(path);
         res.send(all === undefined ? schema[1] : schema);
       } catch (e) {
         next(error2httpError(e as Err));
@@ -98,7 +100,7 @@ export function Router(deps: Deps) {
     let apiSchema = [];
     let desc = "";
     try {
-      apiSchema = domain._getSchemaByPath(methodPath);
+      apiSchema = getSchemaByPath(methodPath);
       desc = apiSchema[1] ? apiSchema[1].description : "unknow";
       apiSchema = jsonSchema2Swagger(
         apiSchema[1] ? apiSchema[1] : {},

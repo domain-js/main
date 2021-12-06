@@ -1,12 +1,13 @@
 import * as restify from "restify";
 import { Router } from "./router";
 import { Utils } from "./utils";
-import { Cnf, Domain, Profile, HttpCodes } from "./defines";
+import { Cnf, Domain, Profile, HttpCodes, GetSchemaByPath } from "./defines";
 
 interface Deps {
   routers(r: ReturnType<typeof Router>): void;
   domain: Domain;
   httpCodes: HttpCodes;
+  getSchemaByPath: GetSchemaByPath;
   swaggerDocJson?: any;
   makeProfileHook?: (obj: Profile, req: restify.Request) => any;
 }
@@ -14,7 +15,7 @@ interface Deps {
 export function Main(cnf: Cnf, deps: Deps) {
   const utils = Utils(cnf);
 
-  const { routers, domain, httpCodes, swaggerDocJson, makeProfileHook } = deps;
+  const { routers, getSchemaByPath, domain, httpCodes, swaggerDocJson, makeProfileHook } = deps;
 
   const server = restify.createServer();
   server.use(restify.plugins.queryParser());
@@ -30,6 +31,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     server,
     httpCodes,
     makeProfileHook,
+    getSchemaByPath,
     domain,
     apisRoute: cnf.apisRoute,
     swagger: [cnf.swaggerApiPath, swaggerDocJson],

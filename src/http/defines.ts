@@ -35,13 +35,13 @@ export interface HttpCodes {
   [propName: string]: number;
 }
 
-interface _Domain {
-  [propName: string]: (profile: Profile, params: any) => any | _Domain;
+export interface Domain {
+  [propName: string]: (profile: Profile, params: any) => any | Domain;
 }
 
-export type Domain = _Domain & {
-  _getSchemaByPath(methodPath: string): [any, any];
-};
+export interface GetSchemaByPath {
+  (methodPath: string): [any, any];
+}
 
 export interface Err {
   message: string;
