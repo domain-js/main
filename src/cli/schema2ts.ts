@@ -4,7 +4,7 @@ import { compile } from "json-schema-to-typescript";
 
 const _require = require;
 
-async function main(file: string, single = false) {
+async function main(file: string, single = false, name = "Params") {
   const stats = fs.statSync(file);
   if (stats.isFile()) {
     const arr = file.split(".");
@@ -15,7 +15,7 @@ async function main(file: string, single = false) {
       if (typeof obj[1] !== "object") return;
     }
     try {
-      const ts = await compile(obj[1], "Params");
+      const ts = await compile(single ? obj : obj[1], name);
       arr.push("d.ts");
       fs.writeFileSync(arr.join("."), ts);
     } catch (e) {
@@ -26,8 +26,8 @@ async function main(file: string, single = false) {
   const files = fs.readdirSync(file);
   for await (const x of files) {
     if (x === "." || x === "..") continue;
-    await main(path.resolve(file, x), single);
+    await main(path.resolve(file, x), single, name);
   }
 }
 
-main(process.argv[2], process.argv[3] === "single");
+main(process.argv[2], process.argv[3] === "single", process.argv[4]);
