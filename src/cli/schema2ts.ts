@@ -30,4 +30,4 @@ async function main(file: string, single = false) {
   }
 }
 
-main(process.argv[2], process.argv[3] === "yes");
+main(process.argv[2], process.argv[3] === "single");
