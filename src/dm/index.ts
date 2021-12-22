@@ -2,7 +2,7 @@ import * as _ from "lodash";
 
 interface ModuleInterface {
   Main: (...args: any[]) => any;
-  Deps?: string[];
+  Deps?: string[] | ReadonlyArray<string>;
   Before?: (...args: any[]) => any;
   After?: (...args: any[]) => void;
 }
