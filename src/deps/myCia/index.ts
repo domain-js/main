@@ -382,7 +382,29 @@ export function Main(cnf: Cnf, deps: Deps) {
   // 进程是否已经退出
   const isExited = () => Boolean(exited);
 
-  return { isExiting, isExited, checkReady, getStats, getUnlinks, regist, link, submit, setFn };
+  /**
+   * 领域方法注册到 cia 上的路径集合
+   */
+  const domainPaths = new Set<string>();
+
+  /**
+   * Model hook 注册到 cia 上的路径集合
+   */
+  const modelHooks = new Set<string>();
+
+  return {
+    isExiting,
+    isExited,
+    checkReady,
+    getStats,
+    getUnlinks,
+    regist,
+    link,
+    submit,
+    setFn,
+    domainPaths,
+    modelHooks,
+  };
 }
 
 export const Deps = ["_", "async", "logger", "utils", "redis", "graceful", "uuid"];
