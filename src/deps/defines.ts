@@ -2,12 +2,12 @@
 import * as aes from "./aes";
 import * as cache from "./cache";
 import * as checker from "./checker";
-import * as cia from "./cia";
 import * as counter from "./counter";
 import * as cron from "./cron";
 import * as graceful from "./graceful";
 import * as hash from "./hash";
 import * as logger from "./logger";
+import * as myCia from "./myCia";
 import * as parallel from "./parallel";
 import * as redis from "./redis";
 import * as request from "./request";
@@ -20,12 +20,12 @@ export = {
   aes,
   cache,
   checker,
-  cia,
   counter,
   cron,
   graceful,
   hash,
   logger,
+  myCia,
   parallel,
   redis,
   request,
