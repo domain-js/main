@@ -65,6 +65,7 @@ describe("router", () => {
     server: server as any,
     httpCodes: {},
     domain: domain as any,
+    getSchemaByPath: (() => new Date()) as any,
   });
   server.get.mock.calls.length = 0;
 
