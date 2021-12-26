@@ -8,14 +8,13 @@ interface Deps {
   domain: Domain;
   httpCodes: HttpCodes;
   getSchemaByPath: GetSchemaByPath;
-  swaggerDocJson?: any;
   makeProfileHook?: (obj: Profile, req: restify.Request) => any;
 }
 
 export function Main(cnf: Cnf, deps: Deps) {
   const utils = Utils(cnf);
 
-  const { routers, getSchemaByPath, domain, httpCodes, swaggerDocJson, makeProfileHook } = deps;
+  const { routers, getSchemaByPath, domain, httpCodes, makeProfileHook } = deps;
 
   const server = restify.createServer();
   server.use(restify.plugins.queryParser());
@@ -34,7 +33,6 @@ export function Main(cnf: Cnf, deps: Deps) {
     getSchemaByPath,
     domain,
     apisRoute: cnf.apisRoute,
-    swagger: [cnf.swaggerApiPath, swaggerDocJson],
   });
   routers(router);
 

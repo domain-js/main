@@ -68,7 +68,6 @@
     "csv-stringify": "^6.0.2",
     "human-interval": "^2.0.1",
     "ioredis": "^4.28.0",
-    "json-schema-to-typescript": "^10.1.5",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
     "moment": "^2.29.1",
@@ -76,7 +75,6 @@
     "restify": "^8.6.0",
     "restify-errors": "^8.0.2",
     "sequelize": "6.12.1",
-    "swagger-ui-restify": "^3.0.8",
     "type-fest": "^2.8.0",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.4"

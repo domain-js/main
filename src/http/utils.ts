@@ -151,44 +151,6 @@ export function Utils(cnf: Cnf) {
 
       return true;
     },
-
-    jsonSchema2Swagger(schema: any, verb: string, methodPath: string, swaggerDocJson: any) {
-      if (verb === "post" || verb === "put" || verb === "patch") {
-        swaggerDocJson.definitions[methodPath] = schema;
-        return [
-          {
-            name: "body",
-            in: "body",
-            require: true,
-            description: schema.description,
-            operationId: methodPath,
-            schema: {
-              $ref: `#/definitions/${methodPath}`,
-            },
-          },
-        ];
-      }
-      const parameters: any[] = [];
-      if (!_.has(schema, "properties")) {
-        return parameters;
-      }
-
-      const requireds = schema.required ? schema.required : [];
-      for (const prop of Object.keys(schema.properties)) {
-        const val = schema.properties[prop];
-        const param = {
-          name: prop,
-          in: "query",
-          ...val,
-        };
-
-        if (requireds.includes("prop")) {
-          param.required = true;
-        }
-        parameters.push(param);
-      }
-      return parameters;
-    },
   };
 
   return utils;

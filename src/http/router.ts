@@ -4,8 +4,6 @@ import * as restify from "restify";
 import { Utils } from "./utils";
 import { HttpCodes, Domain, Err, Profile, GetSchemaByPath } from "./defines";
 
-const swaggerUi = require("swagger-ui-restify");
-
 type Verb = "get" | "post" | "put" | "patch" | "del";
 interface Deps {
   domain: Domain;
@@ -27,9 +25,8 @@ export function Router(deps: Deps) {
     server,
     httpCodes = {},
     makeProfileHook,
-    swagger = ["", {}],
   } = deps;
-  const { ucwords, makeParams, makeProfile, outputCSV, jsonSchema2Swagger } = utils;
+  const { ucwords, makeParams, makeProfile, outputCSV } = utils;
 
   // 改写 HttpErrorToJSON 处理 data
   const HttpErrorToJSON = errors.HttpError.prototype.toJSON;
@@ -50,22 +47,8 @@ export function Router(deps: Deps) {
     return e;
   };
 
-  const [apiSwagger, swaggerDocJson] = swagger;
   const apis: string[] = [];
   let apisHTML = "<h3>API 目录，点击可以查看参数格式定义</h3>";
-
-  let swaggerHtml = "";
-  if (apiSwagger) {
-    server.get(`/${apiSwagger}/*.*`, ...swaggerUi.serve);
-    server.get(`/${apiSwagger}`, (req, res) => {
-      res.writeHead(200, {
-        "Content-Length": Buffer.byteLength(swaggerHtml),
-        "Content-Type": "text/html",
-      });
-      res.write(swaggerHtml);
-      res.end();
-    });
-  }
 
   /** 判断是否需要提供apis的查询接口 */
   if (apisRoute) {
@@ -95,46 +78,6 @@ export function Router(deps: Deps) {
     });
   }
 
-  const getAPISchemaDoc = (verb: string, route: string, methodPath: string) => {
-    if (!apiSwagger) return;
-    let apiSchema = [];
-    let desc = "";
-    try {
-      apiSchema = getSchemaByPath(methodPath);
-      desc = apiSchema[1] ? apiSchema[1].description : "unknow";
-      apiSchema = jsonSchema2Swagger(
-        apiSchema[1] ? apiSchema[1] : {},
-        verb,
-        methodPath,
-        swaggerDocJson,
-      );
-    } catch (e) {
-      console.log(methodPath, "schema to swagger error.");
-    }
-
-    swaggerHtml = swaggerUi.generateHTML(swaggerDocJson, {
-      baseURL: `${swaggerDocJson.basePath}${apiSwagger}`,
-      explorer: true,
-    });
-
-    const apiTag = methodPath.split(".")[0];
-
-    swaggerDocJson.paths[route] = {
-      [verb]: {
-        "x-swagger-router-controller": methodPath,
-        operationId: methodPath,
-        tags: [apiTag],
-        externalDocs: {
-          description: "查看接口参数 json schema 定义",
-          url: `./${apisRoute}/_schema?path=${methodPath}`,
-        },
-        description: desc,
-        parameters: apiSchema || [],
-        responses: {},
-      },
-    };
-  };
-
   function register(
     verb: Verb,
     route: string,
@@ -156,8 +99,6 @@ export function Router(deps: Deps) {
     if (!method || !_.isFunction(method)) {
       throw Error(`Missing domain method: ${methodPath}`);
     }
-
-    getAPISchemaDoc(verb, route, methodPath);
 
     server[verb](route, async (req: restify.Request, res: restify.Response, next: restify.Next) => {
       const profile = makeProfile(req, methodPath, makeProfileHook);
