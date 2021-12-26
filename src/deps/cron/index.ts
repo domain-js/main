@@ -138,4 +138,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return { regist, start, getStats };
 }
 
-export const Deps = ["cia", "humanInterval", "cronParser"];
+export const Deps = ["myCia", "humanInterval", "cronParser"];
