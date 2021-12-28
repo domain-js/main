@@ -4,7 +4,6 @@ export interface Cnf {
   host?: string;
   bodyMaxBytes?: number;
   apisRoute?: string;
-  swaggerApiPath?: string;
   [propName: string]: any;
 }
 

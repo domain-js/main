@@ -64,7 +64,7 @@ export function Main() {
         "x-auth-signature": signature,
         "x-auth-key": key,
         "x-auth-method": method,
-        "x-auth-timestamp": opt.timestamp,
+        "x-auth-timestamp": opt.timestamp as unknown as string,
         "x-auth-sign-method": opt.signMethod,
         "x-auth-sign-version": opt.signVersion,
       } as const;
