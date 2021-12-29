@@ -32,7 +32,7 @@ describe("Singer", () => {
         "x-auth-signature": "0iZkHO/G+ZXYFmyYBLjoxyqQYGTx20TqlaBTfk4BHmI=",
         "x-auth-key": "test key",
         "x-auth-method": "",
-        "x-auth-timestamp": 337008447,
+        "x-auth-timestamp": "337008447",
         "x-auth-sign-method": "HmacSHA256",
         "x-auth-sign-version": "1",
       });

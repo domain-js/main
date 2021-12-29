@@ -7,7 +7,7 @@ export interface Opt {
   /** Key for signature calculation */
   key: string;
   /** Second timestamp */
-  timestamp: number;
+  timestamp: number | string;
   /** Signature algorithm, fixed as hmacsha256 */
   signMethod: "HmacSHA256";
   /** Signature version, fixed as 1 */
@@ -52,7 +52,7 @@ export function Main() {
       const opt: Opt = {
         uri,
         key,
-        timestamp: (Date.now() / 1000) | 0,
+        timestamp: `${(Date.now() / 1000) | 0}`,
         signMethod: "HmacSHA256",
         signVersion: "1",
         method,
