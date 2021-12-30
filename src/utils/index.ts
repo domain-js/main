@@ -25,7 +25,7 @@ export const md5 = (str: { toString: () => string }) => {
 export function randStr(len: number, type: "strong"): string;
 export function randStr(len: number, type: "normal"): string;
 export function randStr(len: number, type: string): string;
-export function randStr(len: number, type: string): string {
+export function randStr(len: number, type = "normal"): string {
   const dict = type === "strong" || type === "normal" ? RAND_STR_DICT[type] : type;
   const { length } = dict;
 

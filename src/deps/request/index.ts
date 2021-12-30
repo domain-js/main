@@ -45,7 +45,7 @@ export function Main(cnf: Cnf, deps: Deps) {
       if (!r.data) return [r.status, r.statusText];
       const d = r.data;
       if (typeof d === "string") return [r.status, d];
-      return [d.code || r.status, d.message || r.statusText];
+      return [d.code || r.status, d.message || JSON.stringify(d)];
     })().join("\t");
 
   if (!cnf.axios) cnf.axios = {};
