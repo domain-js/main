@@ -138,7 +138,7 @@ describe("axios module", () => {
         toJSON: jest.fn(() => ({ value: "hello world" })),
         isAxiosError: false,
       });
-      expect(errorHandler(e6)).toEqual("Dont allowed\tForbidden");
+      expect(errorHandler(e6)).toEqual("Dont allowed\t{\"code\":\"Dont allowed\"}");
 
       expect(typeof _axios.get).toBe("function");
       expect(await _axios.get("http://xiongfei.me/")).toBe("ok");

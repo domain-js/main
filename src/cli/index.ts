@@ -33,10 +33,11 @@ const codeStyleFormat = (targetFile: string) =>
   });
 
 const makeDefineFile = async (modules: any[], targetFile: string, isTS: boolean) => {
+  const dirname = path.dirname(targetFile);
   const content = ["// domain-cli 自动生成"];
   const _exports = [];
   for (let i = 0; i < modules.length; i += 1) {
-    const name = modules[i];
+    const name = path.relative(dirname, modules[i]);
     const variable = filePath2Var(name);
 
     if (isTS) {
@@ -82,7 +83,7 @@ const checkHookExport = (_dir: string) => {
   }
 };
 
-const loadDeps = async (rootDir = process.cwd(), ext = "js") => {
+const loadDeps = async (rootDir: string, ext = "js") => {
   const isTS = ext === "ts";
   const modules = [];
   const dir = path.resolve(rootDir, "./");
@@ -96,7 +97,7 @@ const loadDeps = async (rootDir = process.cwd(), ext = "js") => {
     if (!stat.isDirectory()) continue;
     checkHookExport(_dir);
 
-    modules.push(x);
+    modules.push(path.join(dir, x));
   }
 
   // 按字典排序，后续有变动的时候不容易冲突
@@ -116,7 +117,7 @@ const checkService = (_dir: string) => {
 const loadServices = async (rootDir = process.cwd(), ext = "js") => {
   const isTS = ext === "ts";
   const modules = [];
-  const dir = path.resolve(rootDir, "domain/services/");
+  const dir = path.resolve(rootDir, "src/domain/services/");
   for (const x of fs.readdirSync(dir)) {
     // 忽略隐藏目录, 忽略私有目录
     if (x[0] === "." || x[0] === "_") continue;
@@ -127,95 +128,57 @@ const loadServices = async (rootDir = process.cwd(), ext = "js") => {
     if (!stat.isDirectory()) continue;
     checkService(_dir);
 
-    modules.push(x);
+    modules.push(path.join(dir, x));
   }
 
   // 按字典排序，后续有变动的时候不容易冲突
-  const targetFile = path.resolve(rootDir, `domain/services/defines.${ext}`);
+  const targetFile = path.resolve(rootDir, `src/domain/services/defines.${ext}`);
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
-interface DeepModules {
-  [propName: string]: string | DeepModules;
-}
-
-const deepLoadDir = (root: string, parent: string, files: string[] = []) => {
-  const paths: DeepModules = {};
-  const dir = path.resolve(root, parent);
+/**
+ * 尝试读取目录下的文件
+ * @param dir 目录路径
+ * @param list 读取到schema后压入改列表
+ */
+const tryReadSchemas = (dir: string, list: string[], isTS = false) => {
+  if (!fs.existsSync(dir)) return;
+  const stat = fs.statSync(dir);
+  if (stat.isFile()) return;
   for (const x of fs.readdirSync(dir)) {
-    // 忽略隐藏目录
-    if (x[0] === ".") continue;
-    const file = path.resolve(dir, x);
-    const stat = fs.statSync(file);
-
-    const { name, ext } = path.parse(x);
-    const relativeFilePath = `./${path.join(parent, name)}`;
-    const moduleName = file2Module(name);
-    // 如果是文件则记录
-    if (stat.isFile()) {
-      if (ext === ".ts") {
-        const JSFile = path.resolve(dir, `${name}.js`);
-        // 对应的js文件存在，则ts文件忽略
-        if (fs.existsSync(JSFile)) continue;
-        // 对应的js文件不存在，抛出异常提示用户要先编译
-        throw Error(`请先编译ts文件: ${file}`);
-      }
-      files.push(relativeFilePath);
-      paths[moduleName] = relativeFilePath;
-      continue;
-    }
-
-    if (stat.isDirectory()) {
-      paths[moduleName] = deepLoadDir(root, relativeFilePath, files);
-    }
+    if (x.startsWith(".")) continue;
+    const ext = path.extname(x);
+    if (isTS && ext !== ".ts") continue;
+    if (!isTS && ext !== ".js") continue;
+    list.push(path.join(dir, path.basename(x, isTS ? ".ts" : ".js")));
   }
-
-  return paths;
 };
 
-const deepLoadModule = async (rootDir: string, targetFile: string) => {
-  const files: string[] = [];
-  const paths = deepLoadDir(rootDir, "./", files);
-  const { ext } = path.parse(targetFile);
+const loadSchemas = async (rootDir = process.cwd(), ext = "js") => {
+  const isTS = ext === "ts";
+  const modules: string[] = [];
+  const dir = path.resolve(rootDir, "src/domain/services/");
+  for (const x of fs.readdirSync(dir)) {
+    // 忽略隐藏目录, 忽略私有目录
+    if (x[0] === "." || x[0] === "_") continue;
+    const _dir = path.resolve(dir, x);
+    const stat = fs.statSync(_dir);
+
+    // 非目录忽略，模块必须是目录
+    if (!stat.isDirectory()) continue;
+
+    // 尝试读取子目录里的 schemas 目录
+    tryReadSchemas(path.join(_dir, "schemas"), modules, isTS);
+  }
 
   // 按字典排序，后续有变动的时候不容易冲突
-  files.sort();
-
-  const relative = path.relative(path.dirname(targetFile), rootDir);
-  const isTS = ext === ".ts";
-  const content = ["// domain-cli 自动生成"];
-  for (let i = 0; i < files.length; i += 1) {
-    const name = files[i];
-    const _path = `./${path.join(relative, name)}`;
-    const variable = filePath2Var(name);
-    if (isTS) {
-      content.push(`import * as ${variable} from "${_path}"`);
-    } else {
-      content.push(`const ${variable} = require("${_path}")`);
-    }
-  }
-
-  // 处理导出
-  content.push("\n");
-  let _exports = JSON.stringify(paths, null, 2);
-  for (let i = 0; i < files.length; i += 1) {
-    _exports = _exports.replace(`"${files[i]}"`, filePath2Var(files[i]));
-  }
-  if (isTS) {
-    content.push(`export = ${_exports}`);
-  } else {
-    content.push(`module.exports = ${_exports}`);
-  }
-
-  fs.writeFileSync(targetFile, content.join("\n"));
-  await codeStyleFormat(targetFile);
-
-  console.log(`Completed: ${targetFile}`);
+  const targetFile = path.resolve(rootDir, `src/domain/services/schemas.${ext}`);
+  await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
-const actions = { loadDeps, loadServices, deepLoadModule };
+const actions = { loadDeps, loadServices, loadSchemas };
 
-const main = async (command: "loadDeps" | "loadServices" | "deepLoadModule") => {
+const main = async (command: "loadDeps" | "loadServices" | "loadSchemas") => {
   const action = actions[command];
   if (!action) {
     const msg = `${action} 不存在该指令，只支持 ${Object.keys(actions)}`;
