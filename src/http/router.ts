@@ -16,6 +16,12 @@ interface Deps {
   swagger?: [any, any];
 }
 
+/** 对 params 的处理函数 */
+type Handler = (params: any) => void;
+
+/** 对执行结构的处理 */
+type ResHandler = (results: any, res: restify.Response) => void;
+
 export function Router(deps: Deps) {
   const {
     domain,
@@ -84,8 +90,8 @@ export function Router(deps: Deps) {
     methodPath: string,
     code = 200,
     isList = false,
-    handler?: Function,
-    resHandler?: Function,
+    handler?: Handler,
+    resHandler?: ResHandler,
   ) {
     /**
      * 暂存起来，提供给apis接口来用
@@ -151,8 +157,8 @@ export function Router(deps: Deps) {
       ctlAct: string,
       code = 200,
       isList = false,
-      handler?: Function,
-      resHandler?: Function,
+      handler?: Handler,
+      resHandler?: ResHandler,
     ) => {
       register(verb, routePath, ctlAct, code, isList, handler, resHandler);
       if (verb === "put") {
