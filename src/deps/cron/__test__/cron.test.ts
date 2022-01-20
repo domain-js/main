@@ -13,7 +13,7 @@ describe("cron", () => {
   };
 
   const deps = {
-    cia,
+    myCia: cia,
     humanInterval,
     cronParser,
   };
@@ -88,7 +88,7 @@ describe("cron special", () => {
   };
 
   const deps = {
-    cia,
+    myCia: cia,
     humanInterval,
     cronParser,
   };
