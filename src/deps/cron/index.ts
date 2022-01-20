@@ -20,7 +20,7 @@ interface callbackArg {
 interface Deps {
   cronParser: typeof cronParser;
   humanInterval: typeof human;
-  cia: {
+  myCia: {
     regist: (name: string, validator: any, waiters: waiter[]) => void;
     submit: (name: string, times: number, callback: (arg: callbackArg) => void) => void;
   };
@@ -42,7 +42,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   const { cron = {} } = cnf;
 
   const ciaTaskType = "cronJob";
-  const { cia, humanInterval: human, cronParser: parser } = deps;
+  const { myCia, humanInterval: human, cronParser: parser } = deps;
   const { tz = "Asia/Shanghai" } = cron;
 
   // 注册信息
@@ -82,7 +82,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     setTimeout(() => {
       opt.times += 1;
       opt.triggeredAt = Date.now();
-      cia.submit(`Cron::${name}`, opt.times, ({ cronJob: [err, , totalMS] }) => {
+      myCia.submit(`Cron::${name}`, opt.times, ({ cronJob: [err, , totalMS] }) => {
         if (err) {
           opt.failds += 1;
         } else {
@@ -114,7 +114,7 @@ export function Main(cnf: Cnf, deps: Deps) {
 
     // 注册到cia上, 为了借助cia的能力自动下发任务
     // 增加 Cron:: 前缀是为了避免和其他任务名称冲突
-    cia.regist(`Cron::${name}`, null, [{ type: ciaTaskType }]);
+    myCia.regist(`Cron::${name}`, null, [{ type: ciaTaskType }]);
   };
 
   const start = () => {
