@@ -53,6 +53,7 @@ export function Utils(cnf: Cnf) {
         userAgent: req.userAgent(),
         startedAt: new Date(),
         requestId: req.id(),
+        extra: {},
       };
 
       const token = req.headers["x-auth-token"] || req.query.access_token || req.query.accessToken;
