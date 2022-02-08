@@ -41,7 +41,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param _cols Allow columns to be updated
    * @returns The resource that has been updated
    */
-  const modify = (
+  const modify = async (
     Model: TModel,
     model: Sequelize.Model,
     params: Params,
@@ -56,7 +56,15 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
 
     Object.assign(model, attr);
 
-    return model.save();
+    const fields = model.changed();
+    if (!Array.isArray(fields) || !fields.length) return model;
+
+    try {
+      return await model.save();
+    } catch (e) {
+      Object.assign(model, model.previous());
+      throw e;
+    }
   };
 
   /**

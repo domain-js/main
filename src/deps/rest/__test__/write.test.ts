@@ -35,6 +35,7 @@ describe("rest.write", () => {
       const model = {
         id: 234,
         save: jest.fn(),
+        changed: jest.fn(),
       };
       const params = {};
       model.save.mockResolvedValueOnce(model);
@@ -57,6 +58,7 @@ describe("rest.write", () => {
       const model = {
         id: 234,
         save: jest.fn(),
+        changed: jest.fn(),
       };
       const params = {};
       const isAdmin = false;
