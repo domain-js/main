@@ -1,9 +1,9 @@
 #! /usr/bin/env node
 
+import { exec } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
-import { exec } from "child_process";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -18,7 +18,7 @@ const _require = require;
 
 const showMessage = (msg: string, exit?: number) => {
   rl.write(`${msg}\n`);
-  if (exit != null) process.exit(exit);
+  if (exit) process.exit(exit);
   rl.setPrompt("> ");
 };
 
@@ -36,8 +36,8 @@ const makeDefineFile = async (modules: any[], targetFile: string, isTS: boolean)
   const dirname = path.dirname(targetFile);
   const content = ["// domain-cli 自动生成"];
   const _exports = [];
-  for (let i = 0; i < modules.length; i += 1) {
-    const name = path.relative(dirname, modules[i]);
+  for (const x of modules) {
+    const name = path.relative(dirname, x);
     const variable = filePath2Var(name);
 
     if (isTS) {
