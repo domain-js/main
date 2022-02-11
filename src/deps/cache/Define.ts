@@ -1,5 +1,5 @@
-import * as LRU from "lru-cache";
-import * as Redis from "ioredis";
+import LRU from "lru-cache";
+import Redis from "ioredis";
 import { SetRequired } from "type-fest";
 
 export interface CnfDef {

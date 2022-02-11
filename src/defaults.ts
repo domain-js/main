@@ -1,16 +1,16 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import * as uuid from "uuid";
 import * as ajv from "ajv";
 import * as ajvFormats from "ajv-formats";
 import * as async from "async";
 import * as axios from "axios";
 import * as cronParser from "cron-parser";
-import humanInterval = require("human-interval");
+import humanInterval from "human-interval";
 import * as IORedis from "ioredis";
-import * as LRU from "lru-cache";
+import LRU from "lru-cache";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
-import * as moment from "moment";
+import moment from "moment";
 import * as utils from "./utils";
 import { errors } from "./basic-errors";
 

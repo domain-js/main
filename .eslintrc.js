@@ -1,67 +1,32 @@
 module.exports = {
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
-  extends: ["airbnb", "eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  ignorePatterns: [".eslintrc.js"],
-  root: true,
+  parser: "@typescript-eslint/parser", // 解析ts 代码编译器，将ts 语法树转化为 eslint 期望的
+  extends: ["alloy", "alloy/typescript"],
+  plugins: ["simple-import-sort", "unused-imports"],
   env: {
-    es6: true,
+    // Your environments (which contains several predefined global variables)
+    //
     node: true,
-    jest: true,
+    commonjs: true,
+    es6: true,
   },
-  settings: {
-    react: {
-      version: "999.999.999",
-    },
+  globals: {
+    // Your global variables (setting to false means it's not allowed to be reassigned)
+    //
+    // myGlobal: false
   },
   rules: {
-    "nonblock-statement-body-position": "off",
-    "operator-linebreak": ["error", "after"],
-    "prefer-destructuring": ["error", { object: true, array: true }],
-    indent: ["error", 2],
-    "no-use-before-define": ["error", { functions: true, classes: true, variables: true }],
-    "no-param-reassign": 0,
-    "no-continue": 0,
-    "no-console": 0,
-    "no-debugger": 1,
-    "no-var": 1,
-    semi: ["error", "always"],
-    "no-trailing-spaces": "error",
-    "eol-last": 1,
-    "no-underscore-dangle": 0,
-    "no-empty": "error",
-    "no-loop-func": "error",
-    "no-bitwise": "off", // "error",
-    quotes: ["error", "double"],
-    "comma-dangle": ["error", "only-multiline"],
-    "arrow-parens": ["error", "always"],
-    "object-curly-newline": 0,
-    "function-paren-newline": 0,
-    "implicit-arrow-linebreak": 0,
-    curly: 0,
-    "no-mixed-operators": "error",
-    "no-restricted-syntax": 0,
-    "no-lone-blocks": "error",
-    "lines-between-class-members": "off",
-    yoda: "error",
-    "no-plusplus": 0,
-    "import/export": 0,
-    "no-cond-assign": "error",
-    "no-shadow": 0,
-    camelcase: 0,
-    "prefer-destructuring": 0,
-    "import/prefer-default-export": "off",
-    "newline-per-chained-call": 0,
-    "@typescript-eslint/interface-name-prefix": "off",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-namespace": 0,
-    "@typescript-eslint/ban-types": 0,
-    "import/export": 0,
-    "import/no-unresolved": 0,
-    "import/extensions": 0,
-    "@typescript-eslint/no-var-requires": 0,
-    "@typescript-eslint/no-this-alias": 0,
+    // Customize your rules
+    "spaced-comment": "off", // 注释前有空白检查
+    "simple-import-sort/imports": "error", // 优化import 顺序
+    "simple-import-sort/exports": "error", // 优化 export 顺序
+    "no-multiple-empty-lines": ["warn", { max: 2 }], // 强制最大连续空行数为 2
+    complexity: ["error", 20], // https://cn.eslint.org/docs/rules/complexity
+    "no-template-curly-in-string": "error", //禁止在常规字符串中出现模板字面量占位符语法
+    "unused-imports/no-unused-imports": "warn",
+    "@typescript-eslint/explicit-member-accessibility": "off", // 不强制设置类成员的可访问性
+    "@typescript-eslint/member-ordering": "off", // 不严格限制类成员顺序
+    "max-params": ["error", 6], // 函数最多6个参数
+    "@typescript-eslint/no-require-imports": "off", // 部分第三方库不支持  esModuleInterop 编译选项
+    "@typescript-eslint/prefer-optional-chain": "off", // 过多使用可选操作符降低代码可读性 foo?.a?.b?.c
   },
 };

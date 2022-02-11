@@ -1,7 +1,7 @@
-import * as _ from "lodash";
+import type { LoDashStatic } from "lodash";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
-import * as moment from "moment";
+import moment from "moment";
 import { ModelExtraAtts, Include, TModel, Params } from "./defines";
 
 interface Cnf {
@@ -11,7 +11,7 @@ interface Cnf {
 }
 
 interface Deps {
-  _: typeof _;
+  _: LoDashStatic;
   mysql: Pick<typeof mysql, "escape">;
   moment: typeof moment extends (...args: infer A) => infer B ? (...args: A) => B : never;
   Sequelize: Pick<typeof Sequelize, "where" | "fn" | "col" | "literal" | "Op">;
@@ -26,7 +26,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
 
-  const { errors, moment, Sequelize } = deps;
+  const { _, errors, moment, Sequelize } = deps;
 
   /**
    * 相对多少天的时间

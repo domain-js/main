@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import * as Sequelize from "sequelize";
 import { TModel, Params } from "./defines";
 import { Stats } from "./stats";

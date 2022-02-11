@@ -6,7 +6,8 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
-    "rootDir": "./src/"
+    "rootDir": "./src/",
+    "esModuleInterop": true
   },
   "include": ["./"],
   "exclude": ["./src/**/*.test.ts", "./src/**/samples/*", "node_modules", "dist"]

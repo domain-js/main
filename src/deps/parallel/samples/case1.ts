@@ -1,5 +1,6 @@
-import * as async from "async";
-import * as Redis from "ioredis";
+import async from "async";
+import Redis from "ioredis";
+
 import { Main as Parallel } from "..";
 
 const cnf = {
