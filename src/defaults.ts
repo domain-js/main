@@ -1,18 +1,19 @@
-import _ from "lodash";
-import * as uuid from "uuid";
 import * as ajv from "ajv";
 import * as ajvFormats from "ajv-formats";
 import * as async from "async";
 import * as axios from "axios";
 import * as cronParser from "cron-parser";
 import humanInterval from "human-interval";
-import * as IORedis from "ioredis";
+import IORedis from "ioredis";
+import _ from "lodash";
 import LRU from "lru-cache";
+import moment from "moment";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
-import moment from "moment";
-import * as utils from "./utils";
+import * as uuid from "uuid";
+
 import { errors } from "./basic-errors";
+import * as utils from "./utils";
 
 /** npm packages injection */
 export interface Defaults {

@@ -1,4 +1,5 @@
-import * as process from "process";
+import process from "process";
+
 import { Main as LoggerMain } from "../logger";
 
 interface Deps {
@@ -10,7 +11,8 @@ interface Deps {
 function Graceful(info: Deps["logger"]["info"]) {
   let exiting = false; // 是否正在退出
   const callbacks: Function[] = [];
-  const counter = ((count = 0) => {
+  const counter = ((init = 0) => {
+    let count = init;
     const decr = () => {
       count -= 1;
     };
@@ -76,7 +78,7 @@ function Graceful(info: Deps["logger"]["info"]) {
     callbacks.push(listenner);
   };
 
-  function runner<F extends(...args: any[]) => any>(fn: F) {
+  function runner<F extends (...args: any[]) => any>(fn: F) {
     return (...args: Parameters<F>) => {
       // 当前状态正在退出，阻止执行函数
       if (exiting) throw Error("process exiting...");
@@ -92,7 +94,7 @@ function Graceful(info: Deps["logger"]["info"]) {
     };
   }
 
-  function runnerAsync<F extends(...args: any[]) => Promise<any>>(fn: F) {
+  function runnerAsync<F extends (...args: any[]) => Promise<any>>(fn: F) {
     return async (...args: Parameters<F>) => {
       // 当前状态正在退出，阻止执行函数
       if (exiting) throw Error("process exiting");
