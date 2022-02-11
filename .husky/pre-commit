@@ -5,4 +5,5 @@ fi
 . "$(dirname "$0")/_/husky.sh"
 
 ts-node src/cli/index.ts loadDeps ./src/deps ts && npm run lint-staged && npm run build 
+npm run build
 npm tst
