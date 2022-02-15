@@ -1,7 +1,6 @@
 import _ from "lodash";
 import * as Sequelize from "sequelize";
 
-import { ModelBase } from "../sequelize";
 import { Params, TModel } from "./defines";
 import { Utils } from "./utils";
 
@@ -117,11 +116,11 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param conf Model stats conf
    * @returns Stats result object has two propoties, count and rows
    */
-  const statistics = async (
-    Model: TModel,
+  const statistics = async <T extends TModel>(
+    Model: T,
     params: Params,
     where?: any,
-    conf?: typeof ModelBase.stats,
+    conf?: T["stats"],
   ) => {
     if (!conf) throw Error("Model.stats undefined");
     const { dimensions, metrics, _ignoreTotal } = params;

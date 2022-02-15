@@ -42,9 +42,9 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param _cols Allow columns to be updated
    * @returns The resource that has been updated
    */
-  const modify = async (
-    Model: TModel,
-    model: Sequelize.Model,
+  const modify = async <T extends TModel>(
+    Model: T,
+    model: InstanceType<T>,
     params: Params,
     isAdmin = false,
     _cols?: string[],
@@ -77,13 +77,13 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param creatorAndClientIp creatorId and clientIp
    * @returns The resource that has been created
    */
-  const add = async (
-    Model: TModel,
+  const add = async <T extends TModel>(
+    Model: T,
     params: Params,
     isAdmin = false,
     _cols: string[] | undefined,
     { creatorId, clientIp }: CreatorAndClientIp,
-  ): Promise<InstanceType<typeof Model>> => {
+  ): Promise<InstanceType<T>> => {
     const cols = _cols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
@@ -136,7 +136,12 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param toJSON Whether to directly return JSON formatted objects
    * @returns findAll resource result, object propoties has count, rows
    */
-  const list = async (Model: TModel, params: Params, allowAttrs?: string[], toJSON?: boolean) => {
+  const list = async <T extends TModel>(
+    Model: T,
+    params: Params,
+    allowAttrs?: string[],
+    toJSON?: boolean,
+  ) => {
     const opt = findAllOpts(Model, params);
     const { _ignoreTotal } = params;
 
@@ -145,7 +150,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     if (_ignoreTotal !== "yes") count = await (Model as any).count(_.pick(opt, COUNT_OPT));
 
     if (Array.isArray(allowAttrs) && allowAttrs.length) opt.attributes = allowAttrs;
-    const rows = await Model.findAll(opt);
+    const rows = (await Model.findAll(opt)) as InstanceType<T>[];
     if (toJSON) {
       for (let i = 0; i < rows.length; i += 1) {
         rows[i] = rows[i].toJSON();
