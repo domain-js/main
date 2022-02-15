@@ -30,7 +30,7 @@ export const Deps = ["Sequelize"];
 /**
  * Model 基类
  */
-export class ModelBase<Attrs, Attrs4Create> extends Model<Attrs, Attrs4Create> {
+export class ModelBase extends Model {
   /**
    * 基于主键获取某条数据的Mode实例，自动维护内存级 cache
    * @param pk 主键
