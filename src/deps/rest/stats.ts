@@ -1,6 +1,8 @@
 import _ from "lodash";
 import * as Sequelize from "sequelize";
-import { Params, ModelExtraAtts, TModel } from "./defines";
+
+import { ModelBase } from "../sequelize";
+import { Params, TModel } from "./defines";
 import { Utils } from "./utils";
 
 interface Deps {
@@ -119,7 +121,7 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     Model: TModel,
     params: Params,
     where?: any,
-    conf?: ModelExtraAtts["stats"],
+    conf?: typeof ModelBase.stats,
   ) => {
     if (!conf) throw Error("Model.stats undefined");
     const { dimensions, metrics, _ignoreTotal } = params;

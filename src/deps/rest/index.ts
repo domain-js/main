@@ -1,6 +1,7 @@
 import _ from "lodash";
 import * as Sequelize from "sequelize";
-import { TModel, Params } from "./defines";
+
+import { Params, TModel } from "./defines";
 import { Stats } from "./stats";
 import { Utils } from "./utils";
 
@@ -47,7 +48,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     params: Params,
     isAdmin = false,
     _cols?: string[],
-  ) => {
+  ): Promise<InstanceType<typeof Model>> => {
     const cols = _cols || Model.editableCols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
@@ -82,7 +83,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     isAdmin = false,
     _cols: string[] | undefined,
     { creatorId, clientIp }: CreatorAndClientIp,
-  ) => {
+  ): Promise<InstanceType<typeof Model>> => {
     const cols = _cols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
@@ -144,7 +145,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     if (_ignoreTotal !== "yes") count = await (Model as any).count(_.pick(opt, COUNT_OPT));
 
     if (Array.isArray(allowAttrs) && allowAttrs.length) opt.attributes = allowAttrs;
-    const rows = (await (Model as any).findAll(opt)) as any[];
+    const rows = await Model.findAll(opt);
     if (toJSON) {
       for (let i = 0; i < rows.length; i += 1) {
         rows[i] = rows[i].toJSON();

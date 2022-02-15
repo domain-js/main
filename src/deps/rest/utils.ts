@@ -1,8 +1,10 @@
 import type { LoDashStatic } from "lodash";
+import moment from "moment";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
-import moment from "moment";
-import { ModelExtraAtts, Include, TModel, Params } from "./defines";
+
+import { ModelBase } from "../sequelize";
+import { Params, TModel } from "./defines";
 
 interface Cnf {
   rest: {
@@ -72,11 +74,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   };
 
   // 处理排序参数
-  const sort = (
-    params: any,
-    conf: ModelExtraAtts["sort"],
-    includes?: ModelExtraAtts["includes"],
-  ) => {
+  const sort = (params: any, conf: typeof ModelBase.sort, includes?: typeof ModelBase.includes) => {
     const value: string = params._sort;
     if (!conf) return undefined;
     if (!(value || conf.default)) return undefined;
@@ -195,7 +193,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   // 返回
   // [Model1, Model2]
   // 或者 undefined
-  const modelInclude = (params: any, includes?: ModelExtraAtts["includes"]) => {
+  const modelInclude = (params: any, includes?: typeof ModelBase.includes) => {
     if (!includes) return undefined;
     if (!Array.isArray(params._includes)) return undefined;
     const ret = _.filter(params._includes, (x) => includes[x]);
@@ -210,7 +208,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     maxResultsLimit: 100000,
   });
 
-  const pageParams = (pagination: ModelExtraAtts["pagination"], params: Params) => {
+  const pageParams = (pagination: typeof ModelBase.pagination, params: Params) => {
     const _pagination = { ...DEFAULT_PAGE_PARAMS, ...pagination };
     const startIndex = Math.max(params._startIndex | 0, 0);
     const maxResults = Math.max(params._maxResults | 0 || _pagination.maxResults, 1);
@@ -222,6 +220,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
   const RELATIVE_RANGE_ERROR = errors.notAllowed(`相对时间跨度最多 ${RELATIVE_MAX_RANGE} 天`);
   // findOptFilter 的处理
+  // eslint-disable-next-line complexity
   const findOptFilter = (
     params: Params,
     name: string,
@@ -435,7 +434,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     // 处理关联资源的过滤条件
     // 以及关联资源允许返回的字段
     if (includes) {
-      _.each(includes, (x: Include & { where?: any; attributes?: string[] }) => {
+      _.each(includes, (x) => {
         const includeWhere: any = {};
         const filterAttrs = x.model.filterAttrs || _.keys(x.model.rawAttributes);
         _.each(filterAttrs, (name) => {
@@ -450,10 +449,13 @@ export function Utils(cnf: Cnf, deps: Deps) {
         const searchOptResII = searchOpt(x.model, params._searchs, params.q, x.as);
         if (searchOptResII) searchOrs.push(searchOptResII);
 
-        x.where = includeWhere;
-
         // 以及关联资源允许返回的字段
-        if (x.model.allowIncludeCols) x.attributes = x.model.allowIncludeCols;
+        let attributes: string[] | undefined;
+        if (x.model.allowIncludeCols && x.model.allowIncludeCols.length)
+          attributes = x.model.allowIncludeCols;
+
+        // 将过滤条件和查询的字段附加上去
+        Object.assign(x, { where: includeWhere, attributes });
       });
     }
 
