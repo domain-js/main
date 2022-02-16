@@ -1,7 +1,7 @@
 import _ from "lodash";
 import * as Sequelize from "sequelize";
 
-import { Params, TModel } from "./defines";
+import { ModelBase, ModelStatic } from "../sequelize";
 import { Stats } from "./stats";
 import { Utils } from "./utils";
 
@@ -42,10 +42,10 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param _cols Allow columns to be updated
    * @returns The resource that has been updated
    */
-  const modify = async <T extends TModel>(
-    Model: T,
-    model: InstanceType<T>,
-    params: Params,
+  const modify = async <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    model: T,
+    params: Record<string, any>,
     isAdmin = false,
     _cols?: string[],
   ): Promise<InstanceType<typeof Model>> => {
@@ -77,13 +77,13 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param creatorAndClientIp creatorId and clientIp
    * @returns The resource that has been created
    */
-  const add = async <T extends TModel>(
-    Model: T,
-    params: Params,
+  const add = async <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    params: Record<string, any>,
     isAdmin = false,
     _cols: string[] | undefined,
     { creatorId, clientIp }: CreatorAndClientIp,
-  ): Promise<InstanceType<T>> => {
+  ): Promise<T> => {
     const cols = _cols || Model.writableCols || [];
     const attr = pickParams(params, cols, Model, isAdmin);
 
@@ -136,9 +136,9 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param toJSON Whether to directly return JSON formatted objects
    * @returns findAll resource result, object propoties has count, rows
    */
-  const list = async <T extends TModel>(
-    Model: T,
-    params: Params,
+  const list = async <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    params: Record<string, any>,
     allowAttrs?: string[],
     toJSON?: boolean,
   ) => {
@@ -150,7 +150,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     if (_ignoreTotal !== "yes") count = await (Model as any).count(_.pick(opt, COUNT_OPT));
 
     if (Array.isArray(allowAttrs) && allowAttrs.length) opt.attributes = allowAttrs;
-    const rows = (await Model.findAll(opt)) as InstanceType<T>[];
+    const rows = await Model.findAll(opt);
     if (toJSON) {
       for (let i = 0; i < rows.length; i += 1) {
         rows[i] = rows[i].toJSON();

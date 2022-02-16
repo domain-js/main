@@ -1,4 +1,4 @@
-import { Model, ModelStatic, Options, Sequelize } from "sequelize";
+import { Model, Options, Sequelize } from "sequelize";
 
 interface Cnf {
   sequelize: {
@@ -11,6 +11,11 @@ interface Deps {
     Sequelize: typeof Sequelize;
   };
 }
+
+type NonConstructorKeys<T> = { [P in keyof T]: T[P] extends new () => any ? never : P }[keyof T];
+type NonConstructor<T> = Pick<T, NonConstructorKeys<T>>;
+
+export type ModelStatic<M extends ModelBase> = NonConstructor<typeof ModelBase> & (new () => M);
 
 export function Main(cnf: Cnf, deps: Deps) {
   // 这里之所以要注入 Sequelize 是为了保证项目自身可以灵活选择自己的 Sequelize 版本, 这样改公共模块就会更加稳定, 避免频繁升级
@@ -30,20 +35,26 @@ export const Deps = ["Sequelize"];
 /**
  * Model 基类
  */
-export class ModelBase extends Model {
+export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> extends Model<
+  Attrs,
+  Attrs4Create
+> {
   /**
    * 基于主键获取某条数据的Mode实例，自动维护内存级 cache
    * @param pk 主键
    */
-  static getByPk<M extends Model>(this: ModelStatic<M>, pk: string | number): Promise<M | null> {
-    return (this as any).findByPk(pk);
+  public static getByPk<M extends ModelBase>(
+    this: ModelStatic<M>,
+    pk: string | number,
+  ): Promise<M | null> {
+    return this.findByPk(pk);
   }
 
   /**
    * 基于主键获取某些数据的Mode实例列表，维持参数的顺序，自动维护内存级 cache
    * @param pks 主键数组
    */
-  static async getByPks<M extends Model>(
+  public static async getByPks<M extends ModelBase>(
     this: ModelStatic<M>,
     pks: string[] | number[],
   ): Promise<M[]> {
@@ -52,24 +63,12 @@ export class ModelBase extends Model {
     // eslint-disable-next-line no-undef
     const list = [];
     for await (const x of pks) {
-      const item = await (this as any).getByPk(x);
+      const item = await this.getByPk(x);
       if (item) list.push(item);
     }
 
     return list;
   }
-
-  /*
-  static includes: ModelExtraAtts["includes"];
-  static writableCols: string[] = [];
-  static editableCols: string[] = [];
-  static allowIncludeCols?: string[];
-  static sort: ModelExtraAtts["sort"] = {
-    default: "id",
-    defaultDirection: "DESC",
-    allow: ["id"],
-  };
-  */
 
   /** 允许过滤的字段, 对于某些隐私、敏感信息，应该禁止基于其过滤, 使用者反复尝试可以暴力破解敏感信息 */
   static filterAttrs?: string[];

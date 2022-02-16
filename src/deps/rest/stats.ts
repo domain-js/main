@@ -1,7 +1,7 @@
 import _ from "lodash";
 import * as Sequelize from "sequelize";
 
-import { Params, TModel } from "./defines";
+import { ModelBase, ModelStatic } from "../sequelize";
 import { Utils } from "./utils";
 
 interface Deps {
@@ -18,7 +18,11 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
   const { _, Sequelize } = deps;
 
   // 获取统计的条目数
-  const statsCount = async (Model: TModel, opts: any, dims: [string, string][]) => {
+  const statsCount = async <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    opts: any,
+    dims: [string, string][],
+  ) => {
     if (!dims) return 1;
     if (!dims.length) return 1;
     const option: Parameters<typeof Model.findOne>[0] = { raw: true };
@@ -28,12 +32,16 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     option.attributes = [
       Sequelize.literal(`COUNT(DISTINCT ${distincts.join(", ")}) AS count`) as any,
     ];
-    const res = (await (Model as any).findOne(option)) as any;
+    const res = (await Model.findOne(option)) as unknown as { count: number };
 
     return (res && res.count) || 0 | 0;
   };
 
-  const getDimensions = (Model: TModel, dimensions: string[], _dims?: Record<string, string>) => {
+  const getDimensions = <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    dimensions: string[],
+    _dims?: Record<string, string>,
+  ) => {
     const dims: [string, string][] = [];
 
     if (!dimensions || !Model.stats || !Model.stats.dimensions) return dims;
@@ -62,7 +70,11 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     return _.map(dims, (x) => x[1]);
   };
 
-  const getMetrics = (Model: TModel, metrics: string[], _mets: Record<string, string>) => {
+  const getMetrics = <T extends ModelBase>(
+    Model: ModelStatic<ModelBase>,
+    metrics: string[],
+    _mets: Record<string, string>,
+  ) => {
     const mets: [string, string][] = [];
 
     // 如果设置了，但是不为字符串，直接返回错误
@@ -82,7 +94,7 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     return mets;
   };
 
-  const getSort = (Model: TModel, params: Params) => {
+  const getSort = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
     const sort = params._sort;
     if (!sort) return undefined;
 
@@ -103,7 +115,7 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     return [[Sequelize.literal(order), direction]];
   };
 
-  const pageParams = (Model: TModel, params: Params) => {
+  const pageParams = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
     const pagination = Model.stats?.pagination || defaultPagination;
     return utils.pageParams(pagination, params);
   };
@@ -116,11 +128,11 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param conf Model stats conf
    * @returns Stats result object has two propoties, count and rows
    */
-  const statistics = async <T extends TModel>(
-    Model: T,
-    params: Params,
+  const statistics = async <T extends ModelBase>(
+    Model: ModelStatic<T>,
+    params: Record<string, any>,
     where?: any,
-    conf?: T["stats"],
+    conf?: ModelStatic<T>["stats"],
   ) => {
     if (!conf) throw Error("Model.stats undefined");
     const { dimensions, metrics, _ignoreTotal } = params;
@@ -162,7 +174,7 @@ export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
     opt.raw = true;
     let count = 0;
     if (_ignoreTotal !== "yes") count = await statsCount(Model, opt, dims);
-    const rows = await (Model.findAll as any)(opt);
+    const rows = (await Model.findAll(opt)) as unknown as Record<string, string | number>[];
     for (const x of rows) {
       for (const met of metrics) {
         x[met] = x[met] ? Number(x[met]) : 0;

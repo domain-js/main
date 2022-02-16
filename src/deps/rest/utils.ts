@@ -3,8 +3,7 @@ import moment from "moment";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
 
-import { ModelBase } from "../sequelize";
-import { Params, TModel } from "./defines";
+import { ModelBase, ModelStatic } from "../sequelize";
 
 interface Cnf {
   rest: {
@@ -46,7 +45,12 @@ export function Utils(cnf: Cnf, deps: Deps) {
     return new Date(ms + offset);
   };
 
-  const pickParams = (params: any, cols: string[], Model: TModel, isAdmin: boolean) => {
+  const pickParams = <T extends ModelBase>(
+    params: any,
+    cols: string[],
+    Model: ModelStatic<T>,
+    isAdmin: boolean,
+  ) => {
     const attr: { [propName: string]: any } = {};
 
     const { rawAttributes, onlyAdminCols = [] } = Model;
@@ -134,8 +138,8 @@ export function Utils(cnf: Cnf, deps: Deps) {
   ]
 ]
 */
-  const searchOpt = (
-    Model: TModel,
+  const searchOpt = <T extends ModelBase>(
+    Model: ModelStatic<T>,
     searchStr: string,
     qstr?: string,
     as?: string,
@@ -208,7 +212,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     maxResultsLimit: 100000,
   });
 
-  const pageParams = (pagination: typeof ModelBase.pagination, params: Params) => {
+  const pageParams = (pagination: typeof ModelBase.pagination, params: Record<string, any>) => {
     const _pagination = { ...DEFAULT_PAGE_PARAMS, ...pagination };
     const startIndex = Math.max(params._startIndex | 0, 0);
     const maxResults = Math.max(params._maxResults | 0 || _pagination.maxResults, 1);
@@ -222,7 +226,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   // findOptFilter 的处理
   // eslint-disable-next-line complexity
   const findOptFilter = (
-    params: Params,
+    params: Record<string, any>,
     name: string,
     where: any,
     Op: typeof Sequelize.Op,
@@ -415,7 +419,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   };
 
   // 返回列表查询的条件
-  const findAllOpts = (Model: TModel, params: Params) => {
+  const findAllOpts = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
     const { Op } = Sequelize;
     const where: Record<string, any> = {};
     const searchOrs: string[][][] = [];

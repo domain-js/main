@@ -4483,10 +4483,10 @@ sequelize-pool@^7.1.0:
   resolved "https://registry.npm.taobao.org/sequelize-pool/download/sequelize-pool-7.1.0.tgz?cache=0&sync_timestamp=1616644687987&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fsequelize-pool%2Fdownload%2Fsequelize-pool-7.1.0.tgz#210b391af4002762f823188fd6ecfc7413020768"
   integrity sha1-IQs5GvQAJ2L4IxiP1uz8dBMCB2g=
 
-sequelize@6.12.1:
-  version "6.12.1"
-  resolved "https://registry.npmmirror.com/sequelize/download/sequelize-6.12.1.tgz#c52c4a40a2761fdc95df873502b7dfac0c4b72a4"
-  integrity sha512-5XLBEapH/teme49zx4q6uN+5N4u50qSztW03Mc7T6uJmp1WdCXEcuGCxgGfZo0oQcG6OpkLgfZFn+ysr2iVSmA==
+sequelize@6.16.1:
+  version "6.16.1"
+  resolved "https://registry.npmmirror.com/sequelize/-/sequelize-6.16.1.tgz#2c84036ae0a64843cdfa52c8e3d0bee9c52ce116"
+  integrity sha512-YFGqrwkmEhSbpZBxay5+PRKMiZNNUJzgIixCyFkLm9+/5Rqq5jBADEjTAC8RYHzwsOGNboYh18imXrYNCjBZCQ==
   dependencies:
     "@types/debug" "^4.1.7"
     debug "^4.3.3"
