@@ -7,7 +7,7 @@
     "domain-cli": "dist/cli/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf ./dist/* && tsc",
     "test": "export NODE_ENV=test && jest ./src --coverage",
     "test:watch": "export NODE_ENV=test && jest ./src --watch",
     "prepare": "husky install",
