@@ -13,7 +13,7 @@
     "prepare": "husky install",
     "lint-staged": "lint-staged",
     "lint-staged:js": "eslint --ext .js,.ts",
-    "loadDeps": "ts-node src/cli/index.ts loadDeps ./ ts"
+    "loadDeps": "ts-node src/cli/index.ts loadDeps ./src/deps ts"
   },
   "author": "Redstone Zhao",
   "license": "MIT",
