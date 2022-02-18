@@ -8,6 +8,7 @@ module.exports = {
     node: true,
     commonjs: true,
     es6: true,
+    jest: true,
   },
   globals: {
     // Your global variables (setting to false means it's not allowed to be reassigned)

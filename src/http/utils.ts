@@ -1,7 +1,7 @@
 import * as crypto from "crypto";
-import { PlainObject,stringify } from "csv-stringify";
+import { PlainObject, stringify } from "csv-stringify";
 import * as fs from "fs";
-import * as _ from "lodash";
+import _ from "lodash";
 import * as os from "os";
 import * as restify from "restify";
 import * as xlsx from "xlsx";
