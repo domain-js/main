@@ -1,8 +1,9 @@
 import * as _ from "lodash";
-import * as errors from "restify-errors";
 import * as restify from "restify";
+import * as errors from "restify-errors";
+
+import { Domain, Err, GetSchemaByPath, HttpCodes, Profile } from "./defines";
 import { Utils } from "./utils";
-import { HttpCodes, Domain, Err, Profile, GetSchemaByPath } from "./defines";
 
 type Verb = "get" | "post" | "put" | "patch" | "del";
 interface Deps {
@@ -11,7 +12,7 @@ interface Deps {
   utils: ReturnType<typeof Utils>;
   server: restify.Server;
   httpCodes: HttpCodes;
-  makeProfileHook?(obj: Profile, req: restify.Request): any;
+  makeProfileHook?: (obj: Profile, req: restify.Request) => any;
   apisRoute?: string;
   swagger?: [any, any];
 }
@@ -84,6 +85,7 @@ export function Router(deps: Deps) {
     });
   }
 
+  // eslint-disable-next-line max-params
   function register(
     verb: Verb,
     route: string,
@@ -118,7 +120,7 @@ export function Router(deps: Deps) {
       try {
         let results = await method(profile, params);
         res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
-        if (results == null) results = "Ok";
+        if (results === null || results === undefined) results = "Ok";
         if (resHandler) {
           resHandler(results, res);
         } else if (isList) {

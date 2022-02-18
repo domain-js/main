@@ -1,10 +1,13 @@
 import * as restify from "restify";
+import { Server } from "socket.io";
+
+import { Cnf, Domain, GetSchemaByPath, HttpCodes, Profile } from "./defines";
 import { Router } from "./router";
+import { BridgeSocket } from "./socket";
 import { Utils } from "./utils";
-import { Cnf, Domain, Profile, HttpCodes, GetSchemaByPath } from "./defines";
 
 interface Deps {
-  routers(r: ReturnType<typeof Router>): void;
+  routers: (r: ReturnType<typeof Router>) => void;
   domain: Domain;
   httpCodes: HttpCodes;
   getSchemaByPath: GetSchemaByPath;
@@ -35,6 +38,12 @@ export function Main(cnf: Cnf, deps: Deps) {
     apisRoute: cnf.apisRoute,
   });
   routers(router);
+
+  // 根据需求起送socket服务
+  if (cnf.socket) {
+    const io = new Server(server);
+    BridgeSocket(io, domain);
+  }
 
   // Http server start
   return () => {

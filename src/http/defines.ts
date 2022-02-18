@@ -4,6 +4,7 @@ export interface Cnf {
   host?: string;
   bodyMaxBytes?: number;
   apisRoute?: string;
+  socket?: boolean;
   [propName: string]: any;
 }
 
@@ -30,6 +31,9 @@ export interface Profile {
   uuid?: string;
   token?: string;
   sign?: Sign;
+  isSocket?: boolean;
+  /** socket 的时候汇报自己的位置 */
+  position?: string;
 }
 
 export interface HttpCodes {
@@ -40,9 +44,7 @@ export interface Domain {
   [propName: string]: (profile: Profile, params: any) => any | Domain;
 }
 
-export interface GetSchemaByPath {
-  (methodPath: string): [any, any];
-}
+export type GetSchemaByPath = (methodPath: string) => [any, any];
 
 export interface Err {
   message: string;

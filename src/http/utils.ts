@@ -1,10 +1,11 @@
-import * as os from "os";
-import * as fs from "fs";
 import * as crypto from "crypto";
+import { PlainObject,stringify } from "csv-stringify";
+import * as fs from "fs";
 import * as _ from "lodash";
-import * as xlsx from "xlsx";
-import { stringify, PlainObject } from "csv-stringify";
+import * as os from "os";
 import * as restify from "restify";
+import * as xlsx from "xlsx";
+
 import { Cnf, Profile } from "./defines";
 
 const str2arr = ["_includes", "dimensions", "metrics", "_attrs"];
@@ -45,7 +46,11 @@ export function Utils(cnf: Cnf) {
     /**
      * 构造profile参数
      */
-    makeProfile(req: restify.Request, method: string, customFn?: Function) {
+    makeProfile<T extends {} = {}>(
+      req: restify.Request,
+      method: string,
+      customFn?: (obj: Profile, req: restify.Request) => T,
+    ): Profile & T {
       const obj: Profile = {
         clientIp: utils.clientIp(req),
         remoteIp: utils.remoteIp(req),
@@ -84,7 +89,7 @@ export function Utils(cnf: Cnf) {
 
       if (customFn) Object.assign(obj, customFn(obj, req));
 
-      return Object.freeze(obj);
+      return Object.freeze(obj) as Profile & T;
     },
 
     /**
