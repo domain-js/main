@@ -75,8 +75,8 @@ export function Utils(cnf: Cnf) {
             uri: req.url || "/",
             key: req.headers["x-auth-key"] as string,
             timestamp: Number(req.headers["x-auth-timestamp"] as string) | 0,
-            signMethod: req.headers["x-auth-sign-method"] as string,
-            signVersion: req.headers["x-auth-sign-version"] as string,
+            signMethod: req.headers["x-auth-sign-method"] as "HmacSHA256",
+            signVersion: req.headers["x-auth-sign-version"] as "1",
             method,
           };
         }

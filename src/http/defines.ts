@@ -1,3 +1,5 @@
+import { Opt as Sign } from "../deps/signer";
+
 export interface Cnf {
   proxyIps?: string;
   port?: number;
@@ -6,16 +8,6 @@ export interface Cnf {
   apisRoute?: string;
   socket?: boolean;
   [propName: string]: any;
-}
-
-interface Sign {
-  signature: string;
-  uri: string;
-  key: string;
-  timestamp: number;
-  signMethod: string;
-  signVersion: string;
-  method: string;
 }
 
 export interface Profile {
@@ -30,7 +22,7 @@ export interface Profile {
   revision?: string;
   uuid?: string;
   token?: string;
-  sign?: Sign;
+  sign?: Sign & { signature: string };
   isSocket?: boolean;
   /** socket 的时候加入的房间 */
   roomId?: string;
