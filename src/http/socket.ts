@@ -24,9 +24,13 @@ class MyError extends Error {
   }
 }
 
+export type Listener = Client["emit"] & {
+  roomId?: string;
+};
+
 type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any> & {
   profile?: ReturnType<typeof makeProfile>;
-  listener?: Client["emit"];
+  listener?: Listener;
 };
 
 const utils = {
@@ -81,11 +85,14 @@ const makeProfile = (client: Client, token: string, params: any, extra: Profile[
 export function BridgeSocket(io: Server, domain: Domain) {
   const subscribe = domain["message.subscribe"];
   const unsubscribe = domain["message.unsubscribe"];
+  const entrance = domain["message.entrance"];
 
   if (!subscribe)
     throw Error("要启用 socket 服务，必须要要有 message.subscribe 方法，用来处理 socket 订阅");
   if (!unsubscribe)
     throw Error("要启用 socket 服务，必须要要有 message.unsubscribe 方法，用来处理 socket 退订");
+  if (!entrance)
+    throw Error("要启用 socket 服务，必须要要有 message.entrance 方法，用来处理 加入某个房间");
 
   io.on("connection", (client: Client) => {
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
@@ -99,12 +106,10 @@ export function BridgeSocket(io: Server, domain: Domain) {
       try {
         Object.assign(client, { profile: makeProfile(client, token, params, extra) });
         if (!client.profile) throw new MyError("noAuth", "请先登录");
-        const session = await domain["auth.session"](client.profile, {});
-
         // 创建消息监听函数
         if (!client.listener) client.listener = client.emit.bind(client);
         // 向领域注册改用户的监听函数
-        domain["message.subscribe"](client.profile, client.listener);
+        const session = subscribe(client.profile, client.listener);
 
         client.emit("inited", session);
       } catch (e) {
@@ -116,8 +121,24 @@ export function BridgeSocket(io: Server, domain: Domain) {
       }
     });
 
+    client.on("entrance", async (roomId: string) => {
+      try {
+        if (!client.profile || !client.listener) return;
+        const res = await entrance({ roomId, ...client.profile }, client.listener);
+        client.profile.roomId = roomId;
+        client.listener.roomId = roomId;
+        client.emit("entranced", res);
+      } catch (e) {
+        if (e instanceof MyError) {
+          client.emit("internalError", e.message, e.code || "unknown");
+          return;
+        }
+        console.error(e);
+      }
+    });
+
     client.use(async ([name, params, responseId], next) => {
-      if (name === "init") return next();
+      if (name === "init" || name === "entrance") return next();
 
       const method = domain[name];
       try {

@@ -32,8 +32,8 @@ export interface Profile {
   token?: string;
   sign?: Sign;
   isSocket?: boolean;
-  /** socket 的时候汇报自己的位置 */
-  position?: string;
+  /** socket 的时候加入的房间 */
+  roomId?: string;
 }
 
 export interface HttpCodes {
