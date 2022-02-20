@@ -1,7 +1,11 @@
+import _ from "lodash";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
+import { Opt as Sign } from "../deps/signer";
 import { Domain, Profile } from "./defines";
+
+type Signature = Sign & { signature: string };
 
 const proxyIps = new Set(["127.0.0.1"]);
 
@@ -61,9 +65,13 @@ const utils = {
   },
 };
 
-const makeProfile = (client: Client, token: string, params: any, extra: Profile["extra"]) => {
+const makeProfile = (
+  client: Client,
+  auth: string | Signature,
+  params: any,
+  extra: Profile["extra"],
+) => {
   const obj: Profile = {
-    token,
     clientIp: utils.clientIp(client),
     remoteIp: utils.remoteIp(client),
     realIp: utils.realIp(client),
@@ -78,14 +86,21 @@ const makeProfile = (client: Client, token: string, params: any, extra: Profile[
     /** 额外信息，自由扩展 */
     extra,
   };
+  if (typeof auth === "string") {
+    obj.token = auth;
+  } else {
+    obj.sign = auth;
+    obj.sign.uri = "/socket.io";
+    obj.sign.method = "socket.init";
+  }
 
   return obj;
 };
 
 export function BridgeSocket(io: Server, domain: Domain) {
-  const subscribe = domain["message.subscribe"];
-  const unsubscribe = domain["message.unsubscribe"];
-  const entrance = domain["message.entrance"];
+  const subscribe = _.get(domain, "message.subscribe");
+  const unsubscribe = _.get(domain, "message.unsubscribe");
+  const entrance = _.get(domain, "message.entrance");
 
   if (!subscribe)
     throw Error("要启用 socket 服务，必须要要有 message.subscribe 方法，用来处理 socket 订阅");
@@ -96,15 +111,15 @@ export function BridgeSocket(io: Server, domain: Domain) {
 
   io.on("connection", (client: Client) => {
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
-    client.on("init", async (token, params, extra) => {
+    client.on("init", async (auth: string | Signature, params, extra) => {
       console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
-      if (!token) {
-        client.emit("initError", "Token lost");
+      if (!auth) {
+        client.emit("initError", "auth info lost");
         return;
       }
 
       try {
-        Object.assign(client, { profile: makeProfile(client, token, params, extra) });
+        Object.assign(client, { profile: makeProfile(client, auth, params, extra) });
         if (!client.profile) throw new MyError("noAuth", "请先登录");
         // 创建消息监听函数
         if (!client.listener) client.listener = client.emit.bind(client);

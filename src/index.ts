@@ -1,12 +1,12 @@
-import { defaults, Defaults } from "./defaults";
+import { Defaults,defaults } from "./defaults";
 import * as DM from "./dm";
 import Deps = require("./deps/defines");
 
-export { Main as Http } from "./http";
-export { Errors } from "./Errors";
-export * as DM from "./dm";
-export * as utils from "./utils";
 export { Main as Cfg } from "./cfg";
+export * as DM from "./dm";
+export { Errors } from "./Errors";
+export { Main as Http } from "./http";
+export * as utils from "./utils";
 export const basicErrors = defaults.errors;
 
 type TDeps = typeof Deps;
@@ -30,7 +30,7 @@ export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
 
   return (cnf: Cnf) => {
     /** 这里之所以要浅拷贝，是为了避免多次初始化之间互相干扰 */
-    const _deps = { ...defaults } as Defaults;
+    const _deps: Defaults = { ...defaults };
     const modules = DM.auto(
       _.pick(Deps, features) as Pick<TDeps, MS> /** 要启用的内部模块 */,
       _deps /** 初始的模块依赖对象 */,
