@@ -128,7 +128,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
         // 创建消息监听函数
         if (!client.inited) client.inited = true;
         // 向领域注册改用户的监听函数
-        const session = subscribe(client.profile, client);
+        const session = await subscribe(client.profile, client);
 
         client.emit("inited", session);
       } catch (e) {
