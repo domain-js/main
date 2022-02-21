@@ -28,13 +28,10 @@ class MyError extends Error {
   }
 }
 
-export type Listener = Client["emit"] & {
-  roomId?: string;
-};
-
 type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any> & {
   profile?: ReturnType<typeof makeProfile>;
-  listener?: Listener;
+  inited?: boolean;
+  roomId?: string;
 };
 
 const utils = {
@@ -79,13 +76,14 @@ const makeProfile = (
     startedAt: new Date(),
     userAgent: client.handshake.headers["user-agent"] || "Not captured",
     requestId: client.id,
-    /** 客户端发布号 */
-    revision: params.revision,
-    /** 用户uuid 可以长期跨app */
-    uuid: params.uuid,
-    /** 额外信息，自由扩展 */
-    extra,
   };
+  if (extra) obj.extra = extra;
+  if (params) {
+    /** 客户端发布号 */
+    if (params.revision) obj.revision = params.revision;
+    /** 用户uuid 可以长期跨app */
+    if (params.uuid) obj.uuid = params.uuid;
+  }
   if (typeof auth === "string") {
     obj.token = auth;
   } else {
@@ -122,12 +120,13 @@ export function BridgeSocket(io: Server, domain: Domain) {
         Object.assign(client, { profile: makeProfile(client, auth, params, extra) });
         if (!client.profile) throw new MyError("noAuth", "请先登录");
         // 创建消息监听函数
-        if (!client.listener) client.listener = client.emit.bind(client);
+        if (!client.inited) client.inited = true;
         // 向领域注册改用户的监听函数
-        const session = subscribe(client.profile, client.listener);
+        const session = subscribe(client.profile, client);
 
         client.emit("inited", session);
       } catch (e) {
+        client.inited = false;
         if (e instanceof MyError) {
           client.emit("internalError", e.message, e.code || "unknown");
           return;
@@ -138,12 +137,14 @@ export function BridgeSocket(io: Server, domain: Domain) {
 
     client.on("entrance", async (roomId: string) => {
       try {
-        if (!client.profile || !client.listener) return;
-        const res = await entrance({ roomId, ...client.profile }, client.listener);
+        if (!client.profile || !client.inited) return;
+        const res = await entrance({ roomId, ...client.profile }, client);
         client.profile.roomId = roomId;
-        client.listener.roomId = roomId;
+        client.roomId = roomId;
         client.emit("entranced", res);
       } catch (e) {
+        client.roomId = undefined;
+        if (client.profile) client.profile.roomId = undefined;
         if (e instanceof MyError) {
           client.emit("internalError", e.message, e.code || "unknown");
           return;
@@ -180,9 +181,9 @@ export function BridgeSocket(io: Server, domain: Domain) {
     // 掉线
     client.on("disconnect", () => {
       if (!client.profile) return;
-      if (!client.listener) return;
+      if (!client.inited) return;
       // 这里要取消对领域消息的监听
-      unsubscribe(client.profile, client.listener);
+      unsubscribe(client.profile, client);
     });
   });
 }
