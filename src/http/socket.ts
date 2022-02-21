@@ -28,7 +28,7 @@ class MyError extends Error {
   }
 }
 
-type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any> & {
+export type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any> & {
   profile?: ReturnType<typeof makeProfile>;
   inited?: boolean;
   roomId?: string;
@@ -108,6 +108,12 @@ export function BridgeSocket(io: Server, domain: Domain) {
     throw Error("要启用 socket 服务，必须要要有 message.entrance 方法，用来处理 加入某个房间");
 
   io.on("connection", (client: Client) => {
+    // 定义toJSON 避免 schema 验证报错
+    Object.assign(client, {
+      toJSON() {
+        return {};
+      },
+    });
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
     client.on("init", async (auth: string | Signature, params, extra) => {
       console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
