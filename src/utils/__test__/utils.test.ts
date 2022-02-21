@@ -168,4 +168,19 @@ describe("@domain.js/utils", () => {
       console.log(obj.person.name);
     });
   });
+
+  describe("waitFor", () => {
+    it("case1, wait 1 seconds", async () => {
+      const startAt = Date.now();
+      await utils.waitFor(() => startAt < Date.now() - 1000);
+      expect(startAt < Date.now() - 1000).toBe(true);
+    });
+
+    it("case1, wait 3 seconds", async () => {
+      const startAt = Date.now();
+      await utils.waitFor(() => startAt < Date.now() - 3000, 200);
+      expect(startAt < Date.now() - 3000).toBe(true);
+      expect(startAt > Date.now() - 4000).toBe(true);
+    });
+  });
 });

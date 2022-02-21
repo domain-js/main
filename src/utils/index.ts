@@ -1,3 +1,4 @@
+import async from "async";
 import * as crypto from "crypto";
 
 /** 随机字符串字典 */
@@ -152,4 +153,18 @@ export const modifiyURL = (address: string, adds?: Params, removes?: string[]) =
   }
 
   return obj.toString();
+};
+
+/**
+ * 等待，知道 test 返回 true
+ * @param test 检测函数
+ * @param intervalMS 间隔多久判断一次, 单位毫秒 默认 100
+ */
+export const waitFor = async (test: () => boolean, intervalMS = 100) => {
+  await async.doUntil(
+    async () => {
+      await sleep(intervalMS);
+    },
+    async () => test(),
+  );
 };
