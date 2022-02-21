@@ -58,9 +58,12 @@ export function Utils(cnf: Cnf) {
         userAgent: req.userAgent(),
         startedAt: new Date(),
         requestId: req.id(),
+        type: "user",
         extra: {},
       };
-
+      if (req.headers["x-auth-user-type"]) {
+        obj.type = req.headers["x-auth-user-type"].toString();
+      }
       const token = req.headers["x-auth-token"] || req.query.access_token || req.query.accessToken;
 
       // token 和签名认证只能二选一

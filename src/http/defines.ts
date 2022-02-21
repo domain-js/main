@@ -17,6 +17,8 @@ export interface Profile {
   userAgent: string;
   startedAt: Date;
   requestId: string;
+  /** 用户类型，例如 user, worker */
+  type: string;
   /** 自由挂载信息的节点 */
   extra: Record<string, any>;
   revision?: string;

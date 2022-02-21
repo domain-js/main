@@ -64,8 +64,8 @@ const utils = {
 
 const makeProfile = (
   client: Client,
+  type = "user",
   auth: string | Signature,
-  params: any,
   extra: Profile["extra"] = {},
 ) => {
   const obj: Profile = {
@@ -76,13 +76,14 @@ const makeProfile = (
     startedAt: new Date(),
     userAgent: client.handshake.headers["user-agent"] || "Not captured",
     requestId: client.id,
+    type,
     extra,
   };
-  if (params) {
+  if (extra) {
     /** 客户端发布号 */
-    if (params.revision) obj.revision = params.revision;
+    if (extra.revision) obj.revision = extra.revision;
     /** 用户uuid 可以长期跨app */
-    if (params.uuid) obj.uuid = params.uuid;
+    if (extra.uuid) obj.uuid = extra.uuid;
   }
   if (typeof auth === "string") {
     obj.token = auth;
@@ -115,7 +116,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
       },
     });
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
-    client.on("init", async (auth: string | Signature, params, extra) => {
+    client.on("init", async (type: string, auth: string | Signature, extra = {}) => {
       console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
       if (!auth) {
         client.emit("initError", "auth info lost");
@@ -123,7 +124,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
       }
 
       try {
-        Object.assign(client, { profile: makeProfile(client, auth, params, extra) });
+        Object.assign(client, { profile: makeProfile(client, type, auth, extra) });
         if (!client.profile) throw new MyError("noAuth", "请先登录");
         // 创建消息监听函数
         if (!client.inited) client.inited = true;
