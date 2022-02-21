@@ -66,7 +66,7 @@ const makeProfile = (
   client: Client,
   auth: string | Signature,
   params: any,
-  extra: Profile["extra"],
+  extra: Profile["extra"] = {},
 ) => {
   const obj: Profile = {
     clientIp: utils.clientIp(client),
@@ -76,8 +76,8 @@ const makeProfile = (
     startedAt: new Date(),
     userAgent: client.handshake.headers["user-agent"] || "Not captured",
     requestId: client.id,
+    extra,
   };
-  if (extra) obj.extra = extra;
   if (params) {
     /** 客户端发布号 */
     if (params.revision) obj.revision = params.revision;

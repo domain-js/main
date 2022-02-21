@@ -18,7 +18,7 @@ export interface Profile {
   startedAt: Date;
   requestId: string;
   /** 自由挂载信息的节点 */
-  extra?: Record<string, any>;
+  extra: Record<string, any>;
   revision?: string;
   uuid?: string;
   token?: string;
