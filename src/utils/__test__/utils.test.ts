@@ -1,6 +1,23 @@
 import * as utils from "..";
 
 describe("@domain.js/utils", () => {
+  describe("deepReaddir", () => {
+    it("case1", () => {
+      const files = utils.deepReaddir(__dirname, new Set(["ts"]));
+      expect(files.length).toBe(1);
+    });
+
+    it("case2", () => {
+      const files = utils.deepReaddir(__dirname, new Set(["jpeg"]));
+      expect(files.length).toBe(0);
+    });
+
+    it("case3", () => {
+      const files = utils.deepReaddir(__dirname, new Set(["ts"]), new Set(["utils.test"]));
+      expect(files.length).toBe(0);
+    });
+  });
+
   describe("randStr", () => {
     it("case1", async () => {
       const str = utils.randStr(20, "normal");

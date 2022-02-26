@@ -1,5 +1,7 @@
 import async from "async";
 import * as crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 /** 随机字符串字典 */
 const RAND_STR_DICT = {
@@ -167,4 +169,45 @@ export const waitFor = async (test: () => boolean, intervalMS = 100) => {
     },
     async () => test(),
   );
+};
+
+/**
+ * 读取录下的所有文件，之后返回数组
+ * params
+ *   dir 要加载的目录
+ *   exts 要加载的模块文件后缀，多个可以是数组, 默认为 coffee
+ *   excludes 要排除的文件, 默认排除 index
+ */
+/**
+ * 读取录下的所有文件，之后返回数组
+ * @param dir 要读取的目录
+ * @param exts 要读取的文件后缀，不包含 (.) 点，例如 jpg 而非 .jpg
+ * @param excludes 要排除的文件列表
+ * @param files 读取到的文件路径存放地址
+ */
+export const deepReaddir = (
+  dir: string,
+  exts: Set<string>,
+  excludes: Set<string> = new Set(),
+  files: string[] = [],
+) => {
+  for (const x of fs.readdirSync(dir)) {
+    const file = path.resolve(dir, x);
+    const stat = fs.lstatSync(file);
+    if (stat.isFile()) {
+      // 忽略隐藏文件
+      if (x[0] === ".") continue;
+
+      const arr = x.split(".");
+      const ext = arr.pop();
+      const name = arr.join(".");
+      // 如果是不希望的后缀或者排除的名称，则直接忽略/跳过
+      if ((ext && !exts.has(ext)) || excludes.has(name)) continue;
+      files.push(file);
+    } else if (stat.isDirectory()) {
+      deepReaddir(file, exts, excludes, files);
+    }
+  }
+
+  return files;
 };
