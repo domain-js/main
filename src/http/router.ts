@@ -21,7 +21,7 @@ interface Deps {
 type Handler = (params: any) => void;
 
 /** 对执行结构的处理 */
-type ResHandler = (results: any, res: restify.Response) => void;
+type ResHandler = (results: any, res: restify.Response, params?: any) => void;
 
 export function Router(deps: Deps) {
   const {
@@ -96,7 +96,7 @@ export function Router(deps: Deps) {
     resHandler?: ResHandler,
   ) {
     /**
-     * 暂存起来，提供给apis接口来用
+     * 暂存起来，提供给apis接口来
      *  apis接口用来返回当前 services 提供的可用的 api
      */
     apis.push(`[${verb.toUpperCase()}] ${route} Domain: ${methodPath}`);
@@ -122,7 +122,7 @@ export function Router(deps: Deps) {
         res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
         if (results === null || results === undefined) results = "Ok";
         if (resHandler) {
-          resHandler(results, res);
+          resHandler(results, res, params);
         } else if (isList) {
           const { _ignoreTotal, _format } = params;
           if (_ignoreTotal !== "yes") {

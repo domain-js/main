@@ -469,6 +469,7 @@ describe("router", () => {
     expect(resHandler.mock.calls.pop()).toEqual([
       { count: 999999999999999, rows: ["redstone"] },
       res,
+      { access_token: "this-is-a-token-by-query" },
     ]);
   });
 });
