@@ -19,6 +19,11 @@ describe("@domain.js/utils", () => {
       expect(str).toBe("0".repeat(20));
       expect(str.length).toBe(20);
     });
+
+    it("caser", async () => {
+      const str = utils.randStr(20);
+      expect(str.length).toBe(20);
+    });
   });
 
   describe("md5", () => {

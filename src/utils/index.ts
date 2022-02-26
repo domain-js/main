@@ -24,17 +24,17 @@ export const md5 = (str: { toString: () => string }) => {
  * @param type "strong" or "normal" or other string that custom character range string
  */
 export function randStr(len: number, type: "strong"): string;
-export function randStr(len: number, type: "normal"): string;
+export function randStr(len: number, type?: "normal"): string;
+// eslint-disable-next-line @typescript-eslint/unified-signatures
 export function randStr(len: number, type: string): string;
 export function randStr(len: number, type = "normal"): string {
   const dict = type === "strong" || type === "normal" ? RAND_STR_DICT[type] : type;
   const { length } = dict;
 
   /** 随机字符串的长度不能等于 0 或者负数 */
-  len |= 0;
-  len = Math.max(len, 3);
+  const _len = Math.max(3, len | 0);
 
-  return Array(len)
+  return Array(_len)
     .fill("")
     .map(() => dict[Math.floor(Math.random() * length)])
     .join("");
