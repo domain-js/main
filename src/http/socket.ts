@@ -186,11 +186,15 @@ export function BridgeSocket(io: Server, domain: Domain) {
     });
 
     // 掉线
-    client.on("disconnect", () => {
+    client.on("disconnect", async () => {
       if (!client.profile) return;
       if (!client.inited) return;
       // 这里要取消对领域消息的监听
-      unsubscribe(client.profile, client);
+      try {
+        return await unsubscribe(client.profile, client);
+      } catch (e) {
+        console.error(e);
+      }
     });
   });
 }
