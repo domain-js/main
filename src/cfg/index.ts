@@ -1,9 +1,9 @@
-import * as _ from "lodash";
 import Ajv, { Schema } from "ajv";
 import addFormats from "ajv-formats";
+import _ from "lodash";
 
 interface Cnf {
-  [propName: string]: string | undefined;
+  [propName: string]: string;
 }
 
 export function Main(object: Cnf, schema: Schema) {
