@@ -3,7 +3,7 @@ import addFormats from "ajv-formats";
 import _ from "lodash";
 
 interface Cnf {
-  [propName: string]: string;
+  [propName: string]: string | undefined;
 }
 
 export function Main(object: Cnf, schema: Schema) {
