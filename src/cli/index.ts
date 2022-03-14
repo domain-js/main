@@ -105,37 +105,6 @@ const loadDeps = async (rootDir: string, ext = "js") => {
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
-const checkService = (_dir: string) => {
-  const TSFile = path.resolve(_dir, "index.ts");
-  const JSFile = path.resolve(_dir, "index.js");
-
-  if (!fs.existsSync(TSFile) && !fs.existsSync(JSFile)) {
-    throw Error("目录下缺少index.ts 或 index.js 文件");
-  }
-};
-
-const loadServices = async (rootDir = process.cwd(), ext = "js") => {
-  const isTS = ext === "ts";
-  const modules = [];
-  const dir = path.resolve(rootDir, "src/domain/services/");
-  for (const x of fs.readdirSync(dir)) {
-    // 忽略隐藏目录, 忽略私有目录
-    if (x[0] === "." || x[0] === "_") continue;
-    const _dir = path.resolve(dir, x);
-    const stat = fs.statSync(_dir);
-
-    // 非目录忽略，模块必须是目录
-    if (!stat.isDirectory()) continue;
-    checkService(_dir);
-
-    modules.push(path.join(dir, x));
-  }
-
-  // 按字典排序，后续有变动的时候不容易冲突
-  const targetFile = path.resolve(rootDir, `src/domain/services/defines.${ext}`);
-  await makeDefineFile(modules.sort(), targetFile, isTS);
-};
-
 /**
  * 自动加载领域方法
  * @param rootDir 项目根目录
@@ -208,9 +177,9 @@ const loadSchemas = async (rootDir = process.cwd(), ext = "js") => {
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
-const actions = { loadDeps, loadServices, loadSchemas, loadDomain };
+const actions = { loadDeps, loadSchemas, loadDomain };
 
-const main = async (command: "loadDeps" | "loadServices" | "loadSchemas" | "loadDomain") => {
+const main = async (command: "loadDeps" | "loadSchemas" | "loadDomain") => {
   const action = actions[command];
   if (!action) {
     const msg = `${action} 不存在该指令，只支持 ${Object.keys(actions)}`;

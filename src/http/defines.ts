@@ -41,7 +41,7 @@ export interface Domain {
     /** 领域方法第二个参数 schema 定义 */
     params: any;
     /** 领域方法 */
-    method: (profile: Profile, params?: any) => any;
+    method: (profile: any, params?: any) => any;
   };
 }
 
