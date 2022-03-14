@@ -207,3 +207,26 @@ export function Router(deps: Deps) {
 
   return Object.assign(router, { collection, model, resource });
 }
+
+type TRouter = ReturnType<typeof Router>;
+type normal = Parameters<TRouter["get"]>;
+type ReplaceArrayItem<
+  T extends any[],
+  index extends number,
+  R,
+  S extends any[] = [],
+  L extends number = S["length"],
+> = T extends [infer A, ...infer rest]
+  ? L extends index
+    ? [...S, R, ...rest]
+    : ReplaceArrayItem<rest, index, R, [...S, A]>
+  : never;
+
+type Keys = "get" | "post" | "put" | "patch" | "del";
+
+/**
+ * 利用领域方法路径类型集合，收窄 methodPath, 同时可以自动提示
+ */
+export type NarrowDomainPaths<Paths extends string> = Omit<TRouter, Keys> & {
+  [k in Keys]: (...args: ReplaceArrayItem<normal, 1, Paths>) => void;
+};
