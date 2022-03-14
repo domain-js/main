@@ -45,7 +45,7 @@ const makeDefineFile = async (modules: any[], targetFile: string, isTS: boolean)
     } else {
       content.push(`const ${variable} = require("./${name}")`);
     }
-    _exports.push(`"${file2Module(name)}": ${variable},`);
+    _exports.push(`"${file2Module(name).replace(/[/]/, ".")}": ${variable},`);
   }
 
   // 处理导出
@@ -137,6 +137,38 @@ const loadServices = async (rootDir = process.cwd(), ext = "js") => {
 };
 
 /**
+ * 自动加载领域方法
+ * @param rootDir 项目根目录
+ * @param ext 文件后缀
+ */
+const loadDomain = async (rootDir = process.cwd(), ext = "js") => {
+  const isTS = ext === "ts";
+  const modules = [];
+  const dir = path.resolve(rootDir, "src/domain/services/");
+  for (const domain of fs.readdirSync(dir)) {
+    // 忽略隐藏目录, 忽略私有目录
+    if (domain[0] === "." || domain[0] === "_") continue;
+    const _dir = path.resolve(dir, domain);
+    const stat = fs.statSync(_dir);
+
+    // 非目录忽略，模块必须是目录
+    if (!stat.isDirectory()) continue;
+
+    for (const name of fs.readdirSync(_dir)) {
+      // 忽略隐藏目录, 忽略私有目录
+      if (name[0] === "." || name[0] === "_") continue;
+      const extname = path.extname(name);
+      if (extname.toLowerCase() !== `.${ext}`) continue;
+      modules.push(path.join(dir, domain, path.basename(name, extname)));
+    }
+  }
+
+  // 按字典排序，后续有变动的时候不容易冲突
+  const targetFile = path.resolve(rootDir, `src/domain/services/defines.${ext}`);
+  await makeDefineFile(modules.sort(), targetFile, isTS);
+};
+
+/**
  * 尝试读取目录下的文件
  * @param dir 目录路径
  * @param list 读取到schema后压入改列表
@@ -176,9 +208,9 @@ const loadSchemas = async (rootDir = process.cwd(), ext = "js") => {
   await makeDefineFile(modules.sort(), targetFile, isTS);
 };
 
-const actions = { loadDeps, loadServices, loadSchemas };
+const actions = { loadDeps, loadServices, loadSchemas, loadDomain };
 
-const main = async (command: "loadDeps" | "loadServices" | "loadSchemas") => {
+const main = async (command: "loadDeps" | "loadServices" | "loadSchemas" | "loadDomain") => {
   const action = actions[command];
   if (!action) {
     const msg = `${action} 不存在该指令，只支持 ${Object.keys(actions)}`;

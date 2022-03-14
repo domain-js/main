@@ -35,10 +35,15 @@ export interface HttpCodes {
 }
 
 export interface Domain {
-  [propName: string]: (profile: Profile, params: any) => any | Domain;
+  [propName: string]: {
+    /** 领域方法第一个参数 schema 定义 */
+    profile: any;
+    /** 领域方法第二个参数 schema 定义 */
+    params: any;
+    /** 领域方法 */
+    method: (profile: Profile, params?: any) => any;
+  };
 }
-
-export type GetSchemaByPath = (methodPath: string) => [any, any];
 
 export interface Err {
   message: string;

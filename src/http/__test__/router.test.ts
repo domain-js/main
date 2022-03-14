@@ -12,23 +12,16 @@ const server = {
 type Verb = "get" | "post" | "put" | "del";
 
 const domain = {
-  home: {
-    index: jest.fn(),
-    add: jest.fn(),
-    list: jest.fn(),
-  },
-  user: {
-    detail: jest.fn(),
-    modify: jest.fn(),
-    remove: jest.fn(),
-    list: jest.fn(),
-    add: jest.fn(),
-    files: jest.fn(),
-    addFile: jest.fn(),
-  },
-  _getSchemaByPath() {
-    return {};
-  },
+  "home.index": { method: jest.fn() },
+  "home.add": { method: jest.fn() },
+  "home.list": { method: jest.fn() },
+  "user.detail": { method: jest.fn() },
+  "user.modify": { method: jest.fn() },
+  "user.remove": { method: jest.fn() },
+  "user.list": { method: jest.fn() },
+  "user.add": { method: jest.fn() },
+  "user.files": { method: jest.fn() },
+  "user.addFile": { method: jest.fn() },
 };
 
 const req = {
@@ -65,7 +58,6 @@ describe("router", () => {
     server: server as any,
     httpCodes: {},
     domain: domain as any,
-    getSchemaByPath: (() => new Date()) as any,
   });
   server.get.mock.calls.length = 0;
 
@@ -73,7 +65,7 @@ describe("router", () => {
     it(verb, async () => {
       router[verb as Verb]("/home", "home.index");
 
-      domain.home.index.mockResolvedValueOnce({ name: "redstone" });
+      domain["home.index"].method.mockResolvedValueOnce({ name: "redstone" });
 
       expect(server[verb as Verb].mock.calls.length).toBe(1);
       const [apiPath, handler] = server[verb as Verb].mock.calls.pop();
@@ -88,8 +80,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.home.index.mock.calls.length).toBe(1);
-      expect(domain.home.index.mock.calls.pop()).toMatchObject([
+      expect(domain["home.index"].method.mock.calls.length).toBe(1);
+      expect(domain["home.index"].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -111,8 +103,8 @@ describe("router", () => {
   it("collection", async () => {
     router.collection("home");
 
-    domain.home.list.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
-    domain.home.add.mockResolvedValueOnce({ name: "redstone-list" });
+    domain["home.list"].method.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
+    domain["home.add"].method.mockResolvedValueOnce({ name: "redstone-list" });
 
     for await (const verb of ["get", "post"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -123,8 +115,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.home[methodPath].mock.calls.length).toBe(1);
-      expect(domain.home[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`home.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`home.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -150,8 +142,8 @@ describe("router", () => {
   it("collection, parent be defined", async () => {
     router.collection("file", undefined, "user");
 
-    domain.user.files.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
-    domain.user.addFile.mockResolvedValueOnce({ name: "redstone-list" });
+    domain["user.files"].method.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
+    domain["user.addFile"].method.mockResolvedValueOnce({ name: "redstone-list" });
 
     for await (const verb of ["get", "post"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -162,8 +154,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user[methodPath].mock.calls.length).toBe(1);
-      expect(domain.user[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -189,8 +181,8 @@ describe("router", () => {
   it("collection, parent be defined, and routePath be defined", async () => {
     router.collection("file", "/users/files", "user");
 
-    domain.user.files.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
-    domain.user.addFile.mockResolvedValueOnce({ name: "redstone-list" });
+    domain["user.files"].method.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
+    domain["user.addFile"].method.mockResolvedValueOnce({ name: "redstone-list" });
 
     for await (const verb of ["get", "post"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -201,8 +193,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user[methodPath].mock.calls.length).toBe(1);
-      expect(domain.user[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -228,9 +220,9 @@ describe("router", () => {
   it("model", async () => {
     router.model("user");
 
-    domain.user.detail.mockResolvedValueOnce({ name: "redstone" });
-    domain.user.modify.mockResolvedValueOnce({ name: "redstone-modify" });
-    domain.user.remove.mockResolvedValueOnce(null);
+    domain["user.detail"].method.mockResolvedValueOnce({ name: "redstone" });
+    domain["user.modify"].method.mockResolvedValueOnce({ name: "redstone-modify" });
+    domain["user.remove"].method.mockResolvedValueOnce(null);
 
     for await (const verb of ["get", "put", "del"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -246,8 +238,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user[methodPath].mock.calls.length).toBe(1);
-      expect(domain.user[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -275,9 +267,9 @@ describe("router", () => {
   it("model, routePath is defined", async () => {
     router.model("user", "/employees/:id");
 
-    domain.user.detail.mockResolvedValueOnce({ name: "redstone" });
-    domain.user.modify.mockResolvedValueOnce({ name: "redstone-modify" });
-    domain.user.remove.mockResolvedValueOnce(null);
+    domain["user.detail"].method.mockResolvedValueOnce({ name: "redstone" });
+    domain["user.modify"].method.mockResolvedValueOnce({ name: "redstone-modify" });
+    domain["user.remove"].method.mockResolvedValueOnce(null);
 
     for await (const verb of ["get", "put", "del"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -293,8 +285,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user[methodPath].mock.calls.length).toBe(1);
-      expect(domain.user[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -322,11 +314,14 @@ describe("router", () => {
   it("resource", async () => {
     router.resource("user");
 
-    domain.user.add.mockResolvedValueOnce({ name: "redstone" });
-    domain.user.list.mockResolvedValueOnce({ count: 999999999999999, rows: ["redstone"] });
-    domain.user.detail.mockResolvedValueOnce({ name: "redstone" });
-    domain.user.modify.mockResolvedValueOnce({ name: "redstone-modify" });
-    domain.user.remove.mockResolvedValueOnce(null);
+    domain["user.add"].method.mockResolvedValueOnce({ name: "redstone" });
+    domain["user.list"].method.mockResolvedValueOnce({
+      count: 999999999999999,
+      rows: ["redstone"],
+    });
+    domain["user.detail"].method.mockResolvedValueOnce({ name: "redstone" });
+    domain["user.modify"].method.mockResolvedValueOnce({ name: "redstone-modify" });
+    domain["user.remove"].method.mockResolvedValueOnce(null);
 
     for await (const verb of ["post", "put", "del"]) {
       expect(server[verb as Verb].mock.calls.length).toBe(1);
@@ -346,8 +341,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user[methodPath].mock.calls.length).toBe(1);
-      expect(domain.user[methodPath].mock.calls.pop()).toMatchObject([
+      expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
+      expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -381,8 +376,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user.detail.mock.calls.length).toBe(1);
-      expect(domain.user.detail.mock.calls.pop()).toMatchObject([
+      expect(domain["user.detail"].method.mock.calls.length).toBe(1);
+      expect(domain["user.detail"].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -408,8 +403,8 @@ describe("router", () => {
       await handler(req, res, next);
       expect(next.mock.calls.length).toBe(1);
       expect(next.mock.calls.pop()).toEqual([]);
-      expect(domain.user.list.mock.calls.length).toBe(1);
-      expect(domain.user.list.mock.calls.pop()).toMatchObject([
+      expect(domain["user.list"].method.mock.calls.length).toBe(1);
+      expect(domain["user.list"].method.mock.calls.pop()).toMatchObject([
         {
           clientIp: "x-forwarded-for-ip",
           realIp: "x-real-ip",
@@ -438,10 +433,13 @@ describe("router", () => {
   it("params handler exists", async () => {
     const paramsHandler = jest.fn();
     const resHandler = jest.fn();
-    domain.home.index.mockResolvedValueOnce({ count: 999999999999999, rows: ["redstone"] });
+    domain["home.index"].method.mockResolvedValueOnce({
+      count: 999999999999999,
+      rows: ["redstone"],
+    });
     router.get("/home", "home.index", 205, true, paramsHandler, resHandler);
 
-    domain.home.index.mockResolvedValueOnce({ name: "redstone" });
+    domain["home.index"].method.mockResolvedValueOnce({ name: "redstone" });
 
     expect(server.get.mock.calls.length).toBe(1);
     const [apiPath, handler] = server.get.mock.calls.pop();
@@ -450,8 +448,8 @@ describe("router", () => {
     await handler(req, res, next);
     expect(next.mock.calls.length).toBe(1);
     expect(next.mock.calls.pop()).toEqual([]);
-    expect(domain.home.index.mock.calls.length).toBe(1);
-    expect(domain.home.index.mock.calls.pop()).toMatchObject([
+    expect(domain["home.index"].method.mock.calls.length).toBe(1);
+    expect(domain["home.index"].method.mock.calls.pop()).toMatchObject([
       {
         clientIp: "x-forwarded-for-ip",
         realIp: "x-real-ip",

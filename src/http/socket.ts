@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
@@ -97,9 +96,9 @@ const makeProfile = (
 };
 
 export function BridgeSocket(io: Server, domain: Domain) {
-  const subscribe = _.get(domain, "message.subscribe");
-  const unsubscribe = _.get(domain, "message.unsubscribe");
-  const entrance = _.get(domain, "message.entrance");
+  const { method: subscribe } = domain["message.subscribe"];
+  const { method: unsubscribe } = domain["message.unsubscribe"];
+  const { method: entrance } = domain["message.entrance"];
 
   if (!subscribe)
     throw Error("要启用 socket 服务，必须要要有 message.subscribe 方法，用来处理 socket 订阅");
@@ -163,7 +162,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
     client.use(async ([name, params, responseId], next) => {
       if (name === "init" || name === "entrance") return next();
 
-      const method = domain[name];
+      const { method } = domain[name];
       try {
         if (!method) throw new MyError("notFound", "不存在该领域方法");
         if (!client.profile) throw new MyError("noAuth", "请先执行 init");

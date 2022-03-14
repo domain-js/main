@@ -1,23 +1,23 @@
 import * as restify from "restify";
 import { Server } from "socket.io";
 
-import { Cnf, Domain, GetSchemaByPath, HttpCodes, Profile } from "./defines";
+import { Cnf, Domain, HttpCodes, Profile } from "./defines";
 import { Router } from "./router";
 import { BridgeSocket } from "./socket";
 import { Utils } from "./utils";
 
-interface Deps {
-  routers: (r: ReturnType<typeof Router>) => void;
-  domain: Domain;
-  httpCodes: HttpCodes;
-  getSchemaByPath: GetSchemaByPath;
-  makeProfileHook?: (obj: Profile, req: restify.Request) => any;
-}
-
-export function Main(cnf: Cnf, deps: Deps) {
+export function Main(
+  cnf: Cnf,
+  deps: {
+    routers: (r: any) => void;
+    domain: Domain;
+    httpCodes: HttpCodes;
+    makeProfileHook?: (obj: Profile, req: restify.Request) => any;
+  },
+) {
   const utils = Utils(cnf);
 
-  const { routers, getSchemaByPath, domain, httpCodes, makeProfileHook } = deps;
+  const { routers, domain, httpCodes, makeProfileHook } = deps;
 
   const server = restify.createServer();
   server.use(restify.plugins.queryParser());
@@ -33,7 +33,6 @@ export function Main(cnf: Cnf, deps: Deps) {
     server,
     httpCodes,
     makeProfileHook,
-    getSchemaByPath,
     domain,
     apisRoute: cnf.apisRoute,
   });

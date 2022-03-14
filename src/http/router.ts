@@ -2,13 +2,12 @@ import * as _ from "lodash";
 import * as restify from "restify";
 import * as errors from "restify-errors";
 
-import { Domain, Err, GetSchemaByPath, HttpCodes, Profile } from "./defines";
+import { Domain, Err, HttpCodes, Profile } from "./defines";
 import { Utils } from "./utils";
 
 type Verb = "get" | "post" | "put" | "patch" | "del";
 interface Deps {
   domain: Domain;
-  getSchemaByPath: GetSchemaByPath;
   utils: ReturnType<typeof Utils>;
   server: restify.Server;
   httpCodes: HttpCodes;
@@ -24,15 +23,7 @@ type Handler = (params: any) => void;
 type ResHandler = (results: any, res: restify.Response, params?: any) => void;
 
 export function Router(deps: Deps) {
-  const {
-    domain,
-    apisRoute,
-    getSchemaByPath,
-    utils,
-    server,
-    httpCodes = {},
-    makeProfileHook,
-  } = deps;
+  const { domain, apisRoute, utils, server, httpCodes = {}, makeProfileHook } = deps;
   const { ucwords, makeParams, makeProfile, outputCSV } = utils;
 
   // 改写 HttpErrorToJSON 处理 data
@@ -75,8 +66,9 @@ export function Router(deps: Deps) {
 
       try {
         const { all } = req.query;
-        const schema = getSchemaByPath(path);
-        res.send(all === undefined ? schema[1] : schema);
+        const profile = domain[path]["profile"];
+        const params = domain[path]["params"];
+        res.send(all === undefined ? params : [profile, params]);
       } catch (e) {
         next(error2httpError(e as Err));
         return;
@@ -102,7 +94,8 @@ export function Router(deps: Deps) {
     apis.push(`[${verb.toUpperCase()}] ${route} Domain: ${methodPath}`);
     apisHTML += `\n<li><a href="./${apisRoute}/_schema?path=${methodPath}">[${verb.toUpperCase()}] ${route} Domain: ${methodPath}</a></li>`;
 
-    const method = _.get(domain, methodPath);
+    if (!domain[methodPath]) throw Error(`Missing domain method: ${methodPath}`);
+    const { method } = domain[methodPath];
     /** 如果都没有则抛出异常 */
     if (!method || !_.isFunction(method)) {
       throw Error(`Missing domain method: ${methodPath}`);
