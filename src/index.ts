@@ -1,4 +1,4 @@
-import { Defaults,defaults } from "./defaults";
+import { Defaults, defaults } from "./defaults";
 import * as DM from "./dm";
 import Deps = require("./deps/defines");
 
