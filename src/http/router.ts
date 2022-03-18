@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import * as restify from "restify";
 import * as errors from "restify-errors";
 
@@ -209,47 +209,81 @@ export function Router(deps: Deps) {
 }
 
 type TRouter = ReturnType<typeof Router>;
-export type ReplaceArrayItem<
-  T extends any[],
-  index extends number,
-  R,
-  S extends any[] = [],
-  L extends number = S["length"],
-> = T extends [infer A, ...infer rest]
-  ? L extends index
-    ? [...S, R, ...rest]
-    : ReplaceArrayItem<rest, index, R, [...S, A]>
-  : never;
 
-/** 普通 route 方法名称 */
-type Keys = "get" | "post" | "put" | "patch" | "del";
+/** 普通路径动作类型集合 */
+type normalVerb = "get" | "post" | "put" | "del";
 
-/** 从servers 路径字符串中提取可用作model的名称，目前还不严谨，聊胜于无 */
-type PickModelNames<paths extends string> = paths extends string
+type NoramVerbArguments = Parameters<TRouter["get"]>;
+
+/** 从用点分隔的字符串中提取第一部分 */
+type PickFirst<paths extends string> = paths extends string
   ? paths extends `${infer F}.${string}`
     ? F
     : never
   : never;
 
-/** 替换函数的某个参数类型定义 */
-export type ParameterReplace<T extends (...args: any[]) => any, Index extends number, TR> = (
-  ...args: ReplaceArrayItem<Parameters<T>, Index, TR>
-) => ReturnType<T>;
+/**
+ * 从 services 路径中题可能的 model 名称的联合类型
+ */
+type PickModels<paths extends string, Keys extends string = PickFirst<paths>> = Keys extends any
+  ? `${Keys}.detail` | `${Keys}.modify` | `${Keys}.remove` extends paths
+    ? Keys
+    : never
+  : never;
+
+/**
+ * 从 services 路径中题可能的 resource 名称的联合类型
+ */
+type PickResources<paths extends string, Keys extends string = PickFirst<paths>> = Keys extends any
+  ?
+      | `${Keys}.add`
+      | `${Keys}.list`
+      | `${Keys}.detail`
+      | `${Keys}.modify`
+      | `${Keys}.remove` extends paths
+    ? Keys
+    : never
+  : never;
+
+/**
+ * 根据指定的 controller 尝试提取存在的 collectname
+ * type t2 = PickCollection<"user", "user.addFile" | "user.Files"> // File
+ */
+type PickCollect<Keys extends string, paths extends string> = paths extends `${Keys}.add${infer A}`
+  ? A
+  : never;
+
+type PickCollection<
+  Keys extends string,
+  paths extends string,
+  Collects extends string = PickCollect<Keys, paths>,
+> = Collects extends any
+  ? `${Keys}.add${Collects}` | `${Keys}.${Lowercase<Collects>}s` extends paths
+    ? [Lowercase<Collects>, Keys]
+    : never
+  : never;
+
+export type PickCollections<
+  paths extends string,
+  Keys extends string = PickFirst<paths>,
+> = Keys extends any ? PickCollection<Keys, paths> : never;
 
 /**
  * 利用领域方法路径类型集合，收窄 methodPath, 同时可以自动提示
  */
-export type NarrowDomainPaths<Paths extends string, ModelNames = PickModelNames<Paths>> = Omit<
-  TRouter,
-  Keys
-> & {
-  [k in Keys]: ParameterReplace<TRouter["get"], 1, Paths>;
+export type NarrowDomainPaths<Paths extends string> = {
+  [k in normalVerb]: (
+    routePath: NoramVerbArguments[0],
+    ctlAct: Paths,
+    code?: NoramVerbArguments[2],
+    isList?: NoramVerbArguments[3],
+    handler?: NoramVerbArguments[4],
+    resHandler?: NoramVerbArguments[5],
+  ) => ReturnType<TRouter["get"]>;
 } & {
-  model: ParameterReplace<TRouter["model"], 0, ModelNames>;
-  collection: ParameterReplace<
-    ParameterReplace<TRouter["collection"], 0, ModelNames>,
-    2,
-    ModelNames
-  >;
-  resource: ParameterReplace<TRouter["resource"], 0, ModelNames>;
+  model: (res: PickModels<Paths>, routePath?: string) => ReturnType<TRouter["model"]>;
+  collection: PickCollections<Paths> extends [infer R, infer C]
+    ? (res: R, _routePath?: string, controller?: C) => ReturnType<TRouter["collection"]>
+    : never;
+  resource: (res: PickResources<Paths>, routePath?: string) => ReturnType<TRouter["resource"]>;
 };
