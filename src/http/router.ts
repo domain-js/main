@@ -209,8 +209,7 @@ export function Router(deps: Deps) {
 }
 
 type TRouter = ReturnType<typeof Router>;
-type normal = Parameters<TRouter["get"]>;
-type ReplaceArrayItem<
+export type ReplaceArrayItem<
   T extends any[],
   index extends number,
   R,
@@ -222,11 +221,35 @@ type ReplaceArrayItem<
     : ReplaceArrayItem<rest, index, R, [...S, A]>
   : never;
 
+/** 普通 route 方法名称 */
 type Keys = "get" | "post" | "put" | "patch" | "del";
+
+/** 从servers 路径字符串中提取可用作model的名称，目前还不严谨，聊胜于无 */
+type PickModelNames<paths extends string> = paths extends string
+  ? paths extends `${infer F}.${string}`
+    ? F
+    : never
+  : never;
+
+/** 替换函数的某个参数类型定义 */
+export type ParameterReplace<T extends (...args: any[]) => any, Index extends number, TR> = (
+  ...args: ReplaceArrayItem<Parameters<T>, Index, TR>
+) => ReturnType<T>;
 
 /**
  * 利用领域方法路径类型集合，收窄 methodPath, 同时可以自动提示
  */
-export type NarrowDomainPaths<Paths extends string> = Omit<TRouter, Keys> & {
-  [k in Keys]: (...args: ReplaceArrayItem<normal, 1, Paths>) => void;
+export type NarrowDomainPaths<Paths extends string, ModelNames = PickModelNames<Paths>> = Omit<
+  TRouter,
+  Keys
+> & {
+  [k in Keys]: ParameterReplace<TRouter["get"], 1, Paths>;
+} & {
+  model: ParameterReplace<TRouter["model"], 0, ModelNames>;
+  collection: ParameterReplace<
+    ParameterReplace<TRouter["collection"], 0, ModelNames>,
+    2,
+    ModelNames
+  >;
+  resource: ParameterReplace<TRouter["resource"], 0, ModelNames>;
 };

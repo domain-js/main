@@ -32,6 +32,13 @@ export function Main(cnf: Cnf, deps: Deps) {
 
 export const Deps = ["Sequelize"];
 
+/** Model 上的 sort 设定类型 */
+export interface ModelSort<Fields extends string> {
+  default: Fields;
+  allow: Fields[];
+  defaultDirection?: "DESC" | "ASC";
+}
+
 /**
  * Model 基类
  */
@@ -97,11 +104,7 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
   };
 
   /** 列表查询时候排序控制参数 */
-  static sort?: {
-    default: string;
-    allow: string[];
-    defaultDirection?: "DESC" | "ASC";
-  } = {
+  static sort?: ModelSort<string> = {
     default: "id",
     defaultDirection: "DESC",
     allow: ["id"],
