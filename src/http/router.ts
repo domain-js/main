@@ -170,26 +170,31 @@ export function Router(deps: Deps) {
   };
 
   /**
-   * controller 为可选参数，如果不填写则控制器名称直接就是 res ，方法为 list,add
-   * 如果设置了controller 则控制器为 controller，方法为 #{res}s, add{Res}
+   * 集合方法，集合方法包含了向集合添加元素，以及查看集合(列表)
+   * @param res 资源名称，如果有父级资源用双分号隔开 eg user, user::file
+   * @param _routePath 路径地址，可选，默认按照既定规则拼接
    */
-  const collection = (res: string, _routePath?: string, controller?: string) => {
+  const collection = (res: string, _routePath?: string) => {
+    const arr = res.split("::");
+    const name = arr[1] ? arr[1] : arr[0];
+    const controller = arr[1] ? arr[0] : null;
     let routePath: string;
     if (typeof _routePath !== "string") {
       if (controller) {
-        routePath = `/${controller}s/:${controller}Id/${res}s`;
+        routePath = `/${controller}s/:${controller}Id/${name}s`;
       } else {
-        routePath = `/${res}s`;
+        routePath = `/${name}s`;
       }
     } else {
       routePath = _routePath;
     }
+
     if (controller) {
-      register("get", routePath, `${controller}.${res}s`, 200, true);
-      register("post", routePath, `${controller}.add${ucwords(res)}`, 201);
+      register("get", routePath, `${controller}.${name}s`, 200, true);
+      register("post", routePath, `${controller}.add${ucwords(name)}`, 201);
     } else {
-      register("get", routePath, `${res}.list`, 200, true);
-      register("post", routePath, `${res}.add`, 201);
+      register("get", routePath, `${name}.list`, 200, true);
+      register("post", routePath, `${name}.add`, 201);
     }
   };
 
@@ -259,14 +264,16 @@ type PickCollection<
   Collects extends string = PickCollect<Keys, paths>,
 > = Collects extends any
   ? `${Keys}.add${Collects}` | `${Keys}.${Lowercase<Collects>}s` extends paths
-    ? [Lowercase<Collects>, Keys]
+    ? `${Keys}::${Lowercase<Collects>}`
     : never
   : never;
 
 export type PickCollections<
   paths extends string,
   Keys extends string = PickFirst<paths>,
-> = Keys extends any ? PickCollection<Keys, paths> : never;
+> = Keys extends any
+  ? PickCollection<Keys, paths> | (`${Keys}.add` | `${Keys}.list` extends paths ? Keys : never)
+  : never;
 
 /**
  * 利用领域方法路径类型集合，收窄 methodPath, 同时可以自动提示
@@ -282,8 +289,9 @@ export type NarrowDomainPaths<Paths extends string> = {
   ) => ReturnType<TRouter["get"]>;
 } & {
   model: (res: PickModels<Paths>, routePath?: string) => ReturnType<TRouter["model"]>;
-  collection: PickCollections<Paths> extends [infer R, infer C]
-    ? (res: R, _routePath?: string, controller?: C) => ReturnType<TRouter["collection"]>
-    : never;
+  collection: (
+    res: PickCollections<Paths>,
+    routePath?: string,
+  ) => ReturnType<TRouter["collection"]>;
   resource: (res: PickResources<Paths>, routePath?: string) => ReturnType<TRouter["resource"]>;
 };

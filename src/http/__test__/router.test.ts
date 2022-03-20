@@ -140,7 +140,7 @@ describe("router", () => {
   });
 
   it("collection, parent be defined", async () => {
-    router.collection("file", undefined, "user");
+    router.collection("user::file");
 
     domain["user.files"].method.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
     domain["user.addFile"].method.mockResolvedValueOnce({ name: "redstone-list" });
@@ -179,7 +179,7 @@ describe("router", () => {
   });
 
   it("collection, parent be defined, and routePath be defined", async () => {
-    router.collection("file", "/users/files", "user");
+    router.collection("user::file", "/users/files");
 
     domain["user.files"].method.mockResolvedValueOnce({ count: 1000, rows: [1, 2, 3] });
     domain["user.addFile"].method.mockResolvedValueOnce({ name: "redstone-list" });
