@@ -136,12 +136,24 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
    * @param toJSON Whether to directly return JSON formatted objects
    * @returns findAll resource result, object propoties has count, rows
    */
-  const list = async <T extends ModelBase>(
+  async function list<T extends ModelBase, J = ReturnType<T["toJSON"]>>(
     Model: ModelStatic<T>,
     params: Record<string, any>,
     allowAttrs?: string[],
-    toJSON?: boolean,
-  ) => {
+    toJSON?: false,
+  ): Promise<{ rows: T[]; count: number }>;
+  async function list<T extends ModelBase, J = ReturnType<T["toJSON"]>>(
+    Model: ModelStatic<T>,
+    params: Record<string, any>,
+    allowAttrs?: string[],
+    toJSON?: true,
+  ): Promise<{ rows: J[]; count: number }>;
+  async function list<T extends ModelBase, J = ReturnType<T["toJSON"]>>(
+    Model: ModelStatic<T>,
+    params: Record<string, any>,
+    allowAttrs?: string[],
+    toJSON?: false | true,
+  ) {
     const opt = findAllOpts(Model, params);
     const { _ignoreTotal } = params;
 
@@ -151,13 +163,10 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
 
     if (Array.isArray(allowAttrs) && allowAttrs.length) opt.attributes = allowAttrs;
     const rows = await Model.findAll(opt);
-    if (toJSON) {
-      for (let i = 0; i < rows.length; i += 1) {
-        rows[i] = rows[i].toJSON();
-      }
-    }
-    return { count, rows };
-  };
+    if (!toJSON) return { rows, count };
+
+    return { count, rows: rows.map((x) => x.toJSON() as J) };
+  }
 
   return { modify, add, remove, list, stats: Stats(cnf, deps, utils) };
 }
