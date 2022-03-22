@@ -4,6 +4,7 @@ const redis = {
   hget: jest.fn(),
   hset: jest.fn(),
   hincrby: jest.fn(),
+  hmget: jest.fn(),
 };
 describe("counter", () => {
   const counter = Counter({ counter: { key: "test-key" } }, { redis });
