@@ -34,7 +34,8 @@ describe("counter", () => {
 
     it("case2", async () => {
       redis.hset.mockRejectedValueOnce(Error("write failed"));
-      expect(() => counter.set("t2", 201)).rejects.toThrow("write failed");
+      const fn = () => counter.set("t2", 201);
+      expect(fn).rejects.toThrow("write failed");
       expect(redis.hset.mock.calls.length).toBe(1);
       expect(redis.hset.mock.calls.pop()).toEqual(["test-key", "t2", 201]);
     });
