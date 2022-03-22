@@ -50,7 +50,10 @@ export function Main(cnf: Cnf, deps: Deps) {
    * 一次获取多个key的统计值
    * @param keys 多个key按序输入, 返回的统计数据为数组，和keys数组保持对应关系
    */
-  const mget = async (keys: string[]) => redis.hmget(REDIS_KEY, ...keys);
+  const mget = async (keys: string[]) => {
+    const res = await redis.hmget(REDIS_KEY, ...keys);
+    return res.map((x) => Number(x) | 0);
+  };
 
   return { mget, get, set, incr, decr };
 }
