@@ -96,16 +96,16 @@ const makeProfile = (
 };
 
 export function BridgeSocket(io: Server, domain: Domain) {
-  const { method: subscribe } = domain["message.subscribe"];
-  const { method: unsubscribe } = domain["message.unsubscribe"];
-  const { method: entrance } = domain["message.entrance"];
+  const { method: subscribe } = domain["socket.subscribe"];
+  const { method: unsubscribe } = domain["socket.unsubscribe"];
+  const { method: entrance } = domain["socket.entrance"];
 
   if (!subscribe)
-    throw Error("要启用 socket 服务，必须要要有 message.subscribe 方法，用来处理 socket 订阅");
+    throw Error("要启用 socket 服务，必须要要有 socket.subscribe 方法，用来处理 socket 订阅");
   if (!unsubscribe)
-    throw Error("要启用 socket 服务，必须要要有 message.unsubscribe 方法，用来处理 socket 退订");
+    throw Error("要启用 socket 服务，必须要要有 socket.unsubscribe 方法，用来处理 socket 退订");
   if (!entrance)
-    throw Error("要启用 socket 服务，必须要要有 message.entrance 方法，用来处理 加入某个房间");
+    throw Error("要启用 socket 服务，必须要要有 socket.entrance 方法，用来处理 加入某个房间");
 
   io.on("connection", (client: Client) => {
     // 定义toJSON 避免 schema 验证报错
