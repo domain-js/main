@@ -25,7 +25,7 @@ export interface ParamsSchema<
       /** 当前参数的描述信息 */
       description: string;
       /** 当前参数的类型 */
-      type: "string" | "number" | "integer" | "object" | "array";
+      type: "string" | "number" | "integer" | "object" | "array" | "boolean";
     }
   >;
 }
