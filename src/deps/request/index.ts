@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
-import { Main as Logger } from "../logger";
+
 import * as utils from "../../utils";
+import { Main as Logger } from "../logger";
 
 type VERBS = "post" | "get" | "put" | "patch" | "delete";
 interface Cnf {

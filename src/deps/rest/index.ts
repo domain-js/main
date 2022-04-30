@@ -122,6 +122,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     // 这里不做字段是否存在的判断，无所谓
     (model as any).deletorId = deletorId;
     (model as any).isDeleted = "yes";
+    (model as any).deletedAt = new Date();
     // 丢进垃圾桶
     return model.save(TRASH_OPT);
   };
