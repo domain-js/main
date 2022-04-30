@@ -109,7 +109,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     return model.save();
   };
 
-  const TRASH_OPT = Object.freeze({ fields: ["isDeleted", "deletorId"] });
+  const TRASH_OPT = Object.freeze({ fields: ["isDeleted", "deletorId", "deletedAt"] });
   /**
    * Restful remove (D of CRUD) for delete a resource
    * @param model the resources will be removed
