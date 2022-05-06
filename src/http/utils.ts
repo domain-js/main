@@ -92,7 +92,7 @@ export function Utils(cnf: Cnf) {
 
       if (customFn) Object.assign(obj, customFn(obj, req));
 
-      return Object.freeze(obj) as Profile & T;
+      return obj as Profile & T;
     },
 
     /**
