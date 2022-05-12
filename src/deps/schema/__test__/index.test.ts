@@ -1,5 +1,7 @@
 import * as ajv from "ajv";
 import addFormats from "ajv-formats";
+import ajvKeywords from "ajv-keywords";
+
 import { Main as Schema } from "..";
 
 describe("@domain.js/schema", () => {
@@ -7,6 +9,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({}, deps);
     const errorFn = jest.fn(Error);
@@ -46,6 +49,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({}, deps);
 
@@ -66,6 +70,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({ schema: { coerceTypes: true } }, deps);
     it("case1", () => {
@@ -82,6 +87,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({ schema: { coerceTypes: true, useDefaults: true } }, deps);
     it("case1", () => {
@@ -107,6 +113,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({ schema: { removeAdditional: true } }, deps);
     const data = { age: 20, gender: "female" };
@@ -132,6 +139,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({}, deps);
     const data = { age: "20" };
@@ -155,6 +163,7 @@ describe("@domain.js/schema", () => {
     const deps = {
       ajv,
       ajvFormats: addFormats,
+      ajvKeywords: ajvKeywords,
     };
     const schema = Schema({}, deps);
     const data = { age: 20 };
