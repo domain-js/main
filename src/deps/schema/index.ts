@@ -1,6 +1,7 @@
-import * as util from "util";
 import * as ajv from "ajv";
 import addFormats from "ajv-formats";
+import ajvKeywords from "ajv-keywords";
+import * as util from "util";
 
 interface Cnf {
   schema?: ConstructorParameters<typeof ajv.default>[0];
@@ -11,6 +12,7 @@ interface Deps {
     default: typeof ajv.default;
   };
   ajvFormats: typeof addFormats;
+  ajvKeywords: typeof ajvKeywords;
 }
 
 type Schema = ajv.Schema;
@@ -24,9 +26,11 @@ export function Main(cnf: Cnf, deps: Deps) {
   const {
     ajv: { default: Ajv },
     ajvFormats,
+    ajvKeywords,
   } = deps;
   const ajv = new Ajv(cnf.schema || {});
   ajvFormats(ajv);
+  ajvKeywords(ajv);
 
   /**
    * Ajv complie function
@@ -43,7 +47,7 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param extra Additional information passed to the error function
    * @returns Processed function
    */
-  function auto<F extends(...args: any[]) => any>(
+  function auto<F extends (...args: any[]) => any>(
     fn: F,
     schema: Schema[],
     errorFn: Function,
@@ -85,4 +89,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   });
 }
 
-export const Deps = ["ajv", "ajvFormats"];
+export const Deps = ["ajv", "ajvFormats", "ajvKeywords"];

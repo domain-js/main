@@ -1,5 +1,6 @@
 import Ajv, { Schema } from "ajv";
 import addFormats from "ajv-formats";
+import ajvKeywords from "ajv-keywords";
 import _ from "lodash";
 
 interface Cnf {
@@ -11,6 +12,7 @@ export function Main(object: Cnf, schema: Schema) {
   const FIELDS = new Set(Object.keys(schema.properties));
   const ajv = new Ajv({ allowUnionTypes: true, coerceTypes: true, useDefaults: true });
   addFormats(ajv);
+  ajvKeywords(ajv);
   const validate = ajv.compile(schema);
 
   const obj = _.pick(object, [...FIELDS]);

@@ -1,5 +1,6 @@
 import * as ajv from "ajv";
 import * as ajvFormats from "ajv-formats";
+import ajvKeywords from "ajv-keywords";
 import * as async from "async";
 import * as axios from "axios";
 import * as cronParser from "cron-parser";
@@ -37,6 +38,7 @@ export interface Defaults {
    * @link https://www.npmjs.com/package/ajv-formats
    */
   ajvFormats: typeof ajvFormats;
+  ajvKeywords: typeof ajvKeywords;
   /**
    * Async is a utility module which provides straight-forward
    * powerful functions for working with asynchronous JavaScript.
@@ -108,6 +110,7 @@ export const defaults: Defaults = {
   uuid,
   ajv,
   ajvFormats,
+  ajvKeywords,
   async,
   axios,
   cronParser,

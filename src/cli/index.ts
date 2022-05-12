@@ -41,9 +41,9 @@ const makeDefineFile = async (modules: any[], targetFile: string, isTS: boolean)
     const variable = filePath2Var(name);
 
     if (isTS) {
-      content.push(`import * as ${variable} from "./${name}"`);
+      content.push(`import * as ${variable} from "./${name}";`);
     } else {
-      content.push(`const ${variable} = require("./${name}")`);
+      content.push(`const ${variable} = require("./${name}");`);
     }
     _exports.push(`"${file2Module(name).replace(/[/]/, ".")}": ${variable},`);
   }
@@ -56,7 +56,7 @@ const makeDefineFile = async (modules: any[], targetFile: string, isTS: boolean)
     content.push("module.exports = {");
   }
 
-  for (const x of _exports) content.push(x);
+  for (const x of _exports) content.push(`  ${x}`);
   content.push("};");
 
   fs.writeFileSync(targetFile, content.join("\n"));
