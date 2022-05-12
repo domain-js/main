@@ -16,22 +16,21 @@ import * as schema from "./schema";
 import * as sequelize from "./sequelize";
 import * as signer from "./signer";
 
-
 export = {
-  "aes": aes,
-  "cache": cache,
-  "checker": checker,
-  "counter": counter,
-  "cron": cron,
-  "graceful": graceful,
-  "hash": hash,
-  "logger": logger,
-  "myCia": myCia,
-  "parallel": parallel,
-  "redis": redis,
-  "request": request,
-  "rest": rest,
-  "schema": schema,
-  "sequelize": sequelize,
-  "signer": signer,
+  aes: aes,
+  cache: cache,
+  checker: checker,
+  counter: counter,
+  cron: cron,
+  graceful: graceful,
+  hash: hash,
+  logger: logger,
+  myCia: myCia,
+  parallel: parallel,
+  redis: redis,
+  request: request,
+  rest: rest,
+  schema: schema,
+  sequelize: sequelize,
+  signer: signer,
 };
