@@ -42,7 +42,8 @@ describe("Parallel", () => {
       expect(KEY).toBe("parallel::test");
       expect(ex).toBe("EX");
       expect(life).toBe(300);
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
       expect(nx).toBe("NX");
 
       expect(redis.del.mock.calls.length).toBe(1);
@@ -60,7 +61,8 @@ describe("Parallel", () => {
       expect(redis.set.mock.calls.length).toBe(1);
       const [KEY, time] = redis.set.mock.calls.pop();
       expect(KEY).toBe("parallel::test");
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
 
       expect(redis.del.mock.calls.length).toBe(0);
     });
@@ -78,7 +80,8 @@ describe("Parallel", () => {
       for (let i = 0; i < 2; i += 1) {
         const [KEY, time] = redis.set.mock.calls.pop();
         expect(KEY).toBe("parallel::test");
-        expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+        expect(time <= Date.now()).toBe(true);
+        expect(Date.now() - 1000 <= time).toBe(true);
       }
 
       expect(redis.del.mock.calls.length).toBe(1);
@@ -96,7 +99,8 @@ describe("Parallel", () => {
       (() => {
         const [KEY, time] = redis.set.mock.calls.pop();
         expect(KEY).toBe("parallel::test");
-        expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+        expect(time <= Date.now()).toBe(true);
+        expect(Date.now() - 1000 <= time).toBe(true);
         // 因为 neverReturn 因此不会删除锁
         expect(redis.del.mock.calls.length).toBe(0);
       })();
@@ -109,7 +113,8 @@ describe("Parallel", () => {
       (() => {
         const [KEY, time] = redis.set.mock.calls.pop();
         expect(KEY).toBe("parallel::test");
-        expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+        expect(time <= Date.now()).toBe(true);
+        expect(Date.now() - 1000 <= time).toBe(true);
         // 因为 被并发控制，因此无须删除锁
         expect(redis.del.mock.calls.length).toBe(0);
       })();
@@ -143,7 +148,8 @@ describe("Parallel", () => {
       for (let i = 0; i < 2; i += 1) {
         const [KEY, time] = redis.set.mock.calls.pop();
         expect(KEY).toBe("parallel::test");
-        expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+        expect(time <= Date.now()).toBe(true);
+        expect(Date.now() - 1000 <= time).toBe(true);
       }
 
       expect(redis.del.mock.calls.length).toBe(1);
@@ -164,7 +170,8 @@ describe("Parallel", () => {
       expect(redis.set.mock.calls.length).toBe(1);
       const [KEY, time] = redis.set.mock.calls.pop();
       expect(KEY).toBe("parallel::test");
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
 
       expect(redis.del.mock.calls.length).toBe(1);
       expect(redis.del.mock.calls.pop()).toEqual(["parallel::test"]);
@@ -184,7 +191,8 @@ describe("Parallel", () => {
       expect(redis.set.mock.calls.length).toBe(1);
       const [KEY, time] = redis.set.mock.calls.pop();
       expect(KEY).toBe("parallel::test");
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
 
       // 设置有效时间
       expect(redis.expire.mock.calls.length).toBe(1);
@@ -209,7 +217,8 @@ describe("Parallel", () => {
       expect(redis.set.mock.calls.length).toBe(1);
       const [KEY, time] = redis.set.mock.calls.pop();
       expect(KEY).toBe("parallel::test");
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
 
       // 设置有效时间
       expect(redis.expire.mock.calls.length).toBe(1);
@@ -241,7 +250,8 @@ describe("Parallel", () => {
       expect(redis.set.mock.calls.length).toBe(1);
       const [KEY, time] = redis.set.mock.calls.pop();
       expect(KEY).toBe("parallel::test-key");
-      expect(time <= Date.now() && Date.now() - 100 < time).toBe(true);
+      expect(time <= Date.now()).toBe(true);
+      expect(Date.now() - 1000 <= time).toBe(true);
 
       expect(redis.del.mock.calls.length).toBe(1);
       expect(redis.del.mock.calls.pop()).toEqual(["parallel::test-key"]);
