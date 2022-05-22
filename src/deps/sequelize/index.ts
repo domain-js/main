@@ -140,4 +140,7 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
 
   /** 联合唯一列名称集合，用来自动恢复软删除的资源 */
   static unique?: string[];
+
+  /** cache 是否开启 */
+  static cache = true;
 }
