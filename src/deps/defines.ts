@@ -4,6 +4,7 @@ import * as cache from "./cache";
 import * as checker from "./checker";
 import * as counter from "./counter";
 import * as cron from "./cron";
+import * as frequency from "./frequency";
 import * as graceful from "./graceful";
 import * as hash from "./hash";
 import * as logger from "./logger";
@@ -22,6 +23,7 @@ export = {
   checker: checker,
   counter: counter,
   cron: cron,
+  frequency: frequency,
   graceful: graceful,
   hash: hash,
   logger: logger,
