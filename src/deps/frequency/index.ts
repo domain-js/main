@@ -85,7 +85,7 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param ms 控频周期长度 毫秒
    * @param limit 控频极限次数
    */
-  const generate = async (field: string, ms: number, limit: number) => ({
+  const generate = (field: string, ms: number, limit: number) => ({
     /** 全流程控制，会自动累加次数 */
     control() {
       return control(field, ms, limit);
