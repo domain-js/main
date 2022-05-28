@@ -43,8 +43,9 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param field 控频字段key
    * @param ms 控频周期长度 毫秒
    * @param limit 控频极限次数
+   * @param msg 报错信息
    */
-  const control = async (field: string, ms: number, limit: number) => {
+  const control = async (field: string, ms: number, limit: number, msg = "Too many requests") => {
     const now = Date.now();
     const key = getKey(ms, now);
     const val = await redis.hincrby(key, field, 1);
@@ -58,12 +59,13 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param filed 控频字段key
    * @param ms 控频周期长度 毫秒
    * @param limit 控频极限次数
+   * @param msg 报错信息
    */
-  const check = async (field: string, ms: number, limit: number) => {
+  const check = async (field: string, ms: number, limit: number, msg = "Too many requests") => {
     const key = getKey(ms);
     const val = await redis.hget(key, field);
     const value = Number(val) | 0;
-    if (value > limit) throw Error("Too many request");
+    if (value > limit) throw Error(msg);
     return value;
   };
 
@@ -84,15 +86,16 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param filed 控频字段key
    * @param ms 控频周期长度 毫秒
    * @param limit 控频极限次数
+   * @param msg 报错信息
    */
-  const generate = (field: string, ms: number, limit: number) => ({
+  const generate = (field: string, ms: number, limit: number, msg = "Too many requests") => ({
     /** 全流程控制，会自动累加次数 */
     control() {
-      return control(field, ms, limit);
+      return control(field, ms, limit, msg);
     },
     /** 检测是否超限 */
     check() {
-      return check(field, ms, limit);
+      return check(field, ms, limit, msg);
     },
     /** 仅做累加 */
     incr() {
