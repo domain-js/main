@@ -50,7 +50,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     const key = getKey(ms, now);
     const val = await redis.hincrby(key, field, 1);
     if (val === 1) await redis.expire(key, expire(ms, now));
-    if (val > limit) throw Error("Too many request");
+    if (val > limit) throw Error(msg);
     return val;
   };
 
