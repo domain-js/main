@@ -58,6 +58,7 @@ export function Utils(cnf: Cnf) {
         userAgent: req.userAgent(),
         startedAt: new Date(),
         requestId: req.id(),
+        method,
         type: "user",
         extra: {},
       };

@@ -71,6 +71,7 @@ const makeProfile = (
     clientIp: utils.clientIp(client),
     remoteIp: utils.remoteIp(client),
     realIp: utils.realIp(client),
+    method: "None",
     isSocket: true,
     startedAt: new Date(),
     userAgent: client.handshake.headers["user-agent"] || "Not captured",
@@ -166,7 +167,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
       try {
         if (!method) throw new MyError("notFound", "不存在该领域方法");
         if (!client.profile) throw new MyError("noAuth", "请先执行 init");
-        const res = await method(client.profile, params);
+        const res = await method({ ...client.profile, method: name }, params);
         if (responseId) {
           client.emit("response", responseId, res);
         }
