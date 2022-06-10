@@ -41,7 +41,7 @@ export interface ModelSort<Fields extends string> {
 
 /** Model 上的 stats 设定类型 */
 export interface ModelStats<Fields extends string> {
-  dimensions?: Record<Fields, string>;
+  dimensions?: Record<string, Fields>;
   metrics: Record<string, string>;
   pagination?: {
     maxResults: number;
