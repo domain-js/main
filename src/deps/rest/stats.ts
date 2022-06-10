@@ -9,7 +9,7 @@ interface Deps {
   Sequelize: Pick<typeof Sequelize, "literal" | "and" | "fn">;
 }
 
-export function Stats(cnf: {}, deps: Deps, utils: ReturnType<typeof Utils>) {
+export function Stats(_cnf: any, deps: Deps, utils: ReturnType<typeof Utils>) {
   const defaultPagination = {
     maxResults: 10,
     maxStartIndex: 10000,
