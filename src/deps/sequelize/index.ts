@@ -39,6 +39,17 @@ export interface ModelSort<Fields extends string> {
   defaultDirection?: "DESC" | "ASC";
 }
 
+/** Model 上的 stats 设定类型 */
+export interface ModelStats<Fields extends string> {
+  dimensions?: Record<Fields, string>;
+  metrics: Record<string, string>;
+  pagination?: {
+    maxResults: number;
+    maxStartIndex: number;
+    maxResultsLimit: number;
+  };
+}
+
 /**
  * Model 基类
  */
