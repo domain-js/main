@@ -112,7 +112,9 @@ export function Utils(cnf: Cnf) {
         if (params[k] && _.isString(params[k])) params[k] = params[k].split(",");
       }
 
+      if (params.__files) throw Error("Params.__files disallow assignment");
       if (_.size(req.files)) params.__files = req.files;
+
       return params;
     },
 
