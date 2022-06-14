@@ -1,7 +1,11 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "[markdown]": {
-    "editor.quickSuggestions": true
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    }
   },
   "editor.quickSuggestions": {
     "other": true,

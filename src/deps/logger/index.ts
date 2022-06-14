@@ -1,6 +1,7 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as _ from "lodash";
+import fs from "fs";
+import _ from "lodash";
+import path from "path";
+import { format } from "util";
 import { v4 } from "uuid";
 
 const date = (offset = 0) => new Date(Date.now() + (offset | 0)).toISOString();
@@ -50,8 +51,20 @@ export function Main(cnf: Cnf, deps: Deps) {
     makeDir(dir);
     const file = path.resolve(dir, `${code}.err`);
     const content = [time, clientId, e.message];
-    if (e.data) content.push(JSON.stringify(e.data));
-    if (extra != null) content.push(JSON.stringify(extra));
+    if (e.data) {
+      try {
+        content.push(JSON.stringify(e.data));
+      } catch (err) {
+        content.push(format(e.data));
+      }
+    }
+    if (extra !== null || extra !== undefined) {
+      try {
+        content.push(JSON.stringify(extra));
+      } catch (e) {
+        content.push(format(extra));
+      }
+    }
     if (e.stack) content.push(JSON.stringify(e.stack));
     try {
       fs.appendFileSync(file, `${content.join("\t")}\n`);
@@ -67,7 +80,14 @@ export function Main(cnf: Cnf, deps: Deps) {
     makeDir(dir);
     const file = path.resolve(dir, "info.log");
     const content = [time, clientId, message];
-    if (extra != null) content.push(JSON.stringify(extra));
+    // eslint-disable-next-line no-eq-null
+    if (extra !== null || extra !== undefined) {
+      try {
+        content.push(JSON.stringify(extra));
+      } catch (e) {
+        content.push(format(extra));
+      }
+    }
     try {
       fs.appendFileSync(file, `${content.join("\t")}\n`);
     } catch (e) {
