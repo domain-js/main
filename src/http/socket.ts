@@ -145,13 +145,11 @@ export function BridgeSocket(io: Server, domain: Domain) {
     client.on("entrance", async (roomId: string) => {
       try {
         if (!client.profile || !client.inited) return;
-        const res = await entrance({ roomId, ...client.profile }, client);
+        const res = await entrance({ ...client.profile, roomId }, client);
         client.profile.roomId = roomId;
         client.roomId = roomId;
         client.emit("entranced", res);
       } catch (e) {
-        client.roomId = undefined;
-        if (client.profile) client.profile.roomId = undefined;
         if (e instanceof MyError) {
           client.emit("internalError", e.message, e.code || "unknown");
           return;
