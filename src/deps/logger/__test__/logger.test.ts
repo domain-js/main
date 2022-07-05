@@ -1,19 +1,27 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import * as fs from "fs";
+import fs from "fs/promises";
+import _ from "lodash";
 import * as path from "path";
-import * as _ from "lodash";
 import * as uuid from "uuid";
+
 import { Main } from "..";
 
+jest.mock("fs/promises");
 jest.mock("fs");
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const clientId = "test-client-id";
 const infoLogPath = path.join(__dirname, "log");
 const errorLogPath = path.join(__dirname, "log");
 
 const cnf = { logger: { infoLogPath, clientId, errorLogPath } };
+
+const appendFile = jest.fn();
+appendFile.mockResolvedValue(undefined);
+fs.appendFile = appendFile;
 
 const deps = { _, uuid };
 describe("Logger module", () => {
@@ -27,8 +35,8 @@ describe("Logger module", () => {
   it("info method", () => {
     const logger = Main(cnf, deps);
     logger.info("hello");
-    expect(fs.appendFileSync).toHaveBeenCalledTimes(1);
-    const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[0];
+    expect(fs.appendFile).toHaveBeenCalledTimes(1);
+    const [file, line] = appendFile.mock.calls[0];
     expect(file.slice(0, infoLogPath.length)).toBe(infoLogPath);
     expect(line).toMatch("hello");
   });
@@ -36,8 +44,8 @@ describe("Logger module", () => {
   it("info method, has extra", () => {
     const logger = Main(cnf, deps);
     logger.info("hello", "world");
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(2);
-    const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[1];
+    expect(appendFile.mock.calls.length).toBe(2);
+    const [file, line] = appendFile.mock.calls[1];
     expect(file.slice(0, infoLogPath.length)).toBe(infoLogPath);
     expect(line).toMatch("hello");
     expect(line).toMatch("world");
@@ -46,8 +54,8 @@ describe("Logger module", () => {
   it("error method", () => {
     const logger = Main(cnf, deps);
     logger.error(Error("hello"), "world");
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(3);
-    const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[2];
+    expect(appendFile.mock.calls.length).toBe(3);
+    const [file, line] = appendFile.mock.calls[2];
     expect(file.slice(0, errorLogPath.length)).toBe(errorLogPath);
     expect(line).toMatch("hello");
     expect(line).toMatch("world");
@@ -56,8 +64,8 @@ describe("Logger module", () => {
   it("error method, has extra", () => {
     const logger = Main(cnf, deps);
     logger.error(Error("nihao"));
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(4);
-    const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[3];
+    expect(appendFile.mock.calls.length).toBe(4);
+    const [file, line] = appendFile.mock.calls[3];
     expect(file).toMatch("unknown");
     expect(file.slice(0, errorLogPath.length)).toBe(errorLogPath);
     expect(line).not.toMatch("world");
@@ -68,8 +76,8 @@ describe("Logger module", () => {
     const error = Error("nihao");
     Object.assign(error, { code: "errorCode" });
     logger.error(error);
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(5);
-    const [file, line] = (fs.appendFileSync as jest.Mock).mock.calls[4];
+    expect(appendFile.mock.calls.length).toBe(5);
+    const [file, line] = appendFile.mock.calls[4];
     expect(file.slice(0, errorLogPath.length)).toBe(errorLogPath);
     expect(file).toMatch("errorCode");
     expect(line).not.toMatch("world");
@@ -87,7 +95,7 @@ describe("Logger module", () => {
     expect(fn.mock.calls.length).toBe(1);
     expect(fn.mock.calls[0]).toEqual([1, 2, 3, 4]);
 
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(7);
+    expect(appendFile.mock.calls.length).toBe(7);
   });
 
   it("logger sync method, fn exec faild", () => {
@@ -103,7 +111,7 @@ describe("Logger module", () => {
     expect(calls.length).toBe(1);
     expect(calls[0]).toEqual([1, 2, 3, 4]);
 
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(9);
+    expect(appendFile.mock.calls.length).toBe(9);
   });
 
   it("logger async method, fn exec success", async () => {
@@ -124,8 +132,8 @@ describe("Logger module", () => {
     expect(calls.length).toBe(1);
     expect(calls[0]).toEqual([1, 2, 3, 4]);
 
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(11);
-    expect((fs.appendFileSync as jest.Mock).mock.calls[10][1]).toMatch(ret);
+    expect(appendFile.mock.calls.length).toBe(11);
+    expect(appendFile.mock.calls[10][1]).toMatch(ret);
   });
 
   it("logger async method, fn exec faild", async () => {
@@ -133,7 +141,7 @@ describe("Logger module", () => {
     const calls: any[] = [];
     const fn = async (...args: any[]) => {
       calls.push(args);
-      return new Promise((resolve, reject) => {
+      return new Promise((_resolve, reject) => {
         setTimeout(reject.bind(null, Error("wrong")), 50);
       });
     };
@@ -144,8 +152,8 @@ describe("Logger module", () => {
     expect(calls.length).toBe(1);
     expect(calls[0]).toEqual([3, 2, 3, 4]);
 
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(13);
-    expect((fs.appendFileSync as jest.Mock).mock.calls[12][1]).toMatch("wrong");
+    expect(appendFile.mock.calls.length).toBe(13);
+    expect(appendFile.mock.calls[12][1]).toMatch("wrong");
   });
 
   it("ignore error", async () => {
@@ -154,6 +162,36 @@ describe("Logger module", () => {
     Object.assign(error, { code: "ignored" });
     logger.error(error);
 
-    expect((fs.appendFileSync as jest.Mock).mock.calls.length).toBe(13);
+    expect(appendFile.mock.calls.length).toBe(13);
+  });
+
+  it("level is error", async () => {
+    const logger = Main({ logger: { ...cnf.logger, level: "error" } }, deps);
+    logger.info("hello");
+
+    expect(appendFile.mock.calls.length).toBe(13);
+    logger.error(Error("world"));
+
+    expect(appendFile.mock.calls.length).toBe(14);
+  });
+
+  it("level is info", async () => {
+    const logger = Main({ logger: { ...cnf.logger, level: "info" } }, deps);
+    logger.info("hello");
+
+    expect(appendFile.mock.calls.length).toBe(15);
+    logger.error(Error("world"));
+
+    expect(appendFile.mock.calls.length).toBe(16);
+  });
+
+  it("level is none", async () => {
+    const logger = Main({ logger: { ...cnf.logger, level: "none" } }, deps);
+    logger.info("hello");
+
+    expect(appendFile.mock.calls.length).toBe(16);
+    logger.error(Error("world"));
+
+    expect(appendFile.mock.calls.length).toBe(16);
   });
 });

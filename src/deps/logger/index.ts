@@ -1,4 +1,5 @@
-import fs from "fs";
+import { existsSync, mkdirSync } from "fs";
+import fs from "fs/promises";
 import _ from "lodash";
 import path from "path";
 import { format } from "util";
@@ -8,6 +9,7 @@ const date = (offset = 0) => new Date(Date.now() + (offset | 0)).toISOString();
 
 interface Cnf {
   logger: {
+    level?: "info" | "error" | "none";
     clientId: string;
     errorLogPath: string;
     infoLogPath: string;
@@ -24,7 +26,7 @@ interface Deps {
 
 export function Main(cnf: Cnf, deps: Deps) {
   const {
-    logger: { errorLogPath, infoLogPath, ignoreErrors, clientId },
+    logger: { level, errorLogPath, infoLogPath, ignoreErrors, clientId },
   } = cnf;
   const {
     _,
@@ -32,12 +34,13 @@ export function Main(cnf: Cnf, deps: Deps) {
   } = deps;
 
   const makeDir = _.memoize((dir) => {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    if (!existsSync(dir)) mkdirSync(dir);
   });
 
   const ignores = new Set(ignoreErrors);
 
   const error = (e: any, extra?: any) => {
+    if (level === "none") return;
     if (!e) {
       console.trace("Logger.error but error is null or undefined");
       return;
@@ -66,14 +69,11 @@ export function Main(cnf: Cnf, deps: Deps) {
       }
     }
     if (e.stack) content.push(JSON.stringify(e.stack));
-    try {
-      fs.appendFileSync(file, `${content.join("\t")}\n`);
-    } catch (err) {
-      console.error("Logger.error appendFileSync faid: %o", err);
-    }
+    fs.appendFile(file, `${content.join("\t")}\n`).catch(console.error);
   };
 
   const info = (message: string, extra?: any) => {
+    if (level === "none" || level === "error") return;
     const time = date();
     const today = time.split("T")[0];
     const dir = path.resolve(infoLogPath, today);
@@ -88,11 +88,7 @@ export function Main(cnf: Cnf, deps: Deps) {
         content.push(format(extra));
       }
     }
-    try {
-      fs.appendFileSync(file, `${content.join("\t")}\n`);
-    } catch (e) {
-      console.error("Logger.info appendFileSync faid: %o", e);
-    }
+    fs.appendFile(file, `${content.join("\t")}\n`).catch(console.error);
   };
 
   const logger = <T extends (...args: any[]) => any>(
@@ -103,6 +99,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     errorHandler = (e: any) => (e instanceof Error ? e.message : ""),
     argsHandler: (arg: Parameters<T>) => string = JSON.stringify,
   ) => {
+    if (level === "none") return fn;
     if (isAsync) {
       const handler = {
         async apply(fn: T, me: any, args: Parameters<T>) {
