@@ -115,7 +115,8 @@ export function Utils(cnf: Cnf) {
       if (params.__files) throw Error("Params.__files disallow assignment");
       if (_.size(req.files)) params.__files = req.files;
 
-      return params;
+      // 将上传文件附加到 params 中
+      return { ...params, ...req.files };
     },
 
     /**
