@@ -1,7 +1,7 @@
 import { Cache, CnfDef, DepsDef, PubSubDef } from "./Define";
 
-export { Before } from "./Before";
 export { After } from "./After";
+export { Before } from "./Before";
 
 export function Main(cnf: CnfDef, deps: DepsDef, pubsub?: PubSubDef): Cache {
   let hits = 0; // 击中次数
@@ -11,7 +11,7 @@ export function Main(cnf: CnfDef, deps: DepsDef, pubsub?: PubSubDef): Cache {
   const lru = new LRU<string, string>(cnf.cache);
   const isFunction = (arg: any) => typeof arg === "function";
 
-  function caching<T extends(...args: any[]) => Promise<any>>(
+  function caching<T extends (...args: any[]) => Promise<any>>(
     func: T,
     life: number,
     getKey: (...args: Parameters<T>) => string,

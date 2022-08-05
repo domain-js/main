@@ -12,6 +12,8 @@ interface Deps {
   };
 }
 
+export const Deps = ["Sequelize"];
+
 type NonConstructorKeys<T> = { [P in keyof T]: T[P] extends new () => any ? never : P }[keyof T];
 type NonConstructor<T> = Pick<T, NonConstructorKeys<T>>;
 
@@ -29,8 +31,6 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   return sequelizes;
 }
-
-export const Deps = ["Sequelize"];
 
 /** Model 上的 sort 设定类型 */
 export interface ModelSort<Fields extends string> {
@@ -67,6 +67,12 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
   ): Promise<M | null> {
     return this.findByPk(pk);
   }
+
+  /** cache 是否开启 */
+  static cache = true;
+
+  /** 删除cache */
+  public static delCache(_pk: string | number): void {}
 
   /**
    * 基于主键获取某些数据的Mode实例列表，维持参数的顺序，自动维护内存级 cache
@@ -151,7 +157,4 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
 
   /** 联合唯一列名称集合，用来自动恢复软删除的资源 */
   static unique?: string[];
-
-  /** cache 是否开启 */
-  static cache = true;
 }
