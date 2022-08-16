@@ -57,7 +57,8 @@ describe("cache", () => {
       expect(name).toBe("message");
 
       lru.del("hello");
-      expect(del.mock.calls.length).toBe(0);
+      expect(del.mock.calls.length).toBe(1);
+      expect(del.mock.calls.pop()).toEqual(["hello"]);
       expect(pub.publish.mock.calls.length).toBe(1);
       expect(pub.publish.mock.calls.pop()).toEqual(["__channel__", "hello"]);
       listner("__channel__", "hello");

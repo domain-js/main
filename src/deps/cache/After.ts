@@ -1,5 +1,5 @@
 // import { SetRequired } from "type-fest";
-import { CnfDef, DepsDef, PubSubDef, Cache } from "./Define";
+import { Cache, CnfDef, DepsDef, PubSubDef } from "./Define";
 
 export const After = (
   lru: Pick<Cache, "del">,
@@ -24,6 +24,7 @@ export const After = (
 
   const del = lru.del.bind(lru);
   lru.del = (key) => {
+    del(key);
     pub.publish(delSignalChannel, key);
   };
 
