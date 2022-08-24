@@ -31,6 +31,10 @@ export type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap
   profile?: ReturnType<typeof makeProfile>;
   inited?: boolean;
   roomId?: string;
+  methods?: Record<string, Function>;
+  operator?: any;
+  /** 退出房间回调函数 */
+  quit?: Function;
 };
 
 const utils = {
@@ -132,12 +136,9 @@ export function BridgeSocket(io: Server, domain: Domain) {
         const session = await subscribe(client.profile, client);
 
         client.emit("inited", session);
-      } catch (e) {
+      } catch (e: any) {
         client.inited = false;
-        if (e instanceof MyError) {
-          client.emit("internalError", e.message, e.code || "unknown");
-          return;
-        }
+        client.emit("internalError", e.code || "unknown", e.message, e.data);
         console.error(e);
       }
     });
@@ -145,15 +146,13 @@ export function BridgeSocket(io: Server, domain: Domain) {
     client.on("entrance", async (roomId: string) => {
       try {
         if (!client.profile || !client.inited) return;
-        const res = await entrance({ ...client.profile, roomId }, client);
+        const ret = await entrance({ ...client.profile, roomId }, client);
         client.profile.roomId = roomId;
         client.roomId = roomId;
-        client.emit("entranced", res);
-      } catch (e) {
-        if (e instanceof MyError) {
-          client.emit("internalError", e.message, e.code || "unknown");
-          return;
-        }
+        Object.assign(client, ret);
+        client.emit("entranced", { ...ret, methods: Object.keys(ret.methods) });
+      } catch (e: any) {
+        client.emit("internalError", e.code || "unknown", e.message, e.data);
         console.error(e);
       }
     });
@@ -161,23 +160,20 @@ export function BridgeSocket(io: Server, domain: Domain) {
     client.use(async ([name, params, responseId], next) => {
       if (name === "init" || name === "entrance") return next();
 
-      const { method } = domain[name];
+      if (!client.methods) throw new MyError("没有允许执行的方法", "请先进入房间");
+      const method = client.methods[name];
       try {
         if (!method) throw new MyError("notFound", "不存在该领域方法");
         if (!client.profile) throw new MyError("noAuth", "请先执行 init");
-        const res = await method({ ...client.profile, method: name }, params);
+        const res = await method(...params);
         if (responseId) {
           client.emit("response", responseId, res);
         }
-      } catch (e) {
-        if (e instanceof Error) {
-          if (responseId) {
-            client.emit("responseError", responseId, (e as any).code, e.message, (e as any).data);
-          } else {
-            client.emit(`${name}Error`, (e as any).code, e.message, (e as any).data);
-          }
+      } catch (e: any) {
+        if (responseId) {
+          client.emit("responseError", responseId, e.code, e.message, e.data);
         } else {
-          console.error(e);
+          client.emit(`${name}Error`, e.code, e.message, e.data);
         }
       }
       return next();

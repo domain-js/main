@@ -17,9 +17,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   const { redis } = deps;
 
   const get = async (key: string) => {
-    const num = await redis.hget(REDIS_KEY, key);
-
-    return Number(num) | 0;
+    return redis.hget(REDIS_KEY, key);
   };
 
   const set = (key: string, value: string) => redis.hset(REDIS_KEY, key, value);
