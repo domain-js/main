@@ -163,17 +163,18 @@ export function BridgeSocket(io: Server, domain: Domain) {
       if (!client.methods) throw new MyError("没有允许执行的方法", "请先进入房间");
       const method = client.methods[name];
       try {
-        if (!method) throw new MyError("notFound", "不存在该领域方法");
+        if (!method) throw new MyError("notFound", `不存在该领域方法: ${name}`);
         if (!client.profile) throw new MyError("noAuth", "请先执行 init");
-        const res = await method(...params);
+        const res = await method(...(params || []));
         if (responseId) {
           client.emit("response", responseId, res);
         }
       } catch (e: any) {
         if (responseId) {
+          console.error(e);
           client.emit("responseError", responseId, e.code, e.message, e.data);
         } else {
-          client.emit(`${name}Error`, e.code, e.message, e.data);
+          client.emit("internalError", e.code, e.message, e.data);
         }
       }
       return next();
