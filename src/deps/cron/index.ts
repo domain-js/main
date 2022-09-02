@@ -38,6 +38,21 @@ interface Registed {
   };
 }
 
+/**
+ * 定时执行函数, 解决 setTimeout 第二个参数不能大于 2147483647 的问题
+ * @param fn 要执行的函数
+ * @param timeoutMS 执行间隔时间，单位毫秒
+ */
+export const timeout = (fn: Function, timeoutMS: number) => {
+  if (timeoutMS < 2147483647) {
+    setTimeout(fn, timeoutMS);
+  } else {
+    setTimeout(() => {
+      timeout(fn, timeoutMS - 2147483647);
+    }, 2147483647);
+  }
+};
+
 export function Main(cnf: Cnf, deps: Deps) {
   const { cron = {} } = cnf;
 
@@ -79,7 +94,7 @@ export function Main(cnf: Cnf, deps: Deps) {
       if (!startAt) throw Error("startAt 定义不合法");
       timeoutMS = startAt;
     }
-    setTimeout(() => {
+    timeout(() => {
       opt.times += 1;
       opt.triggeredAt = Date.now();
       myCia.submit(`Cron::${name}`, opt.times, ({ cronJob: [err, , totalMS] }) => {

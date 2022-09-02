@@ -19,6 +19,7 @@ export function Utils(cnf: Cnf) {
     ucwords(value: string) {
       return `${value[0].toUpperCase()}${value.substring(1)}`;
     },
+
     /** 真实的连接请求端ip */
     remoteIp(req: restify.Request) {
       const { socket } = req;
