@@ -1,4 +1,5 @@
 import * as Sequelize from "sequelize";
+
 import { Main } from "..";
 
 describe("Sequelize", () => {
@@ -37,12 +38,18 @@ describe("Sequelize", () => {
       sequelize: {
         db1,
       },
+      aes: {
+        key: "AES_KEY_VALUE",
+      },
     };
 
     const SequelizeMock = jest.fn();
     const deps = {
       Sequelize: {
         Sequelize: SequelizeMock as unknown as typeof Sequelize.Sequelize,
+      },
+      aes: {
+        decrypt: jest.fn(),
       },
     };
 

@@ -1,5 +1,5 @@
-import * as cryptojs from "crypto-js/core";
 import * as AES from "crypto-js/aes";
+import * as cryptojs from "crypto-js/core";
 
 export function Main() {
   // aes-256-cbc encrypt

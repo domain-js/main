@@ -2,7 +2,13 @@ import { Model, Options, Sequelize } from "sequelize";
 
 interface Cnf {
   sequelize: {
-    [propName: string]: Options;
+    [propName: string]: Options & {
+      /** 是否开启账号密码aes加密，以增强安全性 */
+      security?: boolean;
+    };
+  };
+  aes: {
+    key: string;
   };
 }
 
@@ -10,9 +16,12 @@ interface Deps {
   Sequelize: {
     Sequelize: typeof Sequelize;
   };
+  aes: {
+    decrypt: (str: string, key: string) => string;
+  };
 }
 
-export const Deps = ["Sequelize"];
+export const Deps = ["Sequelize", "aes"];
 
 type NonConstructorKeys<T> = { [P in keyof T]: T[P] extends new () => any ? never : P }[keyof T];
 type NonConstructor<T> = Pick<T, NonConstructorKeys<T>>;
@@ -21,11 +30,18 @@ export type ModelStatic<M extends ModelBase> = NonConstructor<typeof ModelBase> 
 
 export function Main(cnf: Cnf, deps: Deps) {
   // 这里之所以要注入 Sequelize 是为了保证项目自身可以灵活选择自己的 Sequelize 版本, 这样改公共模块就会更加稳定, 避免频繁升级
-  const { sequelize: dbs } = cnf;
-  const { Sequelize } = deps;
+  const {
+    sequelize: dbs,
+    aes: { key: AES_KEY },
+  } = cnf;
+  const { Sequelize, aes } = deps;
   const sequelizes: { [propName: string]: Sequelize } = {};
   for (const k of Object.keys(dbs)) {
     const db = dbs[k];
+    if (db.security) {
+      db.username = aes.decrypt(db.username!, AES_KEY);
+      db.password = aes.decrypt(db.password!, AES_KEY);
+    }
     sequelizes[k] = new Sequelize.Sequelize(db);
   }
 
