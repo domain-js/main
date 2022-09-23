@@ -190,6 +190,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
       } catch (e) {
         console.error(e);
       }
+      if (client.quit) client.quit();
     });
   });
 }

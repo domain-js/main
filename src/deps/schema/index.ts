@@ -84,7 +84,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     auto,
     validate,
     compile,
-    /** intance of Ajv */
+    /** instance of Ajv */
     ajv,
   });
 }
