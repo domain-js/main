@@ -64,3 +64,4 @@ typings/
 .next
 
 .test/*
+.npmrc

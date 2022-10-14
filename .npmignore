@@ -18,3 +18,4 @@ coverage/*
 __test__
 src
 src/*
+.npmrc
