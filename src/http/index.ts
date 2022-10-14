@@ -50,7 +50,7 @@ export function Main(
           socketLogger("emit", socket.id, args);
           return emit.apply(socket, args);
         };
-        socketLogger("connection", socket.id);
+        socketLogger("connection", socket.id, socket.handshake);
         socket.use((args, next) => {
           next();
           socketLogger("use", socket.id, args);
