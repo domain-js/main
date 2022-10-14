@@ -13,11 +13,12 @@ export function Main(
     domain: Domain;
     httpCodes: HttpCodes;
     makeProfileHook?: (obj: Profile, req: restify.Request) => any;
+    socketLogger?: (...args: any[]) => void;
   },
 ) {
   const utils = Utils(cnf);
 
-  const { routers, domain, httpCodes, makeProfileHook } = deps;
+  const { routers, domain, httpCodes, makeProfileHook, socketLogger } = deps;
 
   const server = restify.createServer();
   server.use(restify.plugins.queryParser());
@@ -41,6 +42,24 @@ export function Main(
   // 根据需求起送socket服务
   if (cnf.socket) {
     const io = new Server(server);
+    // 处理日志
+    if (socketLogger) {
+      io.on("connection", (socket) => {
+        const { emit } = socket;
+        socket.emit = (...args) => {
+          socketLogger("emit", socket.id, args);
+          return emit.apply(socket, args);
+        };
+        socketLogger("connection", socket.id);
+        socket.use((args, next) => {
+          next();
+          socketLogger("use", socket.id, args);
+        });
+        socket.on("disconnect", (reason) => {
+          socketLogger("disconnect", socket.id, reason);
+        });
+      });
+    }
     BridgeSocket(io, domain);
   }
 
