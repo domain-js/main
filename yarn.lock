@@ -821,6 +821,11 @@
   resolved "https://registry.npmmirror.com/@types/validator/download/@types/validator-13.7.0.tgz?cache=0&sync_timestamp=1637270904805&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fvalidator%2Fdownload%2F%40types%2Fvalidator-13.7.0.tgz"
   integrity sha512-+jBxVvXVuggZOrm04NR8z+5+bgoW4VZyLzUO+hmPPW1mVFL/HaitLAkizfv4yg9TbG8lkfHWVMQ11yDqrVVCzA==
 
+"@types/validator@^13.7.1":
+  version "13.7.7"
+  resolved "https://macroverse-npm.pkg.coding.net/caixuan-main/packages/@types/validator/-/@types/validator-13.7.7/e87cf34dd08522d21acf30130fd8941f433b81b5.tgz#e87cf34dd08522d21acf30130fd8941f433b81b5"
+  integrity sha512-jiEw2kTUJ8Jsh4A1K4b5Pkjj9Xz6FktLLOQ36ZVLRkmxFbpTvAV2VRoKMojz8UlZxNg/2dZqzpigH4JYn1bkQg==
+
 "@types/verror@*":
   version "1.10.5"
   resolved "https://registry.npmmirror.com/@types/verror/download/@types/verror-1.10.5.tgz"
@@ -2737,10 +2742,10 @@ indent-string@^4.0.0:
   resolved "https://registry.nlark.com/indent-string/download/indent-string-4.0.0.tgz?cache=0&sync_timestamp=1618847271946&other_urls=https%3A%2F%2Fregistry.nlark.com%2Findent-string%2Fdownload%2Findent-string-4.0.0.tgz"
   integrity sha1-Yk+PRJfWGbLZdoUx1Y9BIoVNclE=
 
-inflection@^1.13.1:
-  version "1.13.1"
-  resolved "https://registry.nlark.com/inflection/download/inflection-1.13.1.tgz"
-  integrity sha1-xcrdgIiKkM+EwuluNA1+3IXV8Ms=
+inflection@^1.13.2:
+  version "1.13.4"
+  resolved "https://macroverse-npm.pkg.coding.net/caixuan-main/packages/inflection/-/inflection-1.13.4/65aa696c4e2da6225b148d7a154c449366633a32.tgz#65aa696c4e2da6225b148d7a154c449366633a32"
+  integrity sha512-6I/HUDeYFfuNCVS3td055BaXBwKYuzw7K3ExVMStBowKo9oOAMJIXIHvdyR3iboTCp1b+1i5DSkIZTcwIktuDw==
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -4441,10 +4446,10 @@ ret@~0.2.0:
   resolved "https://registry.npm.taobao.org/ret/download/ret-0.2.2.tgz"
   integrity sha1-toYXgqH0di3OQ0Aqcet6KD9EVzw=
 
-retry-as-promised@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npmmirror.com/retry-as-promised/download/retry-as-promised-5.0.0.tgz"
-  integrity sha512-6S+5LvtTl2ggBumk04hBo/4Uf6fRJUwIgunGZ7CYEBCeufGFW1Pu6ucUf/UskHeWOIsUcLOGLFXPig5tR5V1nA==
+retry-as-promised@^6.1.0:
+  version "6.1.0"
+  resolved "https://macroverse-npm.pkg.coding.net/caixuan-main/packages/retry-as-promised/-/retry-as-promised-6.1.0/11eca9a0f97804d552ec8e74bc4eb839bd226dc4.tgz#11eca9a0f97804d552ec8e74bc4eb839bd226dc4"
+  integrity sha512-Hj/jY+wFC+SB9SDlIIFWiGOHnNG0swYbGYsOj2BJ8u2HKUaobNKab0OIC0zOLYzDy0mb7A4xA5BMo4LMz5YtEA==
 
 reusify@^1.0.4:
   version "1.0.4"
@@ -4574,20 +4579,21 @@ sequelize-pool@^7.1.0:
   resolved "https://registry.npm.taobao.org/sequelize-pool/download/sequelize-pool-7.1.0.tgz?cache=0&sync_timestamp=1616644687987&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fsequelize-pool%2Fdownload%2Fsequelize-pool-7.1.0.tgz"
   integrity sha1-IQs5GvQAJ2L4IxiP1uz8dBMCB2g=
 
-sequelize@6.16.1:
-  version "6.16.1"
-  resolved "https://registry.npmmirror.com/sequelize/-/sequelize-6.16.1.tgz"
-  integrity sha512-YFGqrwkmEhSbpZBxay5+PRKMiZNNUJzgIixCyFkLm9+/5Rqq5jBADEjTAC8RYHzwsOGNboYh18imXrYNCjBZCQ==
+sequelize@^6.16.1:
+  version "6.25.2"
+  resolved "https://macroverse-npm.pkg.coding.net/caixuan-main/packages/__tarballs/sequelize/6.25.2/__path/sequelize/-/sequelize-6.25.2/552ec6964be7490906fd9de392af36b9b756553f.tgz#552ec6964be7490906fd9de392af36b9b756553f"
+  integrity sha512-TDHYBDF61zVnkmYetjSj0H5CbnTiM9PZiMrbMCv1wOqh+cspekBQ0f4Y3/5PI1t0SPW40ogr+BiYpMKK9W1DUw==
   dependencies:
     "@types/debug" "^4.1.7"
+    "@types/validator" "^13.7.1"
     debug "^4.3.3"
     dottie "^2.0.2"
-    inflection "^1.13.1"
+    inflection "^1.13.2"
     lodash "^4.17.21"
     moment "^2.29.1"
     moment-timezone "^0.5.34"
     pg-connection-string "^2.5.0"
-    retry-as-promised "^5.0.0"
+    retry-as-promised "^6.1.0"
     semver "^7.3.5"
     sequelize-pool "^7.1.0"
     toposort-class "^1.0.1"

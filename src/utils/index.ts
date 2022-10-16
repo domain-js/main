@@ -133,7 +133,9 @@ export const inExpired = (time: number, life: number) => {
   return time < now - life;
 };
 
-type Params = { [K: string]: string };
+interface Params {
+  [K: string]: string;
+}
 /**
  * Modify a URL address, add some attributes and delete some attributes
  * @param address URL address
@@ -141,7 +143,7 @@ type Params = { [K: string]: string };
  * @param removes The string list will be remove from address
  * @returns Modified address
  */
-export const modifiyURL = (address: string, adds?: Params, removes?: string[]) => {
+export const modifyURL = (address: string, adds?: Params, removes?: string[]) => {
   const obj = new URL(address);
 
   if (typeof adds === "object") {
@@ -156,6 +158,12 @@ export const modifiyURL = (address: string, adds?: Params, removes?: string[]) =
 
   return obj.toString();
 };
+
+/**
+ * @deprecated
+ * alias modifyURL
+ */
+export const modifiyURL = modifyURL;
 
 /**
  * 等待，知道 test 返回 true
