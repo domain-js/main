@@ -83,7 +83,7 @@ const checkHookExport = (_dir: string) => {
   }
 };
 
-const loadDeps = async (rootDir: string, ext = "js") => {
+const loadDeps = async (rootDir: string, ext = "js", ignoreCheckHook = false) => {
   const isTS = ext === "ts";
   const modules = [];
   const dir = path.resolve(rootDir, "./");
@@ -95,7 +95,7 @@ const loadDeps = async (rootDir: string, ext = "js") => {
 
     // 非目录忽略，模块必须是目录
     if (!stat.isDirectory()) continue;
-    checkHookExport(_dir);
+    if (!ignoreCheckHook) checkHookExport(_dir);
 
     modules.push(path.join(dir, x));
   }
