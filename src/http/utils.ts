@@ -53,6 +53,7 @@ export function Utils(cnf: Cnf) {
       customFn?: (obj: Profile, req: restify.Request) => T,
     ): Profile & T {
       const obj: Profile = {
+        verb: req.method,
         clientIp: utils.clientIp(req),
         remoteIp: utils.remoteIp(req),
         realIp: utils.realIp(req),

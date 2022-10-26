@@ -11,6 +11,7 @@ export interface Cnf {
 }
 
 export interface Profile {
+  verb?: string;
   clientIp: string;
   remoteIp: string;
   realIp: string;
