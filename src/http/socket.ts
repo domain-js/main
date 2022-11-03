@@ -185,11 +185,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
       if (!client.profile) return;
       if (!client.inited) return;
       // 这里要取消对领域消息的监听
-      try {
-        return await unsubscribe(client.profile, client);
-      } catch (e) {
-        console.error(e);
-      }
+      await unsubscribe(client.profile, client).catch(console.error);
       if (client.quit) client.quit();
     });
   });
