@@ -91,15 +91,19 @@ export function Utils(cnf: Cnf, deps: Deps) {
       const direction = isDesc ? "DESC" : "ASC";
       const order = isDesc ? x.slice(1) : x;
 
-      // 如果请求的排序方式不允许，则返回null
-      if (!conf.allow || !_.includes(conf.allow, order)) return undefined;
-
       const theOrder = order.split(".");
+      // 如果请求的排序方式不允许，则返回null
+      if (theOrder.length !== 2 && (!conf.allow || !_.includes(conf.allow, order)))
+        return undefined;
+
       // 处理使用模型名称作为关联名称按关联模型的 字段 排序
       if (theOrder.length === 2) {
         if (includes && Array.isArray(params._includes)) {
           const ret = _.filter(params._includes, (val) => includes[val]);
-          if (!ret.includes(theOrder[0])) {
+          if (
+            !ret.includes(theOrder[0]) ||
+            !includes[theOrder[0]].model.sort?.allow.includes(theOrder[1])
+          ) {
             return undefined;
           }
         } else {
