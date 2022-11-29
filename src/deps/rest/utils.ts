@@ -425,6 +425,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   // 返回列表查询的条件
   const findAllOpts = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
     const { Op } = Sequelize;
+    const { literal } = Model.sequelize!;
     const where: Record<string, any> = {};
     const searchOrs: string[][][] = [];
     const includes = modelInclude(params, Model.includes);
@@ -476,12 +477,12 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
     if (_.size(where)) {
       if (_searchOrs.length) {
-        ret.where = (Sequelize as any).and(where, Sequelize.literal(mergeSearchOrs(_searchOrs)));
+        ret.where = (Sequelize as any).and(where, literal(mergeSearchOrs(_searchOrs)));
       } else {
         ret.where = where;
       }
     } else if (_searchOrs.length) {
-      ret.where = Sequelize.literal(mergeSearchOrs(_searchOrs));
+      ret.where = literal(mergeSearchOrs(_searchOrs));
     }
 
     // 处理需要返回的字段
