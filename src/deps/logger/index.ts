@@ -53,14 +53,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     const dir = path.resolve(errorLogPath, today);
     makeDir(dir);
     const file = path.resolve(dir, `${code}.err`);
-    const content = [time, clientId, e.message];
-    if (e.data) {
-      try {
-        content.push(JSON.stringify(e.data));
-      } catch (err) {
-        content.push(format(e.data));
-      }
-    }
+    const content = [time, clientId, format(e)];
     if (extra !== null || extra !== undefined) {
       try {
         content.push(JSON.stringify(extra));
@@ -68,7 +61,7 @@ export function Main(cnf: Cnf, deps: Deps) {
         content.push(format(extra));
       }
     }
-    if (e.stack) content.push(JSON.stringify(e.stack));
+    if (!e.stack) content.push(format(Error()));
     fs.appendFile(file, `${content.join("\t")}\n`).catch(console.error);
   };
 
