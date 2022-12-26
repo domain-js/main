@@ -7,6 +7,7 @@ export interface Cnf {
   bodyMaxBytes?: number;
   apisRoute?: string;
   socket?: boolean;
+  fileUploadMultiple?: boolean; // 是否支持多文件上传
   [propName: string]: any;
 }
 

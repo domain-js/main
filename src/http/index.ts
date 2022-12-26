@@ -26,6 +26,7 @@ export function Main(
     restify.plugins.bodyParser({
       keepExtensions: true,
       maxFieldsSize: cnf.bodyMaxBytes || 2 * 1024 * 1024, // 参数最大容量 2MB
+      multiples: cnf.fileUploadMultiple || false, // 是否支持多文件上传
     }),
   );
 
