@@ -1,7 +1,7 @@
 import type { LoDashStatic } from "lodash";
 import moment from "moment";
 import * as mysql from "mysql2";
-import * as Sequelize from "sequelize";
+import { literal, Op, Sequelize } from "sequelize";
 
 import { ModelBase, ModelStatic } from "../sequelize";
 
@@ -15,7 +15,6 @@ interface Deps {
   _: LoDashStatic;
   mysql: Pick<typeof mysql, "escape">;
   moment: typeof moment extends (...args: infer A) => infer B ? (...args: A) => B : never;
-  Sequelize: Pick<typeof Sequelize, "where" | "fn" | "col" | "literal" | "Op">;
   errors: {
     notAllowed: (...args: any[]) => Error;
     resourceDuplicateAdd: (...args: any[]) => Error;
@@ -27,7 +26,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
 
-  const { _, errors, moment, Sequelize } = deps;
+  const { _, errors, moment } = deps;
 
   /**
    * 相对多少天的时间
@@ -233,7 +232,6 @@ export function Utils(cnf: Cnf, deps: Deps) {
     params: Record<string, any>,
     name: string,
     where: any,
-    Op: typeof Sequelize.Op,
     col: string = name,
   ) => {
     let value: any;
@@ -424,13 +422,11 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
   // 返回列表查询的条件
   const findAllOpts = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
-    const { Op } = Sequelize;
-    const { literal } = Model.sequelize!;
     const where: Record<string, any> = {};
     const searchOrs: string[][][] = [];
     const includes = modelInclude(params, Model.includes);
     _.each(Model.filterAttrs || _.keys(Model.rawAttributes), (name) => {
-      findOptFilter(params, name, where, Op);
+      findOptFilter(params, name, where);
     });
     if (Model.rawAttributes.isDeleted && !params._showDeleted) {
       where.isDeleted = "no";
@@ -447,7 +443,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
         const includeWhere: any = {};
         const filterAttrs = x.model.filterAttrs || _.keys(x.model.rawAttributes);
         _.each(filterAttrs, (name) => {
-          findOptFilter(params, `${x.as}.${name}`, includeWhere, Op, name);
+          findOptFilter(params, `${x.as}.${name}`, includeWhere, name);
         });
         if (x.model.rawAttributes.isDeleted && !params._showDeleted) {
           includeWhere[Op.or] = [{ isDeleted: "no" }];
