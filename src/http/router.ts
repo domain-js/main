@@ -86,6 +86,7 @@ export function Router(deps: Deps) {
     isList = false,
     handler?: Handler,
     resHandler?: ResHandler,
+    resource?: string,
   ) {
     /**
      * 暂存起来，提供给apis接口来
@@ -103,6 +104,7 @@ export function Router(deps: Deps) {
 
     server[verb](route, async (req: restify.Request, res: restify.Response, next: restify.Next) => {
       const profile = makeProfile(req, methodPath, makeProfileHook);
+      if (resource) profile.resource = resource;
       const params = makeParams(req);
 
       // 额外处理 params
@@ -190,19 +192,28 @@ export function Router(deps: Deps) {
     }
 
     if (controller) {
-      register("get", routePath, `${controller}.${name}s`, 200, true);
-      register("post", routePath, `${controller}.add${ucwords(name)}`, 201);
+      register("get", routePath, `${controller}.${name}s`, 200, true, undefined, undefined, name);
+      register(
+        "post",
+        routePath,
+        `${controller}.add${ucwords(name)}`,
+        201,
+        false,
+        undefined,
+        undefined,
+        name,
+      );
     } else {
-      register("get", routePath, `${name}.list`, 200, true);
-      register("post", routePath, `${name}.add`, 201);
+      register("get", routePath, `${name}.list`, 200, true, undefined, undefined, name);
+      register("post", routePath, `${name}.add`, 201, false, undefined, undefined, name);
     }
   };
 
   const model = (res: string, routePath = `/${res}s/:id`) => {
-    register("get", routePath, `${res}.detail`);
-    register("put", routePath, `${res}.modify`);
-    register("patch", routePath, `${res}.modify`);
-    register("del", routePath, `${res}.remove`, 204);
+    register("get", routePath, `${res}.detail`, 200, false, undefined, undefined, res);
+    register("put", routePath, `${res}.modify`, 200, false, undefined, undefined, res);
+    register("patch", routePath, `${res}.modify`, 200, false, undefined, undefined, res);
+    register("del", routePath, `${res}.remove`, 204, false, undefined, undefined, res);
   };
 
   const resource = (res: string, routePath = `/${res}s`) => {

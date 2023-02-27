@@ -12,6 +12,8 @@ export interface Cnf {
 }
 
 export interface Profile {
+  /** 操作涉及到的资源名称 */
+  resource?: string;
   verb?: string;
   clientIp: string;
   remoteIp: string;
