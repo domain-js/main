@@ -156,10 +156,12 @@ export function Router(deps: Deps) {
       isList = false,
       handler?: Handler,
       resHandler?: ResHandler,
+      resource?: string,
+      // eslint-disable-next-line max-params
     ) => {
-      register(verb, routePath, ctlAct, code, isList, handler, resHandler);
+      register(verb, routePath, ctlAct, code, isList, handler, resHandler, resource);
       if (verb === "put") {
-        register("patch", routePath, ctlAct, code, isList, handler, resHandler);
+        register("patch", routePath, ctlAct, code, isList, handler, resHandler, resource);
       }
     };
   }
