@@ -449,7 +449,6 @@ export function Utils(cnf: Cnf, deps: Deps) {
           if (x.model.rawAttributes.isDeleted || x.model.rawAttributes.deletedAt) {
             includeWhere[Op.or] = [];
             if (x.model.rawAttributes.isDeleted) includeWhere[Op.or].push({ isDeleted: "no" });
-            if (x.model.rawAttributes.deletedAt) includeWhere[Op.or].push({ deletedAt: null });
             if (x.required === false) includeWhere[Op.or].push({ id: null });
           }
         }
