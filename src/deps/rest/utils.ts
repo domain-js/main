@@ -334,7 +334,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
     // 处理like
     if (_.isString(params[`${name}_like`])) {
-      value = params[`${name}_like`].trim().replace(/\*/g, "%");
+      value = params[`${name}_like`].trim().replace(/\*/g, "%").replace(/_/g, "\\_");
       if (!where[col]) where[col] = {};
       where[col][Op.like] = value;
     }
@@ -344,14 +344,14 @@ export function Utils(cnf: Cnf, deps: Deps) {
       const likes = params[`${name}_likes`].trim().split(",");
       if (!where[col]) where[col] = {};
       where[col][Op.or] = likes.map((x: string) => {
-        value = x.trim().replace(/\*/g, "%");
+        value = x.trim().replace(/\*/g, "%").replace(/_/g, "\\_");
         return { [Op.like]: value };
       });
     }
 
     // 处理notLike
     if (_.isString(params[`${name}_notLike`])) {
-      value = params[`${name}_notLike`].trim().replace(/\*/g, "%");
+      value = params[`${name}_notLike`].trim().replace(/\*/g, "%").replace(/_/g, "\\_");
       if (!where[col]) where[col] = {};
       where[col][Op.notLike] = value;
     }
@@ -428,8 +428,9 @@ export function Utils(cnf: Cnf, deps: Deps) {
     _.each(Model.filterAttrs || _.keys(Model.rawAttributes), (name) => {
       findOptFilter(params, name, where);
     });
-    if (Model.rawAttributes.isDeleted && !params._showDeleted) {
-      where.isDeleted = "no";
+    if (!params._showDeleted) {
+      if (Model.rawAttributes.isDeleted) where.isDeleted = "no";
+      if (Model.rawAttributes.deletedAt) where.deletedAt = null;
     }
 
     // 将搜索条件添加到主条件上
@@ -445,9 +446,13 @@ export function Utils(cnf: Cnf, deps: Deps) {
         _.each(filterAttrs, (name) => {
           findOptFilter(params, `${x.as}.${name}`, includeWhere, name);
         });
-        if (x.model.rawAttributes.isDeleted && !params._showDeleted) {
-          includeWhere[Op.or] = [{ isDeleted: "no" }];
-          if (x.required === false) includeWhere[Op.or].push({ id: null });
+        if (!params._showDeleted) {
+          if (x.model.rawAttributes.isDeleted || x.model.rawAttributes.deletedAt) {
+            includeWhere[Op.or] = [];
+            if (x.model.rawAttributes.isDeleted) includeWhere[Op.or].push({ isDeleted: "no" });
+            if (x.model.rawAttributes.deletedAt) includeWhere[Op.or].push({ deletedAt: null });
+            if (x.required === false) includeWhere[Op.or].push({ id: null });
+          }
         }
 
         // 将搜索条件添加到 include 的 where 条件上
