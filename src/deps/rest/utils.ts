@@ -446,9 +446,8 @@ export function Utils(cnf: Cnf, deps: Deps) {
           findOptFilter(params, `${x.as}.${name}`, includeWhere, name);
         });
         if (!params._showDeleted) {
-          if (x.model.rawAttributes.isDeleted || x.model.rawAttributes.deletedAt) {
-            includeWhere[Op.or] = [];
-            if (x.model.rawAttributes.isDeleted) includeWhere[Op.or].push({ isDeleted: "no" });
+          if (x.model.rawAttributes.isDeleted) {
+            if (x.model.rawAttributes.isDeleted) includeWhere[Op.or] = [{ isDeleted: "no" }];
             if (x.required === false) includeWhere[Op.or].push({ id: null });
           }
         }
