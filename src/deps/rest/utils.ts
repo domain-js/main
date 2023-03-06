@@ -430,7 +430,6 @@ export function Utils(cnf: Cnf, deps: Deps) {
     });
     if (!params._showDeleted) {
       if (Model.rawAttributes.isDeleted) where.isDeleted = "no";
-      if (Model.rawAttributes.deletedAt) where.deletedAt = null;
     }
 
     // 将搜索条件添加到主条件上
