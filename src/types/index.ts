@@ -3,7 +3,7 @@ export type ReadonlyArray2union<T extends ReadonlyArray<any>> = T extends Readon
   ? A
   : never;
 
-type Type = "string" | "number" | "integer" | "object" | "array" | "boolean";
+type Type = "string" | "number" | "integer" | "object" | "array" | "boolean" | "null";
 
 /** 接口参数 schema 定义的类型 */
 export interface ParamsSchema<
@@ -27,7 +27,7 @@ export interface ParamsSchema<
       /** 当前参数的描述信息 */
       description: string;
       /** 当前参数的类型 */
-      type: Type | [Type];
+      type: Type | Type[];
     }
   >;
 }
