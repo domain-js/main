@@ -228,10 +228,11 @@ export function Utils(cnf: Cnf, deps: Deps) {
   const RELATIVE_RANGE_ERROR = errors.notAllowed(`相对时间跨度最多 ${RELATIVE_MAX_RANGE} 天`);
   // findOptFilter 的处理
   // eslint-disable-next-line complexity
-  const findOptFilter = (
+  const findOptFilter = <T extends ModelBase>(
     params: Record<string, any>,
     name: string,
     where: any,
+    modelAlias4Ins: string,
     col: string = name,
   ) => {
     let value: any;
@@ -370,7 +371,11 @@ export function Utils(cnf: Cnf, deps: Deps) {
       if (!where[Op.and]) where[Op.and] = [];
       where[Op.and].push(
         (Sequelize as any).where(
-          Sequelize.fn("FIND_IN_SET", params[`${name}_ins`], Sequelize.col(name)),
+          Sequelize.fn(
+            "FIND_IN_SET",
+            params[`${name}_ins`],
+            Sequelize.col(`${modelAlias4Ins}.${col}`),
+          ),
           Op.gte,
           1,
         ),
@@ -383,7 +388,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
       for (const v of params[`${name}_ins_and`].split(",")) {
         where[Op.and].push(
           (Sequelize as any).where(
-            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(`${modelAlias4Ins}.${col}`)),
             Op.gte,
             1,
           ),
@@ -397,7 +402,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
       where[Op.and].push({
         [Op.or]: params[`${name}_ins_or`].split(",").map((v: string) =>
           Sequelize.where(
-            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(`${modelAlias4Ins}.${col}`)),
             Op.gte,
             1 as any, // Sequelize 的定义文件可能有问题，这里类型无法匹配，但是功能是正常的
           ),
@@ -411,7 +416,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
       for (const v of params[`${name}_ins_not`].split(",")) {
         where[Op.and].push(
           Sequelize.where(
-            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(name)),
+            Sequelize.fn("FIND_IN_SET", v.trim(), Sequelize.col(`${modelAlias4Ins}.${col}`)),
             Op.lt,
             1 as any,
           ),
@@ -426,7 +431,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     const searchOrs: string[][][] = [];
     const includes = modelInclude(params, Model.includes);
     _.each(Model.filterAttrs || _.keys(Model.rawAttributes), (name) => {
-      findOptFilter(params, name, where);
+      findOptFilter(params, name, where, Model.name);
     });
     if (!params._showDeleted) {
       if (Model.rawAttributes.isDeleted) where.isDeleted = "no";
@@ -443,7 +448,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
         const includeWhere: any = {};
         const filterAttrs = x.model.filterAttrs || _.keys(x.model.rawAttributes);
         _.each(filterAttrs, (name) => {
-          findOptFilter(params, `${x.as}.${name}`, includeWhere, name);
+          findOptFilter(params, `${x.as}.${name}`, includeWhere, x.as, name);
         });
         if (!params._showDeleted) {
           if (x.model.rawAttributes.isDeleted) {
