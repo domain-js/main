@@ -35,6 +35,7 @@ export type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap
   operator?: any;
   /** 退出房间回调函数 */
   quit?: Function;
+  entranceOpts?: any[];
 };
 
 const utils = {
