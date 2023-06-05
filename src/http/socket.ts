@@ -143,9 +143,10 @@ export function BridgeSocket(io: Server, domain: Domain) {
       }
     });
 
-    client.on("entrance", async (roomId: string) => {
+    client.on("entrance", async (roomId: string, ...opts: any[]) => {
       try {
         if (!client.profile || !client.inited) return;
+        if (opts.length) Object.assign(client, { entranceOpts: opts });
         const ret = await entrance({ ...client.profile, roomId }, client);
         client.profile.roomId = roomId;
         client.roomId = roomId;
