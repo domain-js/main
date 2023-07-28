@@ -69,7 +69,7 @@ const utils = {
 const makeProfile = (
   client: Client,
   type = "user",
-  auth: string | Signature,
+  auth: string | Signature | undefined,
   extra: Profile["extra"] = {},
 ) => {
   const obj: Profile = {
@@ -90,12 +90,14 @@ const makeProfile = (
     /** 用户uuid 可以长期跨app */
     if (extra.uuid) obj.uuid = extra.uuid;
   }
-  if (typeof auth === "string") {
-    obj.token = auth;
-  } else {
-    obj.sign = auth;
-    obj.sign.uri = "/socket.io";
-    obj.sign.method = "socket.init";
+  if (auth) {
+    if (typeof auth === "string") {
+      obj.token = auth;
+    } else {
+      obj.sign = auth;
+      obj.sign.uri = "/socket.io";
+      obj.sign.method = "socket.init";
+    }
   }
 
   return obj;
@@ -121,12 +123,8 @@ export function BridgeSocket(io: Server, domain: Domain) {
       },
     });
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
-    client.on("init", async (type: string, auth: string | Signature, extra = {}) => {
+    client.on("init", async (type: string, auth: string | Signature | undefined, extra = {}) => {
       console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
-      if (!auth) {
-        client.emit("initError", "auth info lost");
-        return;
-      }
 
       try {
         Object.assign(client, { profile: makeProfile(client, type, auth, extra) });
