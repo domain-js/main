@@ -51,7 +51,6 @@ const res = {
   header: jest.fn(),
   send: jest.fn(),
 };
-const next = jest.fn();
 
 const utils = Utils({});
 
@@ -80,9 +79,7 @@ describe("router", () => {
       }
 
       expect(apiPath).toEqual("/home");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain["home.index"].method.mock.calls.length).toBe(1);
       expect(domain["home.index"].method.mock.calls.pop()).toMatchObject([
         {
@@ -115,9 +112,7 @@ describe("router", () => {
 
       const methodPath = verb === "get" ? "list" : "add";
       expect(apiPath).toEqual("/homes");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`home.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`home.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -154,9 +149,7 @@ describe("router", () => {
 
       const methodPath = verb === "get" ? "files" : "addFile";
       expect(apiPath).toEqual("/users/:userId/files");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -193,9 +186,7 @@ describe("router", () => {
 
       const methodPath = verb === "get" ? "files" : "addFile";
       expect(apiPath).toEqual("/users/files");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -238,9 +229,7 @@ describe("router", () => {
       }[verb] as "detail" | "modify" | "remove";
 
       expect(apiPath).toEqual("/users/:id");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -285,9 +274,7 @@ describe("router", () => {
       }[verb] as "detail" | "modify" | "remove";
 
       expect(apiPath).toEqual("/employees/:id");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -341,9 +328,7 @@ describe("router", () => {
       } else {
         expect(apiPath).toEqual("/users/:id");
       }
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain[`user.${methodPath}`].method.mock.calls.length).toBe(1);
       expect(domain[`user.${methodPath}`].method.mock.calls.pop()).toMatchObject([
         {
@@ -376,9 +361,7 @@ describe("router", () => {
       const [apiPath, handler] = server.get.mock.calls.pop();
 
       expect(apiPath).toEqual("/users/:id");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain["user.detail"].method.mock.calls.length).toBe(1);
       expect(domain["user.detail"].method.mock.calls.pop()).toMatchObject([
         {
@@ -403,9 +386,7 @@ describe("router", () => {
       const [apiPath, handler] = server.get.mock.calls.pop();
 
       expect(apiPath).toEqual("/users");
-      await handler(req, res, next);
-      expect(next.mock.calls.length).toBe(1);
-      expect(next.mock.calls.pop()).toEqual([]);
+      await handler(req, res);
       expect(domain["user.list"].method.mock.calls.length).toBe(1);
       expect(domain["user.list"].method.mock.calls.pop()).toMatchObject([
         {
@@ -448,9 +429,7 @@ describe("router", () => {
     const [apiPath, handler] = server.get.mock.calls.pop();
 
     expect(apiPath).toEqual("/home");
-    await handler(req, res, next);
-    expect(next.mock.calls.length).toBe(1);
-    expect(next.mock.calls.pop()).toEqual([]);
+    await handler(req, res);
     expect(domain["home.index"].method.mock.calls.length).toBe(1);
     expect(domain["home.index"].method.mock.calls.pop()).toMatchObject([
       {

@@ -102,16 +102,26 @@ export function Router(deps: Deps) {
       throw Error(`Missing domain method: ${methodPath}`);
     }
 
-    const send = (res: restify.Response, results: any, isEventStream = false) => {
+    const send = async (res: restify.Response, results: any, isEventStream = false) => {
       if ("pipe" in results) {
-        if (isEventStream) res.setHeader("Content-Type", "text/event-stream");
-        results.pipe(res);
+        if (isEventStream) {
+          res.setHeader("Content-Type", "text/event-stream");
+          await new Promise((resolve) => {
+            results.on("data", (chunk: any) => {
+              res.write(chunk);
+            });
+            results.on("end", resolve);
+          });
+          res.end();
+        } else {
+          results.pipe(res);
+        }
       } else {
         res.send(code, results);
       }
     };
 
-    server[verb](route, async (req: restify.Request, res: restify.Response, next: restify.Next) => {
+    server[verb](route, async (req: restify.Request, res: restify.Response) => {
       const profile = makeProfile(req, methodPath, makeProfileHook);
       if (resource) profile.resource = resource;
       const params = makeParams(req);
@@ -146,14 +156,12 @@ export function Router(deps: Deps) {
             res.sendRaw(code, String(results));
           }
         } else {
-          send(res, code !== 204 && results, req.header("response-event-stream") === "yes");
+          await send(res, code !== 204 && results, req.header("response-event-stream") === "yes");
         }
       } catch (e) {
         res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
-        next(error2httpError(e as Err));
-        return;
+        throw error2httpError(e as Err);
       }
-      next();
     });
   }
 
