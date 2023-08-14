@@ -102,6 +102,15 @@ export function Router(deps: Deps) {
       throw Error(`Missing domain method: ${methodPath}`);
     }
 
+    const send = (res: restify.Response, results: any, isEventStream = false) => {
+      if ("pipe" in results) {
+        if (isEventStream) res.setHeader("Content-Type", "text/event-stream");
+        results.pipe(res);
+      } else {
+        res.send(code, results);
+      }
+    };
+
     server[verb](route, async (req: restify.Request, res: restify.Response, next: restify.Next) => {
       const profile = makeProfile(req, methodPath, makeProfileHook);
       if (resource) profile.resource = resource;
@@ -137,7 +146,7 @@ export function Router(deps: Deps) {
             res.sendRaw(code, String(results));
           }
         } else {
-          res.send(code, code !== 204 && results);
+          send(res, code !== 204 && results, req.header("response-event-stream") === "yes");
         }
       } catch (e) {
         res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());

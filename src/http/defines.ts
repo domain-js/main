@@ -33,6 +33,8 @@ export interface Profile {
   isSocket?: boolean;
   /** socket 的时候加入的房间 */
   roomId?: string;
+  /** 是否需要返回 stream */
+  needStream?: boolean;
 }
 
 export interface HttpCodes {

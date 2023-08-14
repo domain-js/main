@@ -30,6 +30,9 @@ const req = {
     "x-real-ip": "x-real-ip",
     "x-auth-token": "this-is-a-token-by-headers",
   },
+  header(key: string) {
+    return req.headers[key as keyof typeof req.headers];
+  },
   query: {
     access_token: "this-is-a-token-by-query",
   },
