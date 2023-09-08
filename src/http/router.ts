@@ -103,7 +103,7 @@ export function Router(deps: Deps) {
     }
 
     const send = async (res: restify.Response, results: any, isEventStream = false) => {
-      if (typeof results === "object" && "pipe" in results) {
+      if (results && typeof results === "object" && typeof results.pipe === "function") {
         if (isEventStream) {
           res.setHeader("Content-Type", "text/event-stream");
           await new Promise((resolve) => {
