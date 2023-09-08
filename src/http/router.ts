@@ -1,6 +1,7 @@
 import _ from "lodash";
 import * as restify from "restify";
 import * as errors from "restify-errors";
+import { isStream } from "../utils";
 
 import { Domain, Err, HttpCodes, Profile } from "./defines";
 import { Utils } from "./utils";
@@ -103,7 +104,7 @@ export function Router(deps: Deps) {
     }
 
     const send = async (res: restify.Response, results: any, isEventStream = false) => {
-      if (results && typeof results === "object" && typeof results.pipe === "function") {
+      if (isStream(results)) {
         if (isEventStream) {
           res.setHeader("Content-Type", "text/event-stream");
           await new Promise((resolve) => {

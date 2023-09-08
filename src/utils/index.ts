@@ -219,3 +219,10 @@ export const deepReaddir = (
 
   return files;
 };
+
+/**
+ * 判断某个值是否为一个流
+ * @param stream 要判断的对象
+ */
+export const isStream = (stream: any) =>
+  stream && typeof stream === "object" && typeof stream.pipe === "function";
