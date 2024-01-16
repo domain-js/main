@@ -1,8 +1,8 @@
 import _ from "lodash";
 import * as restify from "restify";
 import * as errors from "restify-errors";
-import { isStream } from "../utils";
 
+import { isStream } from "../utils";
 import { Domain, Err, HttpCodes, Profile } from "./defines";
 import { Utils } from "./utils";
 

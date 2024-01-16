@@ -225,4 +225,4 @@ export const deepReaddir = (
  * @param stream 要判断的对象
  */
 export const isStream = (stream: any) =>
-  stream && typeof stream === "object" && typeof stream.pipe === "function";
+  Boolean(stream && typeof stream === "object" && typeof stream.pipe === "function");

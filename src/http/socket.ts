@@ -3,6 +3,7 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
 import { Opt as Sign } from "../deps/signer";
 import { Domain, Profile } from "./defines";
+import { errors } from "../basic-errors";
 
 type Signature = Sign & { signature: string };
 
@@ -36,6 +37,7 @@ export type Client = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap
   /** 退出房间回调函数 */
   quit?: Function;
   entranceOpts?: any[];
+  extra?: Record<string, any>;
 };
 
 const utils = {
@@ -118,12 +120,16 @@ export function BridgeSocket(io: Server, domain: Domain) {
   io.on("connection", (client: Client) => {
     // 定义toJSON 避免 schema 验证报错
     Object.assign(client, {
+      extra: {},
       toJSON() {
         return {};
       },
     });
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
     client.on("init", async (type: string, auth: string | Signature | undefined, extra = {}) => {
+      if (client.inited) throw errors.notAllowed("已经初始化，请勿重复操作");
+      if (client.extra!.initing) throw errors.notAllowed("正在初始化，请勿重复操作");
+      client.extra!.initing = true;
       console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
 
       try {
@@ -140,9 +146,13 @@ export function BridgeSocket(io: Server, domain: Domain) {
         client.emit("internalError", e.code || "unknown", e.message, e.data);
         console.error(e);
       }
+      client.extra!.initing = false;
     });
 
     client.on("entrance", async (roomId: string, ...opts: any[]) => {
+      if (client.extra!.entrancing) throw errors.notAllowed("正在进入房间，请勿重复操作");
+
+      client.extra!.entrancing = true;
       try {
         if (!client.profile || !client.inited) return;
         if (opts.length) Object.assign(client, { entranceOpts: opts });
@@ -155,6 +165,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
         client.emit("internalError", e.code || "unknown", e.message, e.data);
         console.error(e);
       }
+      client.extra!.entrancing = false;
     });
 
     client.use(async ([name, params, responseId], next) => {
