@@ -1,6 +1,6 @@
 {
   "name": "@domain.js/main",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "description": "DDD framework",
   "main": "dist/index.js",
   "bin": {
