@@ -154,7 +154,7 @@ export function BridgeSocket(io: Server, domain: Domain) {
 
       client.extra!.entrancing = true;
       try {
-        if (!client.profile || !client.inited) return;
+        if (!client.profile || !client.inited) throw errors.notAllowed("请先执行 init");
         if (opts.length) Object.assign(client, { entranceOpts: opts });
         const ret = await entrance({ ...client.profile, roomId }, client);
         client.profile.roomId = roomId;
