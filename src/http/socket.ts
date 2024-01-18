@@ -1,13 +1,13 @@
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
+import { errors } from "../basic-errors";
 import { Opt as Sign } from "../deps/signer";
 import { Domain, Profile } from "./defines";
-import { errors } from "../basic-errors";
 
 type Signature = Sign & { signature: string };
 
-const proxyIps = new Set(["127.0.0.1"]);
+const proxyIps = new Set((process.env["PROXY_IPS"] || "127.0.0.1").split(","));
 
 interface MyError {
   code: string | number;
