@@ -127,12 +127,12 @@ export function BridgeSocket(io: Server, domain: Domain) {
     });
     console.log("[%s] connection: client.id: %s", new Date(), client.id);
     client.on("init", async (type: string, auth: string | Signature | undefined, extra = {}) => {
-      if (client.inited) throw errors.notAllowed("已经初始化，请勿重复操作");
-      if (client.extra!.initing) throw errors.notAllowed("正在初始化，请勿重复操作");
-      client.extra!.initing = true;
-      console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
-
       try {
+        if (client.inited) throw errors.notAllowed("已经初始化，请勿重复操作");
+        if (client.extra!.initing) throw errors.notAllowed("正在初始化，请勿重复操作");
+        client.extra!.initing = true;
+
+        console.log("[%s] socket.init: client.id: %s", new Date(), client.id);
         Object.assign(client, { profile: makeProfile(client, type, auth, extra) });
         if (!client.profile) throw new MyError("noAuth", "请先登录");
         // 创建消息监听函数
@@ -150,10 +150,10 @@ export function BridgeSocket(io: Server, domain: Domain) {
     });
 
     client.on("entrance", async (roomId: string, ...opts: any[]) => {
-      if (client.extra!.entrancing) throw errors.notAllowed("正在进入房间，请勿重复操作");
-
-      client.extra!.entrancing = true;
       try {
+        if (client.extra!.entrancing) throw errors.notAllowed("正在进入房间，请勿重复操作");
+
+        client.extra!.entrancing = true;
         if (!client.profile || !client.inited) throw errors.notAllowed("请先执行 init");
         if (opts.length) Object.assign(client, { entranceOpts: opts });
         const ret = await entrance({ ...client.profile, roomId }, client);
@@ -171,9 +171,9 @@ export function BridgeSocket(io: Server, domain: Domain) {
     client.use(async ([name, params, responseId], next) => {
       if (name === "init" || name === "entrance") return next();
 
-      if (!client.methods) throw new MyError("没有允许执行的方法", "请先进入房间");
-      const method = client.methods[name];
       try {
+        if (!client.methods) throw new MyError("没有允许执行的方法", "请先进入房间");
+        const method = client.methods[name];
         if (!method) throw new MyError("notFound", `不存在该领域方法: ${name}`);
         if (!client.profile) throw new MyError("noAuth", "请先执行 init");
         const res = await method(...(params || []));
