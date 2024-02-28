@@ -427,7 +427,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
   // 返回列表查询的条件
   const findAllOpts = <T extends ModelBase>(Model: ModelStatic<T>, params: Record<string, any>) => {
-    const where: Record<string, any> = {};
+    const where: Record<string | symbol, any> = {};
     const searchOrs: string[][][] = [];
     const includes = modelInclude(params, Model.includes);
     _.each(Model.filterAttrs || _.keys(Model.rawAttributes), (name) => {
@@ -478,7 +478,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     // 将 searchOrs 赋到 where 上
     const _searchOrs = _.filter(_.compact(searchOrs), (x) => x.length) as string[][][];
 
-    if (_.size(where)) {
+    if (_.size(where) || where[Op.and] || where[Op.or] || where[Op.not]) {
       if (_searchOrs.length) {
         ret.where = (Sequelize as any).and(where, literal(mergeSearchOrs(_searchOrs)));
       } else {
