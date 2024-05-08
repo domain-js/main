@@ -1,4 +1,4 @@
-export interface MyError {
+export interface MyError extends Error {
   message: string;
   code?: string | number;
   data?: any;
