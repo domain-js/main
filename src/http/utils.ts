@@ -142,7 +142,7 @@ export function Utils(cnf: Cnf) {
         const workBook = xlsx.utils.book_new();
         const workSheet = xlsx.utils.aoa_to_sheet([
           titles,
-          ...rows.map((x) => keys.map((k) => x[k])),
+          ...rows.map((x) => keys.map((k) => _.get(x, k))),
         ]);
         xlsx.utils.book_append_sheet(workBook, workSheet);
         xlsx.writeFile(workBook, file, { bookType: "xlsx", type: "binary" });
