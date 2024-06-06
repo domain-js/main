@@ -228,7 +228,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
   const RELATIVE_RANGE_ERROR = errors.notAllowed(`相对时间跨度最多 ${RELATIVE_MAX_RANGE} 天`);
   // findOptFilter 的处理
   // eslint-disable-next-line complexity
-  const findOptFilter = <T extends ModelBase>(
+  const findOptFilter = (
     params: Record<string, any>,
     name: string,
     where: any,
@@ -378,6 +378,21 @@ export function Utils(cnf: Cnf, deps: Deps) {
           ),
           Op.gte,
           1,
+        ),
+      );
+    }
+
+    // 处理 json_contains 方式的过滤
+    if (_.isString(params[`${name}_contains`]) || _.isNumber(params[`${name}_contains`])) {
+      if (!where[Op.and]) where[Op.and] = [];
+      where[Op.and].push(
+        (Sequelize as any).where(
+          Sequelize.fn(
+            "JSON_CONTAINS",
+            Sequelize.col(`${modelAlias4Ins}.${col}`),
+            params[`${name}_contains`],
+          ),
+          true,
         ),
       );
     }
