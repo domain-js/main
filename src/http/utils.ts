@@ -15,6 +15,21 @@ const TMPDIR = os.tmpdir();
 export function Utils(cnf: Cnf) {
   const proxyIps = new Set((cnf.proxyIps || "127.0.0.1").split(","));
 
+  /**
+   * 判断是否是内网ip
+   * 10.0.0.0 - 10.255.255.255 (10/8 前缀)
+   * 172.16.0.0 - 172.31.255.255 (172.16/12 到 172.31/12 前缀)
+   * 192.168.0.0 - 192.168.255.255 (192.168/16 前缀)
+   */
+  const isInternalIp = (ip: string) => {
+    const parts = ip.split(".").map(Number);
+    return (
+      parts[0] === 10 ||
+      (parts[0] === 192 && parts[1] === 168) ||
+      (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31)
+    );
+  };
+
   const utils = {
     ucwords(value: string) {
       return `${value[0].toUpperCase()}${value.substring(1)}`;
@@ -40,7 +55,7 @@ export function Utils(cnf: Cnf) {
      */
     realIp(req: restify.Request) {
       const remoteIp = utils.remoteIp(req);
-      if (!proxyIps.has(remoteIp)) return remoteIp;
+      if (!proxyIps.has(remoteIp) && !isInternalIp(remoteIp)) return remoteIp;
       return (req.headers["x-real-ip"] || remoteIp).toString();
     },
 
