@@ -15,9 +15,9 @@ const RAND_STR_DICT = {
  * @param str string or An object that contains a toString method that returns a string
  * @returns hex md5 string
  */
-export const md5 = (str: { toString: () => string }) => {
+export const md5 = (data: crypto.BinaryLike) => {
   const hash = crypto.createHash("md5");
-  return hash.update(str.toString()).digest().toString("hex");
+  return hash.update(data).digest().toString("hex");
 };
 
 /**

@@ -50,16 +50,12 @@ describe("@domain.js/utils", () => {
     });
 
     it("case3", () => {
-      const str = utils.md5(12);
+      const str = utils.md5("12");
       expect(str).toBe("c20ad4d76fe97759aa27a0c99bff6710");
     });
 
     it("case4", () => {
-      const obj = {
-        toString() {
-          return "hello";
-        },
-      };
+      const obj = "hello";
       const str = utils.md5(obj);
       expect(str).toBe("5d41402abc4b2a76b9719d911017c592");
     });
