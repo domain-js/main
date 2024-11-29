@@ -1,5 +1,5 @@
-import LRU from "lru-cache";
 import Redis from "ioredis";
+import LRU from "lru-cache";
 import { SetRequired } from "type-fest";
 
 export interface CnfDef {
@@ -14,14 +14,14 @@ export interface DepsDef {
   LRU: typeof LRU;
   IORedis: typeof Redis;
   logger: {
-    info(message: string, extra?: any): void;
-    error(error: Error, extra?: any): void;
+    info: (message: string, extra?: any) => void;
+    error: (error: Error, extra?: any) => void;
   };
 }
 
 export interface PubSubDef {
-  pub: SetRequired<Partial<Redis.Redis>, "publish">;
-  sub: SetRequired<Partial<Redis.Redis>, "on" | "subscribe">;
+  pub: SetRequired<Partial<Redis>, "publish">;
+  sub: SetRequired<Partial<Redis>, "on" | "subscribe">;
 }
 
 export interface Cache extends LRU<string, string> {

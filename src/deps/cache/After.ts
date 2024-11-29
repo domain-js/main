@@ -16,7 +16,7 @@ export const After = (
   const { logger } = deps;
   const { pub, sub } = pubsub;
 
-  sub.subscribe(delSignalChannel, (err: Error | null, count: number) => {
+  sub.subscribe(delSignalChannel, (err: Error | null | undefined, count: unknown) => {
     logger.info("cache.redis.subscribe", { chanels: delSignalChannel, count });
     if (err) return logger.error(err);
     return logger.info(`cache.redis.subscribe succeed, channel count: ${count}`);
