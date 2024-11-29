@@ -1,6 +1,6 @@
 {
   "name": "@domain.js/main",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "description": "DDD framework",
   "main": "dist/index.js",
   "bin": {
@@ -54,7 +54,6 @@
   "dependencies": {
     "@types/async": "^3.2.10",
     "@types/crypto-js": "^4.0.2",
-    "@types/ioredis": "^4.28.1",
     "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.177",
     "@types/lru-cache": "^5.1.1",
@@ -71,14 +70,14 @@
     "crypto-js": "^4.1.1",
     "csv-stringify": "^6.0.2",
     "human-interval": "^2.0.1",
-    "ioredis": "^4.28.0",
+    "ioredis": "^5.4.1",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
     "moment": "^2.29.1",
     "mysql2": "^2.3.3",
     "restify": "^11.1.0",
     "restify-errors": "^8.0.2",
-    "sequelize": "^6.37.3",
+    "sequelize": "^6.37.5",
     "socket.io": "^4.4.1",
     "type-fest": "^2.8.0",
     "uuid": "^8.3.2",

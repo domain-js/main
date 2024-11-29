@@ -1,7 +1,7 @@
-import Redis from "ioredis";
+import Redis, { RedisOptions } from "ioredis";
 
 interface Cnf {
-  redis: Redis.RedisOptions;
+  redis: RedisOptions;
 }
 
 interface Deps {
