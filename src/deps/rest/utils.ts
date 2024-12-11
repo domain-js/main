@@ -449,7 +449,9 @@ export function Utils(cnf: Cnf, deps: Deps) {
       findOptFilter(params, name, where, Model.name);
     });
     if (!params._showDeleted) {
-      if (Model.rawAttributes.isDeleted) where.isDeleted = "no";
+      const rawAttributes = Model.getAttributes();
+      if ("isDeleted" in rawAttributes) where.isDeleted = "no";
+      if ("deletedAt" in rawAttributes) where.deletedAt = null;
     }
 
     // 将搜索条件添加到主条件上
@@ -465,9 +467,14 @@ export function Utils(cnf: Cnf, deps: Deps) {
         _.each(filterAttrs, (name) => {
           findOptFilter(params, `${x.as}.${name}`, includeWhere, x.as, name);
         });
+        const rawAttributes = x.model.getAttributes();
         if (!params._showDeleted) {
-          if (x.model.rawAttributes.isDeleted) {
-            if (x.model.rawAttributes.isDeleted) includeWhere[Op.or] = [{ isDeleted: "no" }];
+          if ("isDeleted" in rawAttributes) {
+            includeWhere[Op.or] = [{ isDeleted: "no" }];
+            if (x.required === false) includeWhere[Op.or].push({ id: null });
+          }
+          if ("deletedAt" in rawAttributes) {
+            includeWhere[Op.or] = [{ deletedAt: null }];
             if (x.required === false) includeWhere[Op.or].push({ id: null });
           }
         }
