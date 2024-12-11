@@ -1,6 +1,6 @@
 {
   "name": "@domain.js/main",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "description": "DDD framework",
   "main": "dist/index.js",
   "bin": {
@@ -77,7 +77,7 @@
     "mysql2": "^2.3.3",
     "restify": "^11.1.0",
     "restify-errors": "^8.0.2",
-    "sequelize": "^6.37.3",
+    "sequelize": "^6.37.5",
     "socket.io": "^4.4.1",
     "type-fest": "^2.8.0",
     "uuid": "^8.3.2",
