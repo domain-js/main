@@ -77,7 +77,9 @@ export function Utils(cnf: Cnf) {
         requestId: req.id(),
         method,
         type: "user",
-        needStream: req.headers["response-event-stream"] === "yes",
+        needStream:
+          req.headers["response-event-stream"] === "yes" ||
+          req.headers["accept"]?.includes("text/event-stream"),
         extra: {},
       };
       if (req.headers["x-auth-user-type"]) {
