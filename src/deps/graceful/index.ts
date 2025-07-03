@@ -117,6 +117,7 @@ function Graceful(info: Deps["logger"]["info"]) {
     runnerAsync,
     enabled,
     exit,
+    exitHandle,
   };
 }
 
