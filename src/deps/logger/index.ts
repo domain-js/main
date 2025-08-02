@@ -1,9 +1,9 @@
+import { randomUUID } from "crypto";
 import { existsSync, mkdirSync } from "fs";
 import fs from "fs/promises";
 import _ from "lodash";
 import path from "path";
 import { format } from "util";
-import { v4 } from "uuid";
 
 const date = (offset = 0) => new Date(Date.now() + (offset | 0)).toISOString();
 
@@ -17,21 +17,12 @@ interface Cnf {
   };
 }
 
-interface Deps {
-  _: {
-    memoize: typeof _.memoize;
-  };
-  uuid: { v4: typeof v4 };
-}
+interface Deps {}
 
 export function Main(cnf: Cnf, deps: Deps) {
   const {
     logger: { level, errorLogPath, infoLogPath, ignoreErrors, clientId },
   } = cnf;
-  const {
-    _,
-    uuid: { v4: uuid },
-  } = deps;
 
   const makeDir = _.memoize((dir) => {
     if (!existsSync(dir)) mkdirSync(dir);
@@ -73,7 +64,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     makeDir(dir);
     const file = path.resolve(dir, "info.log");
     const content = [time, clientId, message];
-    // eslint-disable-next-line no-eq-null
+
     if (extra !== null || extra !== undefined) {
       try {
         content.push(JSON.stringify(extra));
@@ -96,7 +87,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     if (isAsync) {
       const handler = {
         async apply(fn: T, me: any, args: Parameters<T>) {
-          const callId = uuid();
+          const callId = randomUUID();
           try {
             info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
             const startedAt = Date.now();
@@ -119,7 +110,7 @@ export function Main(cnf: Cnf, deps: Deps) {
 
     const handler = {
       apply(fn: T, me: any, args: Parameters<T>) {
-        const callId = uuid();
+        const callId = randomUUID();
         try {
           info(`Begin: ${name}\t${callId}\t${argsHandler(args)}`);
           const startedAt = Date.now();
@@ -143,4 +134,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return { error, info, logger };
 }
 
-export const Deps = ["_", "uuid"];
+export const Deps = [];

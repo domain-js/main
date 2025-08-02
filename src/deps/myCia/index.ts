@@ -1,6 +1,7 @@
-import * as _ from "lodash";
-import * as async from "async";
-import { v4 } from "uuid";
+import async from "async";
+import { randomUUID } from "crypto";
+import _ from "lodash";
+
 import Errors from "./errors";
 
 interface Cnf {
@@ -11,11 +12,6 @@ interface Cnf {
 }
 
 interface Deps {
-  _: Pick<typeof _, "pick" | "map" | "isFunction">;
-  async: Pick<typeof async, "eachSeries" | "queue">;
-  uuid: {
-    v4: typeof v4;
-  };
   logger: {
     info: (...args: any[]) => void;
     error: (...args: any[]) => void;
@@ -77,9 +73,6 @@ interface Message {
 
 export function Main(cnf: Cnf, deps: Deps) {
   const {
-    _,
-    async,
-    uuid: { v4: uuid },
     logger,
     redis,
     graceful,
@@ -345,7 +338,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     if (callback && !_.isFunction(callback)) callback = undefined;
     const { validator } = registeds[name];
     if (validator) validator(data);
-    const id = uuid();
+    const id = randomUUID();
     queue.push({ id, name, data, callback });
     updatePendings(registeds[name]);
     logger.info(`cia.submit\t${id}`, { name, data });
@@ -407,4 +400,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   };
 }
 
-export const Deps = ["_", "async", "logger", "utils", "redis", "graceful", "uuid"];
+export const Deps = ["logger", "redis", "graceful"];

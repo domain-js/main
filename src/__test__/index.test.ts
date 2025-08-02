@@ -1,4 +1,4 @@
-import { Main, Http, DM, utils } from "..";
+import { DM, Http, Main, utils } from "..";
 
 describe("@domain.js/main index", () => {
   describe("test1", () => {
@@ -25,7 +25,7 @@ describe("@domain.js/main index", () => {
       const Start = Main(["aes", "cache"]);
 
       expect(() => {
-        Start({});
+        Start({ cache: { max: 50000, isMulti: true } });
       }).toThrow("conflict");
     });
   });

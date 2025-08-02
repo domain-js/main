@@ -57,3 +57,17 @@ export interface Err {
   code?: number | string;
   data?: any;
 }
+
+/** 上传文件 */
+export interface UploadFile {
+  /** 文件大小 */
+  size: number;
+  /** 文件路径 */
+  path: string;
+  /** 文件名称 */
+  name: string;
+  /** 文件类型 */
+  type: string;
+  /** 文件修改时间 */
+  mtime: string;
+}

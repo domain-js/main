@@ -1,8 +1,13 @@
-import humanInterval = require("human-interval");
+/* eslint-disable max-nested-callbacks */
 import * as cronParser from "cron-parser";
+import humanInterval from "human-interval";
+
 import { Main as Cron } from "..";
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 describe("cron", () => {
   const cnf = {};
@@ -33,6 +38,7 @@ describe("cron", () => {
     });
 
     it("case3, name duplicate", async () => {
+      // eslint-disable-next-line max-nested-callbacks
       expect(() => cron.regist("test", "2 hours", "1 seconds")).toThrow("has been registed");
     });
   });
@@ -103,6 +109,8 @@ describe("cron special", () => {
       cron.start();
       await sleep(2010);
       expect(cia.submit.mock.calls.length).toBe(1);
+
+      // eslint-disable-next-line max-nested-callbacks
       await (async () => {
         const [name, times, fn] = cia.submit.mock.calls.pop();
         expect(name).toBe("Cron::test");
@@ -114,6 +122,7 @@ describe("cron special", () => {
 
       await sleep(2010);
       expect(cia.submit.mock.calls.length).toBe(1);
+      // eslint-disable-next-line max-nested-callbacks
       await (async () => {
         const [name, times, fn] = cia.submit.mock.calls.pop();
         expect(name).toBe("Cron::test");
@@ -143,6 +152,7 @@ describe("cron special", () => {
       expect(cia.regist.mock.calls.length).toBe(1);
       expect(cia.regist.mock.calls.pop()).toEqual(["Cron::test", null, [{ type: "cronJob" }]]);
 
+      // eslint-disable-next-line max-nested-callbacks
       expect(() => cron.start()).toThrow("startAt 定义不合法");
     });
   });

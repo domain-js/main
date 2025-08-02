@@ -1,4 +1,6 @@
-import * as restify from "restify";
+import multipart from "@fastify/multipart";
+import Fastify, { FastifyRequest } from "fastify";
+import socketio from "fastify-socket.io";
 import { Server } from "socket.io";
 
 import { Cnf, Domain, HttpCodes, Profile } from "./defines";
@@ -12,7 +14,7 @@ export function Main(
     routers: (r: any) => void;
     domain: Domain;
     httpCodes: HttpCodes;
-    makeProfileHook?: (obj: Profile, req: restify.Request) => any;
+    makeProfileHook?: (obj: Profile, req: FastifyRequest) => any;
     socketLogger?: (...args: any[]) => void;
   },
 ) {
@@ -20,15 +22,29 @@ export function Main(
 
   const { routers, domain, httpCodes, makeProfileHook, socketLogger } = deps;
 
-  const server = restify.createServer();
-  server.use(restify.plugins.queryParser());
-  server.use(
-    restify.plugins.bodyParser({
-      keepExtensions: true,
-      maxFieldsSize: cnf.bodyMaxBytes || 2 * 1024 * 1024, // 参数最大容量 2MB
-      multiples: cnf.fileUploadMultiple || false, // 是否支持多文件上传
-    }),
-  );
+  const server = Fastify();
+  server.setErrorHandler((error, request, reply) => {
+    const { code, message, data } = error as unknown as {
+      code: string;
+      message: string;
+      data: any;
+    };
+    const statusCode = httpCodes[code] || 500;
+    // Send error response
+    reply.code(statusCode).send({ code, message, data });
+  });
+
+  server.register(multipart, {
+    limits: {
+      fileSize: cnf.bodyMaxBytes || 10 * 1024 * 1024, // 参数最大容量 10MB
+    },
+  });
+  server.register(socketio, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
   const router = Router({
     utils,
@@ -42,34 +58,48 @@ export function Main(
 
   // 根据需求起送socket服务
   if (cnf.socket) {
-    const io = new Server(server);
-    // 处理日志
-    if (socketLogger) {
-      io.on("connection", (socket) => {
-        const { emit } = socket;
-        socket.emit = (...args) => {
-          socketLogger("emit", socket.id, args);
-          return emit.apply(socket, args);
-        };
-        socketLogger("connection", socket.id, socket.handshake);
-        socket.use((args, next) => {
-          next();
-          socketLogger("use", socket.id, args);
+    server.ready((err) => {
+      const io = server.io;
+      // 处理日志
+      if (socketLogger) {
+        io.on("connection", (socket) => {
+          const { emit } = socket;
+          socket.emit = (...args) => {
+            socketLogger("emit", socket.id, args);
+            return emit.apply(socket, args);
+          };
+          socketLogger("connection", socket.id, socket.handshake);
+          socket.use((args, next) => {
+            next();
+            socketLogger("use", socket.id, args);
+          });
+          socket.on("disconnect", (reason) => {
+            socketLogger("disconnect", socket.id, reason);
+          });
         });
-        socket.on("disconnect", (reason) => {
-          socketLogger("disconnect", socket.id, reason);
-        });
-      });
-    }
-    BridgeSocket(io, domain);
+      }
+      BridgeSocket(io, domain);
+    });
   }
 
   // Http server start
   return () => {
-    server.listen(cnf.port || 8088, cnf.host || "127.0.0.1", () => {
-      console.log("%s listening at %s", server.name, server.url);
+    const port = cnf.port || 8088;
+    const host = cnf.host || "127.0.0.1";
+    server.listen({ port, host }, (err, address) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      console.log("%s listening at %s", host, address);
     });
 
     return server;
   };
+}
+
+declare module "fastify" {
+  interface FastifyInstance {
+    io: Server<any>;
+  }
 }

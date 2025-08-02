@@ -1,6 +1,3 @@
-import * as _ from "lodash";
-import * as uuid from "uuid";
-import * as async from "async";
 import { Main as Cia } from "..";
 
 process.on("uncaughtException", console.error);
@@ -51,9 +48,6 @@ describe("Cia", () => {
       hgetall: jest.fn(),
     };
     const deps = {
-      _,
-      uuid,
-      async,
       logger,
       redis,
       graceful,

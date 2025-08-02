@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { Defaults, defaults } from "./defaults";
 import * as DM from "./dm";
 import Deps = require("./deps/defines");
@@ -21,7 +23,6 @@ type Include<T, U> = T extends U ? T : never;
 type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
 export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
-  const { _ } = defaults;
   /** 模块名称联合类型 */
   type MS = RemoveReadonlyArray<T>;
   type Cnf = Merge<

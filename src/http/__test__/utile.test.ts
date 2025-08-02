@@ -1,4 +1,4 @@
-import * as restify from "restify";
+import { FastifyRequest } from "fastify";
 
 import { Profile } from "../defines";
 import { Utils } from "../utils";
@@ -27,14 +27,14 @@ describe("utils", () => {
       },
     };
 
-    const customFn = (profile: Profile, req: restify.Request) => {
+    const customFn = (profile: Profile, req: FastifyRequest) => {
       const expand = {
         name: "redstone",
         gender: "male",
       };
       return expand;
     };
-    const profile = utils.makeProfile(req as unknown as restify.Request, "auth.session", customFn);
+    const profile = utils.makeProfile(req as unknown as FastifyRequest, "auth.session", customFn);
 
     expect(profile.name).toBe("redstone");
     expect(profile.gender).toBe("male");

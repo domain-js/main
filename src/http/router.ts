@@ -1,18 +1,17 @@
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import _ from "lodash";
-import * as restify from "restify";
-import * as errors from "restify-errors";
 
 import { isStream } from "../utils";
-import { Domain, Err, HttpCodes, Profile } from "./defines";
+import { Domain, HttpCodes, Profile } from "./defines";
 import { Utils } from "./utils";
 
-type Verb = "get" | "post" | "put" | "patch" | "del";
+type Verb = "get" | "post" | "put" | "patch" | "delete";
 interface Deps {
   domain: Domain;
   utils: ReturnType<typeof Utils>;
-  server: restify.Server;
+  server: FastifyInstance;
   httpCodes: HttpCodes;
-  makeProfileHook?: (obj: Profile, req: restify.Request) => any;
+  makeProfileHook?: (obj: Profile, req: FastifyRequest) => any;
   apisRoute?: string;
   swagger?: [any, any];
 }
@@ -21,60 +20,41 @@ interface Deps {
 type Handler = (params: any) => void;
 
 /** 对执行结构的处理 */
-type ResHandler = (results: any, res: restify.Response, params?: any) => void;
+type ResHandler = (results: any, res: FastifyReply, params?: any) => void;
 
 export function Router(deps: Deps) {
-  const { domain, apisRoute, utils, server, httpCodes = {}, makeProfileHook } = deps;
+  const { domain, apisRoute, utils, server, makeProfileHook } = deps;
   const { ucwords, makeParams, makeProfile, outputCSV } = utils;
-
-  // 改写 HttpErrorToJSON 处理 data
-  const HttpErrorToJSON = errors.HttpError.prototype.toJSON;
-  errors.HttpError.prototype.toJSON = function toJSON() {
-    const json = HttpErrorToJSON.call(this);
-    if (this.body.data) json.data = this.body.data;
-
-    return json;
-  };
-
-  const error2httpError = (error: Err) => {
-    const { code, message, data } = error;
-    const e = errors.makeErrFromCode((code && httpCodes[code]) || 500, message);
-
-    if (code) e.body.code = code;
-    if (data) e.body.data = data;
-
-    return e;
-  };
 
   const apis: string[] = [];
   let apisHTML = "<h3>API 目录，点击可以查看参数格式定义</h3>";
+  console.error("server", server, "server");
 
   /** 判断是否需要提供apis的查询接口 */
   if (apisRoute) {
-    server.get(`/${apisRoute}`, (req, res, next) => {
+    server.get<{
+      Querystring: {
+        _format: string;
+      };
+    }>(`/${apisRoute}`, (req, res) => {
       if (req.query._format === "html") {
-        res.sendRaw(200, apisHTML, {
-          "Content-Type": "text/html; charset=utf-8",
-        });
+        res.code(200).type("text/html; charset=utf-8").send(apisHTML);
       } else {
         res.send(apis);
       }
-      next();
     });
 
-    server.get(`/${apisRoute}/_schema`, (req, res, next) => {
-      const { path } = req.query;
+    server.get<{
+      Querystring: {
+        path: string;
+        all?: string;
+      };
+    }>(`/${apisRoute}/_schema`, (req, res) => {
+      const { path, all } = req.query;
 
-      try {
-        const { all } = req.query;
-        const profile = domain[path]["profile"];
-        const params = domain[path]["params"];
-        res.send(all === undefined ? params : [profile, params]);
-      } catch (e) {
-        next(error2httpError(e as Err));
-        return;
-      }
-      next();
+      const profile = domain[path]["profile"];
+      const params = domain[path]["params"];
+      res.send(all === undefined ? params : [profile, params]);
     });
   }
 
@@ -103,65 +83,66 @@ export function Router(deps: Deps) {
       throw Error(`Missing domain method: ${methodPath}`);
     }
 
-    const send = async (res: restify.Response, results: any, isEventStream = false) => {
+    const send = async (res: FastifyReply, results: any, isEventStream = false) => {
       if (isStream(results)) {
         if (isEventStream) {
-          res.setHeader("Content-Type", "text/event-stream");
+          res.type("text/event-stream");
           await new Promise((resolve) => {
             results.on("data", (chunk: any) => {
-              res.write(chunk);
+              res.raw.write(chunk);
             });
             results.on("end", resolve);
           });
-          res.end();
         } else {
-          results.pipe(res);
+          results.pipe(res.raw);
         }
       } else {
-        res.send(code, results);
+        res.code(code);
+        res.send(results);
       }
     };
 
-    server[verb](route, async (req: restify.Request, res: restify.Response) => {
+    server[verb]<{
+      Querystring: Record<string, any>;
+      Params: Record<string, any>;
+      Body: Record<string, any>;
+    }>(route, async (req, res) => {
       const profile = makeProfile(req, methodPath, makeProfileHook);
       if (resource) profile.resource = resource;
-      const params = makeParams(req);
+      const params = await makeParams(req);
 
       // 额外处理 params
       if (handler) handler(params);
 
       res.header("X-RequestID", profile.requestId);
 
-      try {
-        let results = await method(profile, params);
-        res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
-        if (results === null || results === undefined) results = "Ok";
-        if (resHandler) {
-          resHandler(results, res, params);
-        } else if (isList) {
-          const { _ignoreTotal, _format } = params;
-          if (_ignoreTotal !== "yes") {
-            res.header("X-Content-Record-Total", results.count);
-          }
-          let ok = false;
-          if (_format === "csv" || _format === "xlsx") {
-            // 导出csv
-            ok = await outputCSV(results.rows, params, res, _format === "xlsx");
-          }
-
-          if (!ok) res.send(code, results.rows);
-        } else if (!_.isObject(results)) {
-          if (code === 204) {
-            res.send(code);
-          } else {
-            res.sendRaw(code, String(results));
-          }
-        } else {
-          await send(res, code !== 204 && results, req.header("response-event-stream") === "yes");
+      let results = await method(profile, params);
+      res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
+      if (results === null || results === undefined) results = "Ok";
+      if (resHandler) {
+        resHandler(results, res, params);
+      } else if (isList) {
+        const { _ignoreTotal, _format } = params as { _ignoreTotal: string; _format: string };
+        if (_ignoreTotal !== "yes") {
+          res.header("X-Content-Record-Total", results.count);
         }
-      } catch (e) {
-        res.header("X-ConsumedTime", Date.now() - profile.startedAt.valueOf());
-        throw error2httpError(e as Err);
+        let ok = false;
+        if (_format === "csv" || _format === "xlsx") {
+          // 导出csv
+          ok = await outputCSV(results.rows, params, res, _format === "xlsx");
+        }
+
+        if (!ok) {
+          res.code(code);
+          res.send(results.rows);
+        }
+      } else if (!_.isObject(results)) {
+        res.code(code);
+        if (code !== 204) {
+          res.send(String(results));
+        }
+      } else {
+        await send(res, code !== 204 && results, req.headers["response-event-stream"] === "yes");
       }
     });
   }
@@ -188,7 +169,7 @@ export function Router(deps: Deps) {
     get: RouterVerbFn("get"),
     post: RouterVerbFn("post"),
     put: RouterVerbFn("put"),
-    del: RouterVerbFn("del"),
+    del: RouterVerbFn("delete"),
   };
 
   /**
@@ -233,7 +214,7 @@ export function Router(deps: Deps) {
     register("get", routePath, `${res}.detail`, 200, false, undefined, undefined, res);
     register("put", routePath, `${res}.modify`, 200, false, undefined, undefined, res);
     register("patch", routePath, `${res}.modify`, 200, false, undefined, undefined, res);
-    register("del", routePath, `${res}.remove`, 204, false, undefined, undefined, res);
+    register("delete", routePath, `${res}.remove`, 204, false, undefined, undefined, res);
   };
 
   const resource = (res: string, routePath = `/${res}s`) => {

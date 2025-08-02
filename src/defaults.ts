@@ -1,33 +1,18 @@
 import * as ajv from "ajv";
 import * as ajvFormats from "ajv-formats";
 import ajvKeywords from "ajv-keywords";
-import * as async from "async";
-import * as axios from "axios";
 import * as cronParser from "cron-parser";
 import humanInterval from "human-interval";
 import IORedis from "ioredis";
-import _ from "lodash";
 import LRU from "lru-cache";
-import moment from "moment";
 import * as mysql from "mysql2";
 import * as Sequelize from "sequelize";
-import * as uuid from "uuid";
 
 import { errors } from "./basic-errors";
 import * as utils from "./utils";
 
 /** npm packages injection */
 export interface Defaults {
-  /**
-   * The Lodash library exported as Node.js modules.
-   * @link https://www.npmjs.com/package/lodash
-   */
-  _: typeof _;
-  /**
-   * For the creation of RFC4122 UUIDs
-   * @link https://www.npmjs.com/package/uuid
-   */
-  uuid: typeof uuid;
   /**
    * Ajv JSON schema validator
    * @link https://www.npmjs.com/package/ajv
@@ -39,17 +24,6 @@ export interface Defaults {
    */
   ajvFormats: typeof ajvFormats;
   ajvKeywords: typeof ajvKeywords;
-  /**
-   * Async is a utility module which provides straight-forward
-   * powerful functions for working with asynchronous JavaScript.
-   * @link https://www.npmjs.com/package/async
-   */
-  async: typeof async;
-  /**
-   * Promise based HTTP client for the browser and node.js
-   * @Link https://www.npmjs.com/package/axios
-   */
-  axios: typeof axios;
   /**
    * Node.js library for parsing and manipulating crontab instructions.
    * It includes support for timezones and DST transitions.
@@ -87,11 +61,6 @@ export interface Defaults {
    */
   Sequelize: typeof Sequelize;
   /**
-   * A JavaScript date library for parsing, validating, manipulating, and formatting dates.
-   */
-  moment: typeof moment;
-
-  /**
    * utils tools function
    */
   utils: typeof utils;
@@ -106,20 +75,15 @@ export interface Defaults {
 }
 
 export const defaults: Defaults = {
-  _,
-  uuid,
   ajv,
   ajvFormats,
   ajvKeywords,
-  async,
-  axios,
   cronParser,
   humanInterval,
   IORedis,
   LRU,
   mysql,
   Sequelize,
-  moment,
   utils,
   U: utils,
   errors,

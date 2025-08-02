@@ -1,7 +1,5 @@
 import fs from "fs/promises";
-import _ from "lodash";
 import * as path from "path";
-import * as uuid from "uuid";
 
 import { Main } from "..";
 
@@ -23,7 +21,7 @@ const appendFile = jest.fn();
 appendFile.mockResolvedValue(undefined);
 fs.appendFile = appendFile;
 
-const deps = { _, uuid };
+const deps = {};
 describe("Logger module", () => {
   it("instance method", () => {
     const logger = Main(cnf, deps);

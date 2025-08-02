@@ -1,12 +1,13 @@
+import { MultipartFile } from "@fastify/multipart";
 import * as crypto from "crypto";
 import { PlainObject, stringify } from "csv-stringify";
+import { FastifyReply, FastifyRequest } from "fastify";
 import * as fs from "fs";
 import _ from "lodash";
 import * as os from "os";
-import * as restify from "restify";
 import * as xlsx from "xlsx";
 
-import { Cnf, Profile } from "./defines";
+import { Cnf, Profile, UploadFile } from "./defines";
 
 const str2arr = ["_includes", "dimensions", "metrics", "_attrs"];
 const enc = encodeURI;
@@ -36,7 +37,7 @@ export function Utils(cnf: Cnf) {
     },
 
     /** 真实的连接请求端ip */
-    remoteIp(req: restify.Request) {
+    remoteIp(req: FastifyRequest) {
       const { socket } = req;
       return socket.remoteAddress || "";
     },
@@ -44,7 +45,7 @@ export function Utils(cnf: Cnf) {
     /**
      * 获取客户端真实ip地址
      */
-    clientIp(req: restify.Request) {
+    clientIp(req: FastifyRequest) {
       return (req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || utils.remoteIp(req))
         .toString()
         .split(",")[0];
@@ -53,7 +54,7 @@ export function Utils(cnf: Cnf) {
     /**
      * 获取可信任的真实ip
      */
-    realIp(req: restify.Request) {
+    realIp(req: FastifyRequest) {
       const remoteIp = utils.remoteIp(req);
       if (!proxyIps.has(remoteIp) && !isInternalIp(remoteIp)) return remoteIp;
       return (req.headers["x-real-ip"] || remoteIp).toString();
@@ -63,18 +64,18 @@ export function Utils(cnf: Cnf) {
      * 构造profile参数
      */
     makeProfile<T extends {} = {}>(
-      req: restify.Request,
+      req: FastifyRequest,
       method: string,
-      customFn?: (obj: Profile, req: restify.Request) => T,
+      customFn?: (obj: Profile, req: FastifyRequest) => T,
     ): Profile & T {
       const obj: Profile = {
         verb: req.method,
         clientIp: utils.clientIp(req),
         remoteIp: utils.remoteIp(req),
         realIp: utils.realIp(req),
-        userAgent: req.userAgent(),
+        userAgent: req.headers["user-agent"] || "",
         startedAt: new Date(),
-        requestId: req.id(),
+        requestId: req.id,
         method,
         type: "user",
         needStream:
@@ -85,7 +86,10 @@ export function Utils(cnf: Cnf) {
       if (req.headers["x-auth-user-type"]) {
         obj.type = req.headers["x-auth-user-type"].toString();
       }
-      const token = req.headers["x-auth-token"] || req.query.access_token || req.query.accessToken;
+      const token =
+        req.headers["x-auth-token"] ||
+        (req.query as any).access_token ||
+        (req.query as any).accessToken;
 
       // token 和签名认证只能二选一
       if (token) {
@@ -119,10 +123,16 @@ export function Utils(cnf: Cnf) {
     /**
      * 构造领域方法所需的 params 参数
      */
-    makeParams(req: restify.Request) {
-      let params = { ...req.params, ...req.query };
+    async makeParams(
+      req: FastifyRequest<{
+        Querystring: Record<string, any>;
+        Params: Record<string, any>;
+        Body: Record<string, any>;
+      }>,
+    ) {
+      let params = { ...(req.query || {}), ...(req.params || {}) };
       if (_.isObject(req.body) && !Array.isArray(req.body)) {
-        params = { ...req.body, ...params };
+        params = { ...(req.body || {}), ...params };
       } else if (req.body) {
         params.__raw = req.body;
       }
@@ -132,8 +142,7 @@ export function Utils(cnf: Cnf) {
         if (params[k] && _.isString(params[k])) params[k] = params[k].split(",");
       }
 
-      if (params.__files) throw Error("Params.__files disallow assignment");
-      if (_.size(req.files)) params.__files = req.files;
+      const files = await RestifyFileConvertUploadFiles(await req.file());
 
       // 将上传文件附加到 params 中
       return { ...params, ...req.files };
@@ -143,7 +152,7 @@ export function Utils(cnf: Cnf) {
      *
      * 输出csv相关
      */
-    async outputCSV(rows: any[], params: any, res: restify.Response, isXLSX = false) {
+    async outputCSV(rows: any[], params: any, res: FastifyReply, isXLSX = false) {
       const { _names, _cols, _filename } = params;
       if (!_.isString(_cols)) return false;
       if (_names && !_.isString(_names)) return false;
@@ -165,7 +174,7 @@ export function Utils(cnf: Cnf) {
         xlsx.writeFile(workBook, file, { bookType: "xlsx", type: "binary" });
         await new Promise((resolve: Function) => {
           const stream = fs.createReadStream(file);
-          stream.pipe(res);
+          stream.pipe(res.raw);
           stream.on("end", () => {
             resolve();
             fs.unlinkSync(file);
@@ -177,7 +186,7 @@ export function Utils(cnf: Cnf) {
             header: true,
             columns: _.zipObject(keys, titles) as PlainObject<string>,
           });
-          stream.pipe(res);
+          stream.pipe(res.raw);
           stream.on("end", resolve);
         });
       }
@@ -185,6 +194,56 @@ export function Utils(cnf: Cnf) {
       return true;
     },
   };
+
+  async function RestifyFileConvertUploadFiles(
+    files?: MultipartFile,
+  ): Promise<Record<string, UploadFile>> {
+    if (!files) return {};
+
+    const result: Record<string, UploadFile> = {};
+
+    // 生成临时文件路径
+    const tempFileName = `${crypto.randomBytes(16).toString("hex")}_${files.filename}`;
+    const tempFilePath = `${TMPDIR}/${tempFileName}`;
+
+    // 将文件流保存到临时文件
+    return new Promise<Record<string, UploadFile>>((resolve, reject) => {
+      const writeStream = fs.createWriteStream(tempFilePath);
+      const fileStream = files.file;
+
+      let fileSize = 0;
+
+      fileStream.on("data", (chunk: Buffer) => {
+        fileSize += chunk.length;
+      });
+
+      fileStream.pipe(writeStream);
+
+      writeStream.on("finish", () => {
+        // 获取文件状态信息
+        const stats = fs.statSync(tempFilePath);
+
+        const uploadFile: UploadFile = {
+          size: fileSize,
+          path: tempFilePath,
+          name: files.filename,
+          type: files.mimetype,
+          mtime: stats.mtime.toISOString(),
+        };
+
+        result[files.fieldname] = uploadFile;
+        resolve(result);
+      });
+
+      writeStream.on("error", (error) => {
+        reject(error);
+      });
+
+      fileStream.on("error", (error) => {
+        reject(error);
+      });
+    });
+  }
 
   return utils;
 }
