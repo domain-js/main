@@ -22,7 +22,7 @@ describe("rest.write", () => {
     mysql: {
       escape: jest.fn(),
     },
-    moment: jest.fn(),
+    dayjs: jest.fn(),
     Sequelize,
   };
   const helper = Rest({ rest: {} }, deps, utils as any);

@@ -1,5 +1,5 @@
+import dayjs from "dayjs";
 import type { LoDashStatic } from "lodash";
-import moment from "moment";
 import * as mysql from "mysql2";
 import { literal, Op, Sequelize } from "sequelize";
 
@@ -14,7 +14,7 @@ interface Cnf {
 interface Deps {
   _: LoDashStatic;
   mysql: Pick<typeof mysql, "escape">;
-  moment: typeof moment extends (...args: infer A) => infer B ? (...args: A) => B : never;
+  dayjs: typeof dayjs extends (...args: infer A) => infer B ? (...args: A) => B : never;
   errors: {
     notAllowed: (...args: any[]) => Error;
     resourceDuplicateAdd: (...args: any[]) => Error;
@@ -26,7 +26,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
 
-  const { _, errors, moment } = deps;
+  const { _, errors, dayjs } = deps;
 
   /**
    * 相对多少天的时间
@@ -250,8 +250,8 @@ export function Utils(cnf: Cnf, deps: Deps) {
       if (!where[col][Op.and]) where[col][Op.and] = [];
       if (ignoreYear) {
         // 忽略年，这里要处理跨年的问题
-        const startDate = moment(Date.now() + start * 86400000).format("MM-DD");
-        const endDate = moment(Date.now() + end * 86400000).format("MM-DD");
+        const startDate = dayjs(Date.now() + start * 86400000).format("MM-DD");
+        const endDate = dayjs(Date.now() + end * 86400000).format("MM-DD");
         if (endDate < startDate) {
           where[col][Op.and].push({
             [Op.or]: [

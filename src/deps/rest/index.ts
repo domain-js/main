@@ -172,4 +172,4 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   return { modify, add, remove, list, stats: Stats(cnf, deps, utils) };
 }
 
-export const Deps = ["errors", "_", "moment", "mysql", "Sequelize"];
+export const Deps = ["errors", "_", "dayjs", "mysql", "Sequelize"];

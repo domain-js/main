@@ -18,7 +18,7 @@ describe("helper.list", () => {
     mysql: {
       escape: jest.fn(),
     },
-    moment: jest.fn(),
+    dayjs: jest.fn(),
     Sequelize,
   };
 
