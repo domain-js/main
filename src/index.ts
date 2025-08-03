@@ -20,11 +20,10 @@ type Merge<T> = {
  * Include from T those types that are assignable to U
  */
 type Include<T, U> = T extends U ? T : never;
-type RemoveReadonlyArray<T> = T extends ReadonlyArray<infer T1> ? T1 : false;
 
 export function Main<T extends Readonly<Array<keyof TDeps>>>(features: T) {
   /** 模块名称联合类型 */
-  type MS = RemoveReadonlyArray<T>;
+  type MS = T[number];
   type Cnf = Merge<
     TDeps[Include<keyof TDeps, MS>]["Main"] extends (arg: infer R, ...args: any[]) => any ? R : {}
   >;
