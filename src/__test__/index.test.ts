@@ -25,7 +25,8 @@ describe("@domain.js/main index", () => {
       const Start = Main(["aes", "cache"]);
 
       expect(() => {
-        Start({ cache: { max: 50000, isMulti: true } });
+        // 使用类型断言来避免类型检查错误
+        Start({ cache: { max: 50000, isMulti: true } } as any);
       }).toThrow("conflict");
     });
   });

@@ -19,7 +19,7 @@ type ModuleFn = (((...args: any[]) => any) | {}) & ModuleInterface;
  */
 export function exec<
   Args extends any[],
-  BeforeFn extends(...args: Args) => any[],
+  BeforeFn extends (...args: Args) => any[],
   MainFn extends (...args: ReturnType<BeforeFn>) => any,
   AfterFn extends (main: ReturnType<MainFn>, ...args: ReturnType<BeforeFn>) => void,
 >(
