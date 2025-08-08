@@ -1,4 +1,4 @@
-import { Redis } from "ioredis";
+import { Redis, RedisOptions } from "ioredis";
 import { LRUCache } from "lru-cache";
 
 export interface CnfDef {
@@ -6,7 +6,7 @@ export interface CnfDef {
     isMulti?: boolean;
     delSignalChannel?: string;
   } & LRUCache.Options<{}, {}, unknown>;
-  redis?: any;
+  redis?: RedisOptions;
 }
 
 export interface DepsDef {
@@ -73,7 +73,7 @@ export function Main(cnf: CnfDef, deps: DepsDef): Cache {
   const needToBroad = Boolean(cnf.cache.isMulti);
   // 如果不是多节点分部署部署，则不需要处理
   // 开启多节点分布式部署后，要通过redis广播cache的del事件，依次来保持cache的有效性
-  if (needToBroad) {
+  if (needToBroad && cnf.redis) {
     const pub = new IORedis(cnf.redis);
     const sub = new IORedis(cnf.redis);
 
