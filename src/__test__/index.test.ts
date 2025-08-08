@@ -14,7 +14,7 @@ describe("@domain.js/main index", () => {
       const features = ["aes"] as const;
       const Start = Main(features);
 
-      const deps = Start({});
+      const deps = Start();
       expect(typeof deps.aes.encrypt).toBe("function");
       expect(typeof (deps as any).cache).toBe("undefined");
       expect(typeof (deps as any).request).toBe("undefined");
