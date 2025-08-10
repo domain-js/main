@@ -12,6 +12,7 @@ type Deps = Parameters<typeof Utils>[1] &
   Parameters<typeof Stats>[1] & {
     _: typeof _;
     Sequelize: Pick<typeof Sequelize, "literal" | "and" | "fn" | "Op">;
+    errors: any;
   };
 
 type UserId = string | number;
@@ -30,7 +31,6 @@ export interface CreatorAndClientIp {
  * @returns modify, add, remove, list, stats five methods
  */
 export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
-  const { errors } = deps;
   const { findAllOpts, pickParams } = utils;
 
   /**
@@ -102,7 +102,7 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
     if (!model) return (Model as any).create(attr);
 
     // 资源存在但是并非已删除的，抛出资源重复添加的error
-    if (model.isDeleted === "no") throw errors.resourceDuplicateAdd(where as any);
+    if (model.isDeleted === "no") throw deps.errors.resourceDuplicateAdd(where as any);
     // 资源存在，恢复
     model.isDeleted = "no";
     Object.assign(model, attr);
@@ -172,4 +172,4 @@ export function Main(cnf: Cnf, deps: Deps, utils: ReturnType<typeof Utils>) {
   return { modify, add, remove, list, stats: Stats(cnf, deps, utils) };
 }
 
-export const Deps = ["errors", "_", "dayjs", "mysql", "Sequelize"];
+export const Deps = [];

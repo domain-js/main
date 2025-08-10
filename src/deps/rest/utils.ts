@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
-import type { LoDashStatic } from "lodash";
+import _ from "lodash";
 import * as mysql from "mysql2";
 import { literal, Op, Sequelize } from "sequelize";
 
+import { errors } from "../../basic-errors";
 import { ModelBase, ModelStatic } from "../sequelize";
 
 interface Cnf {
@@ -11,22 +12,12 @@ interface Cnf {
   };
 }
 
-interface Deps {
-  _: LoDashStatic;
-  mysql: Pick<typeof mysql, "escape">;
-  dayjs: typeof dayjs extends (...args: infer A) => infer B ? (...args: A) => B : never;
-  errors: {
-    notAllowed: (...args: any[]) => Error;
-    resourceDuplicateAdd: (...args: any[]) => Error;
-  };
-}
+interface Deps {}
 
 export function Utils(cnf: Cnf, deps: Deps) {
   const {
     rest: { relativeMaxRangeDays: RELATIVE_MAX_RANGE = 100 },
   } = cnf;
-
-  const { _, errors, dayjs } = deps;
 
   /**
    * 相对多少天的时间

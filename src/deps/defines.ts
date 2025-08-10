@@ -1,7 +1,6 @@
 // domain-cli 自动生成
 import * as aes from "./aes";
 import * as cache from "./cache";
-import * as checker from "./checker";
 import * as counter from "./counter";
 import * as cron from "./cron";
 import * as frequency from "./frequency";
@@ -19,7 +18,6 @@ import * as signer from "./signer";
 export = {
   aes: aes,
   cache: cache,
-  checker: checker,
   counter: counter,
   cron: cron,
   frequency: frequency,

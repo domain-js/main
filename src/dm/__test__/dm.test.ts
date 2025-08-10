@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import * as dm from "..";
 
 const case1 = require("../samples/case1");

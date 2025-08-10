@@ -1,8 +1,9 @@
 import { eachLimit, forever, whilst } from "async";
 import { Redis } from "ioredis";
-import { Main as Logger } from "../logger";
-import { Main as Graceful } from "../graceful";
+
 import * as utils from "../../utils";
+import { Main as Graceful } from "../graceful";
+import { Main as Logger } from "../logger";
 
 interface Cnf {
   parallel: {
@@ -29,12 +30,6 @@ interface Deps {
   };
   /** redis instance */
   redis: Pick<Redis, "get" | "set" | "del" | "expire" | "exists">;
-  /** async package */
-  async: {
-    eachLimit: typeof eachLimit;
-    whilst: typeof whilst;
-    forever: typeof forever;
-  };
 }
 
 export interface Option {
@@ -68,7 +63,7 @@ export function Main(cnf: Cnf, deps: Deps) {
     },
   } = cnf;
 
-  const { async, logger, graceful, redis } = deps;
+  const { logger, graceful, redis } = deps;
   const { sleep } = utils;
   // 存放当前处于执行中的 key
   const doings = new Set<string>();
@@ -78,7 +73,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   const onExit = async () => {
     exiting = true;
     logger.info("graceful.onExit parallel start", [...doings]);
-    await async.eachLimit([...doings], 10, async (key: string) => {
+    await eachLimit([...doings], 10, async (key: string) => {
       doings.delete(key);
       await redis.del(key);
       logger.info(`graceful.onExit parallel del: ${key}`);
@@ -88,12 +83,12 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   const delay = async () => {
     if (!doings.size) return;
-    await async.eachLimit([...doings], 10, async (key) => {
+    await eachLimit([...doings], 10, async (key) => {
       await redis.expire(key, maxExpireSeconds);
     });
   };
 
-  async.forever(async () => {
+  forever(async () => {
     try {
       await sleep(resetExpireIntervalMS);
       await delay();
@@ -108,7 +103,7 @@ export function Main(cnf: Cnf, deps: Deps) {
    * @param opt Parallel control parameters
    * @returns Functions with parallel control capability
    */
-  function control<F extends(...args: any[]) => any>(method: F, opt: Option) {
+  function control<F extends (...args: any[]) => any>(method: F, opt: Option) {
     const {
       path,
       keyFn = () => opt.path,
@@ -144,7 +139,7 @@ export function Main(cnf: Cnf, deps: Deps) {
         if (!needWaitMS) throw error;
 
         // 需要等待
-        await async.whilst(
+        await whilst(
           async () => Boolean(await redis.exists(key)),
           async () => sleep(needWaitMS),
         );
@@ -171,4 +166,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return control;
 }
 
-export const Deps = ["async", "logger", "graceful", "redis"];
+export const Deps = ["logger", "graceful", "redis"];

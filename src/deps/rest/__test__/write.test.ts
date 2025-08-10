@@ -11,7 +11,7 @@ const errors = {
     return new Error("重复添加资源");
   },
   resourceDuplicateAdd() {
-    return new Error("重复添加资源");
+    return new Error("重复");
   },
 };
 
@@ -26,6 +26,10 @@ describe("rest.write", () => {
     Sequelize,
   };
   const helper = Rest({ rest: {} }, deps, utils as any);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe("modify", () => {
     it("case1", async () => {
       const Model = {

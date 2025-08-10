@@ -1,6 +1,6 @@
 import * as async from "async";
-import { sleep } from "../../../utils";
 import { Main as Parallel } from "..";
+import { sleep } from "../../../utils";
 
 describe("Parallel", () => {
   describe("noraml", () => {
