@@ -28,7 +28,6 @@ export function Router(deps: Deps) {
 
   const apis: string[] = [];
   let apisHTML = "<h3>API 目录，点击可以查看参数格式定义</h3>";
-  console.error("server", server, "server");
 
   /** 判断是否需要提供apis的查询接口 */
   if (apisRoute) {

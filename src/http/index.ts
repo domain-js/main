@@ -91,7 +91,7 @@ export function Main(
         console.error(err);
         process.exit(1);
       }
-      console.log("%s listening at %s", host, address);
+      console.log("[%s] listening at %s", new Date().toISOString(), address);
     });
 
     return server;

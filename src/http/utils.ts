@@ -142,10 +142,23 @@ export function Utils(cnf: Cnf) {
         if (params[k] && _.isString(params[k])) params[k] = params[k].split(",");
       }
 
-      const files = await RestifyFileConvertUploadFiles(await req.file());
+      // 检查请求是否包含文件上传
+      let files = {};
+      try {
+        // 只有在 multipart 请求时才处理文件
+        if (req.headers["content-type"]?.includes("multipart/form-data")) {
+          const uploadedFile = await req.file();
+          if (uploadedFile) {
+            files = await RestifyFileConvertUploadFiles(uploadedFile);
+          }
+        }
+      } catch (error) {
+        // 如果文件处理出错，记录错误但不中断请求处理
+        console.warn("File upload processing error:", error);
+      }
 
       // 将上传文件附加到 params 中
-      return { ...params, ...req.files };
+      return { ...params, ...files };
     },
 
     /**
