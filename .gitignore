@@ -65,3 +65,4 @@ typings/
 
 .test/*
 .npmrc
+__temps__

@@ -137,24 +137,38 @@ export function Utils(cnf: Cnf) {
         params.__raw = req.body;
       }
 
-      // 逗号分隔的属性，自动转换为 array
-      for (const k of str2arr) {
-        if (params[k] && _.isString(params[k])) params[k] = params[k].split(",");
-      }
-
-      // 检查请求是否包含文件上传
-      let files = {};
+      // 处理 multipart：同时解析字段与文件
+      let files: Record<string, any> = {};
       try {
-        // 只有在 multipart 请求时才处理文件
         if (req.headers["content-type"]?.includes("multipart/form-data")) {
-          const uploadedFile = await req.file();
-          if (uploadedFile) {
-            files = await RestifyFileConvertUploadFiles(uploadedFile);
+          const fields: Record<string, any> = {};
+          const parts = req.parts();
+          for await (const part of parts as any) {
+            if (part.type === "file") {
+              const saved = await RestifyFileConvertUploadFiles(part);
+              Object.assign(files, saved);
+            } else if (part.type === "field") {
+              const key = part.fieldname as string;
+              const value = part.value as any;
+              if (fields[key] !== undefined) {
+                fields[key] = Array.isArray(fields[key])
+                  ? [...fields[key], value]
+                  : [fields[key], value];
+              } else {
+                fields[key] = value;
+              }
+            }
           }
+          // 将表单字段合并进 params
+          params = { ...fields, ...params };
         }
       } catch (error) {
-        // 如果文件处理出错，记录错误但不中断请求处理
         console.warn("File upload processing error:", error);
+      }
+
+      // 逗号分隔的属性，自动转换为 array（在合并字段之后处理）
+      for (const k of str2arr) {
+        if (params[k] && _.isString(params[k])) params[k] = params[k].split(",");
       }
 
       // 将上传文件附加到 params 中
