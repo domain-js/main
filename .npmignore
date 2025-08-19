@@ -16,6 +16,7 @@ npm-debug.log
 coverage
 coverage/*
 __test__
+__temps__
 src
 src/*
 .npmrc
