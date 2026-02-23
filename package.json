@@ -1,6 +1,6 @@
 {
   "name": "@domain.js/main",
-  "version": "1.0.0-arpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "DDD framework",
   "main": "dist/index.js",
   "bin": {
@@ -16,6 +16,16 @@
   },
   "author": "Redstone Zhao",
   "license": "MIT",
+  "prettier": {
+    "printWidth": 100,
+    "trailingComma": "all"
+  },
+  "lint-staged": {
+    "src/**/*.{js,ts}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
     "@eslint/js": "^10.0.1",
@@ -27,6 +37,12 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
+    "async": "^3.2.6",
+    "ioredis": "^5.9.3",
+    "lodash": "^4.17.23",
+    "mysql2": "^3.17.4",
+    "sequelize": "^6.37.5",
+    "socket.io": "^4.8.3",
     "eslint": "^10.0.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-alloy": "^5.1.2",
@@ -37,6 +53,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "fastify": "^5.7.4",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
@@ -45,34 +62,26 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
-  "prettier": {
-    "printWidth": 100,
-    "trailingComma": "all"
-  },
-  "lint-staged": {
-    "src/**/*.{js,ts}": [
-      "prettier --write",
-      "eslint --fix"
-    ]
-  },
   "dependencies": {
     "@fastify/multipart": "^9.4.0",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "ajv-keywords": "^5.1.0",
-    "async": "^3.2.6",
     "cron-parser": "^5.5.0",
     "csv-stringify": "^6.6.0",
     "dayjs": "^1.11.19",
-    "fastify": "^5.7.4",
     "fastify-socket.io": "^5.1.0",
     "human-interval": "^2.0.1",
+    "lru-cache": "^11.2.6",
+    "xlsx": "^0.18.5"
+  },
+  "peerDependencies": {
+    "async": "^3.2.6",
+    "fastify": "^5.7.4",
     "ioredis": "^5.9.3",
     "lodash": "^4.17.23",
-    "lru-cache": "^11.2.6",
     "mysql2": "^3.17.4",
-    "sequelize": "^6.37.7",
-    "socket.io": "^4.8.3",
-    "xlsx": "^0.18.5"
+    "sequelize": "^6.37.5",
+    "socket.io": "^4.8.3"
   }
 }
