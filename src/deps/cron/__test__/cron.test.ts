@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import * as cronParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import humanInterval from "human-interval";
 
 import { Main as Cron } from "..";
@@ -20,7 +20,7 @@ describe("cron", () => {
   const deps = {
     myCia: cia,
     humanInterval,
-    cronParser,
+    cronParser: CronExpressionParser,
   };
 
   const cron = Cron(cnf, deps);
@@ -96,7 +96,7 @@ describe("cron special", () => {
   const deps = {
     myCia: cia,
     humanInterval,
-    cronParser,
+    cronParser: CronExpressionParser,
   };
 
   describe("linux style schedule", () => {

@@ -1,4 +1,4 @@
-import * as cronParser from "cron-parser";
+import { CronExpression, CronExpressionParser } from "cron-parser";
 import human = require("human-interval");
 
 interface Cnf {
@@ -18,7 +18,7 @@ interface callbackArg {
 }
 
 interface Deps {
-  cronParser: typeof cronParser;
+  cronParser: typeof CronExpressionParser;
   humanInterval: typeof human;
   myCia: {
     regist: (name: string, validator: any, waiters: waiter[]) => void;
@@ -57,7 +57,7 @@ export function Main(cnf: Cnf, deps: Deps) {
   const { cron = {} } = cnf;
 
   const ciaTaskType = "cronJob";
-  const { myCia, humanInterval: human, cronParser: parser } = deps;
+  const { myCia, humanInterval: human, cronParser: CronParser } = deps;
   const { tz = "Asia/Shanghai" } = cron;
 
   // 注册信息
@@ -68,7 +68,8 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   // 计算具体下次执行还有多少毫秒
   const calcNextMS = (intervalStr: string) => {
-    const interval = human(intervalStr) || parser.parseExpression(intervalStr, { tz });
+    const interval: CronExpression | number =
+      human(intervalStr) || CronParser.parse(intervalStr, { tz });
     if (typeof interval === "number") return interval;
 
     //  *    *    *    *    *    *
