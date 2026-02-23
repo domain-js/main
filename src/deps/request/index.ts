@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 
-import * as utils from "../../utils";
+import { sleep } from "../../utils";
 import { Main as Logger } from "../logger";
 
 type VERBS = "post" | "get" | "put" | "patch" | "delete";
@@ -21,13 +21,7 @@ interface Cnf {
 }
 
 interface Deps {
-  axios: {
-    create: typeof axios.create;
-  };
   logger: ReturnType<typeof Logger>;
-  utils: {
-    sleep: typeof utils.sleep;
-  };
 }
 
 /**
@@ -51,11 +45,7 @@ export function Main(cnf: Cnf, deps: Deps) {
 
   if (!cnf.axios) cnf.axios = {};
   const { loggers, retrys, retryTimes = 3, retryIntervalMS = 3000, conf } = cnf.axios;
-  const {
-    axios,
-    utils: { sleep },
-    logger,
-  } = deps;
+  const { logger } = deps;
 
   const retryAble = <F extends (...args: any[]) => any>(fn: F, times: number, interval: number) => {
     type FnParameters = Parameters<F>;
@@ -108,4 +98,4 @@ export function Main(cnf: Cnf, deps: Deps) {
   return instance;
 }
 
-export const Deps = ["logger", "utils", "axios"];
+export const Deps = ["logger"];
