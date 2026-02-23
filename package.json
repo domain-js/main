@@ -10,7 +10,6 @@
     "build": "rm -rf ./dist/* && tsc",
     "test": "export NODE_ENV=test && jest ./src --coverage",
     "test:watch": "export NODE_ENV=test && jest ./src --watch",
-    "prepare": "husky install",
     "lint-staged": "lint-staged",
     "lint-staged:js": "eslint --no-warn-ignored src/**/*.ts",
     "loadDeps": "ts-node src/cli/index.ts loadDeps ./src/deps ts"
