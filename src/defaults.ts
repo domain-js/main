@@ -1,7 +1,7 @@
 import * as ajv from "ajv";
 import * as ajvFormats from "ajv-formats";
 import ajvKeywords from "ajv-keywords";
-import * as cronParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import humanInterval from "human-interval";
 import IORedis from "ioredis";
 import LRU from "lru-cache";
@@ -29,7 +29,7 @@ export interface Defaults {
    * It includes support for timezones and DST transitions.
    * @link https://www.npmjs.com/package/cron-parser
    */
-  cronParser: typeof cronParser;
+  cronParser: typeof CronExpressionParser;
   /**
    * Human-readable interval parser for Javascript.
    * @link https://www.npmjs.com/package/human-interval
@@ -78,7 +78,7 @@ export const defaults: Defaults = {
   ajv,
   ajvFormats,
   ajvKeywords,
-  cronParser,
+  cronParser: CronExpressionParser,
   humanInterval,
   IORedis,
   LRU,
