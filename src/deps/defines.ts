@@ -10,6 +10,7 @@ import * as logger from "./logger";
 import * as myCia from "./myCia";
 import * as parallel from "./parallel";
 import * as redis from "./redis";
+import * as request from "./request";
 import * as rest from "./rest";
 import * as schema from "./schema";
 import * as sequelize from "./sequelize";
@@ -27,6 +28,7 @@ export = {
   myCia: myCia,
   parallel: parallel,
   redis: redis,
+  request: request,
   rest: rest,
   schema: schema,
   sequelize: sequelize,
