@@ -1,6 +1,6 @@
 {
   "name": "@domain.js/main",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "DDD framework",
   "main": "dist/index.js",
   "bin": {
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
     "@eslint/js": "^10.0.1",
+    "@fastify/multipart": "^9.4.0",
     "@types/async": "^3.2.25",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
@@ -63,7 +64,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@fastify/multipart": "^9.4.0",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "ajv-keywords": "^5.1.0",
@@ -76,6 +76,7 @@
     "xlsx": "^0.18.5"
   },
   "peerDependencies": {
+    "@fastify/multipart": "^9.4.0",
     "async": "^3.2.6",
     "fastify": "^5.7.4",
     "ioredis": "^5.9.3",

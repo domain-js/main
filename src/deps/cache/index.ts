@@ -24,6 +24,10 @@ export interface Cache extends LRUCache<{}, {}, unknown> {
     getKey: (...args: Parameters<T>) => string,
     hit?: (hited: boolean) => void,
   ) => T;
+  /**
+   * @deprecated use delete instead of del
+   */
+  del: (key: string) => boolean;
   hitCount: () => { hits: number; misseds: number };
   needToBroad: boolean;
 }
@@ -98,6 +102,7 @@ export function Main(cnf: CnfDef, deps: DepsDef): Cache {
   }
 
   const cache: Cache = Object.assign(lru, {
+    del: lru.delete.bind(lru),
     caching,
     hitCount,
     needToBroad: Boolean(cnf.cache.isMulti),
