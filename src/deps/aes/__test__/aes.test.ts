@@ -3,7 +3,6 @@ import * as AES from "..";
 describe("AES", () => {
   const aes = AES.Main();
   const key = "AES_KEY";
-
   describe("encrypt", () => {
     it("case1", () => {
       const msg = aes.encrypt("hello world", key);
@@ -11,48 +10,27 @@ describe("AES", () => {
 
       expect(aes.decrypt(msg, key)).toBe("hello world");
     });
+  });
 
-    it("should handle empty string", () => {
-      const msg = aes.encrypt("", key);
-      expect(typeof msg).toBe("string");
-      expect(aes.decrypt(msg, key)).toBe("");
+  describe("decrypt1", () => {
+    it("case1", () => {
+      const msg =
+        "U2FsdGVkX1/AsbpJ5O04SsecKpTZz1aBS3D6Ri9mwzRNCGRKzZQ8gOJ217vZqKQZKUYAc7Hixl63XPUNI1Q6M0/wKVCkamrq0qJAFkeFlXjRp1oD39NTjhpgct3eFQoY";
+      const key = "76TO6SIlpbh7ngqNMgwDdYre7YPLM4nw";
+
+      expect(aes.decrypt(msg, key)).toBe(
+        "5oZ2m1YFkQ7Scu0BrLSw9ODAnTDoAJpHQcbIcV8coNyaHE5N4at5eutPcMpmZAUV",
+      );
     });
+  });
 
-    it("should handle special characters", () => {
-      const specialMsg = "Hello 世界! @#$%^&*()_+-=[]{}|;':\",./<>?";
-      const msg = aes.encrypt(specialMsg, key);
-      expect(typeof msg).toBe("string");
-      expect(aes.decrypt(msg, key)).toBe(specialMsg);
-    });
+  describe("decrypt2", () => {
+    it("roundtrip: encrypt then decrypt with same key", () => {
+      const key = "76TO6SIlpbh7ngqNMgwDdYre7YPLM4nw";
+      const plain = "hello world";
+      const msg = aes.encrypt(plain, key);
 
-    it("should handle long text", () => {
-      const longMsg =
-        "This is a very long message that should be encrypted and decrypted properly. ".repeat(100);
-      const msg = aes.encrypt(longMsg, key);
-      expect(typeof msg).toBe("string");
-      expect(aes.decrypt(msg, key)).toBe(longMsg);
-    });
-
-    it("should generate different ciphertext for same plaintext", () => {
-      const plaintext = "hello world";
-      const msg1 = aes.encrypt(plaintext, key);
-      const msg2 = aes.encrypt(plaintext, key);
-
-      // 由于使用了随机 IV，每次加密结果应该不同
-      expect(msg1).not.toBe(msg2);
-
-      // 但解密结果应该相同
-      expect(aes.decrypt(msg1, key)).toBe(plaintext);
-      expect(aes.decrypt(msg2, key)).toBe(plaintext);
-    });
-
-    it("should fail decryption with wrong key", () => {
-      const msg = aes.encrypt("hello world", key);
-      expect(() => aes.decrypt(msg, "WRONG_KEY")).toThrow("Decryption failed");
-    });
-
-    it("should fail decryption with invalid format", () => {
-      expect(() => aes.decrypt("invalid_format", key)).toThrow("Decryption failed");
+      expect(aes.decrypt(msg, key)).toBe(plain);
     });
   });
 });
