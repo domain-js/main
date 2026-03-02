@@ -85,12 +85,37 @@ export function Router(deps: Deps) {
     const send = async (res: FastifyReply, results: any, isEventStream = false) => {
       if (isStream(results)) {
         if (isEventStream) {
-          res.type("text/event-stream");
-          await new Promise((resolve) => {
-            results.on("data", (chunk: any) => {
+          // 告知 Fastify 由我们自行通过 res.raw 发送响应，避免 handler 返回后框架再发一次
+          res.hijack();
+          // 使用 res.raw 直接写响应时，Fastify 不会把 reply.type/header 同步到 raw，
+          // 必须在 Node 原生 response 上设置头，否则 Content-Type 等不会生效。
+          res.raw.setHeader("Content-Type", "text/event-stream");
+          res.raw.setHeader("Cache-Control", "no-cache");
+          res.raw.setHeader("Pragma", "no-cache");
+          res.raw.setHeader("Connection", "keep-alive");
+          if (typeof res.raw.flushHeaders === "function") {
+            res.raw.flushHeaders();
+          }
+          await new Promise<void>((resolve) => {
+            const onEnd = () => {
+              cleanup();
+              resolve();
+            };
+            const onError = () => {
+              cleanup();
+              resolve();
+            };
+            const cleanup = () => {
+              results.off("data", onData);
+              results.off("end", onEnd);
+              results.off("error", onError);
+            };
+            const onData = (chunk: any) => {
               res.raw.write(chunk);
-            });
-            results.on("end", resolve);
+            };
+            results.on("data", onData);
+            results.on("end", onEnd);
+            results.on("error", onError);
           });
         } else {
           results.pipe(res.raw);
