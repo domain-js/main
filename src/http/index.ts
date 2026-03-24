@@ -1,3 +1,4 @@
+import formbody from "@fastify/formbody";
 import multipart from "@fastify/multipart";
 import Fastify, { FastifyRequest } from "fastify";
 import socketio from "fastify-socket.io";
@@ -39,6 +40,7 @@ export function Main(
       fileSize: cnf.bodyMaxBytes || 10 * 1024 * 1024, // 参数最大容量 10MB
     },
   });
+  server.register(formbody);
   server.register(socketio, {
     cors: {
       origin: "*",
@@ -58,7 +60,7 @@ export function Main(
 
   // 根据需求起送socket服务
   if (cnf.socket) {
-    server.ready((err) => {
+    server.ready((_err) => {
       const io = server.io;
       // 处理日志
       if (socketLogger) {
