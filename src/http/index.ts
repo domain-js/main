@@ -1,5 +1,6 @@
 import formbody from "@fastify/formbody";
 import multipart from "@fastify/multipart";
+import { randomUUID } from "crypto";
 import Fastify, { FastifyRequest } from "fastify";
 import socketio from "fastify-socket.io";
 import { Server } from "socket.io";
@@ -23,7 +24,9 @@ export function Main(
 
   const { routers, domain, httpCodes, makeProfileHook, socketLogger } = deps;
 
-  const server = Fastify();
+  const server = Fastify({
+    genReqId: () => randomUUID(),
+  });
   server.setErrorHandler((error, request, reply) => {
     const { code, message, data } = error as unknown as {
       code: string;
