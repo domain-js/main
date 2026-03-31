@@ -140,7 +140,7 @@ export function Utils(cnf: Cnf) {
       // 处理 multipart：同时解析字段与文件
       let files: Record<string, any> = {};
       try {
-        if (req.headers["content-type"]?.includes("multipart/form-data")) {
+        if (req.isMultipart()) {
           const fields: Record<string, any> = {};
           const parts = req.parts();
           for await (const part of parts as any) {
