@@ -38,9 +38,20 @@ export function Main(
     reply.code(statusCode).send({ code, message, data });
   });
 
+  const bodyLimit = cnf.bodyMaxBytes || 10 * 1024 * 1024;
+  // 仅注册 MIME，使 Fastify 接受 XML 类 Content-Type（否则会 FST_ERR_CTP_INVALID_MEDIA_TYPE）。
+  // parseAs: "string" 只是把请求体读成原始字符串，不做 XML 结构化解析；解析由业务层按需进行。
+  server.addContentTypeParser(
+    ["application/xml", "text/xml", "application/rss+xml", "application/atom+xml"],
+    { parseAs: "string", bodyLimit },
+    (_req, body, done) => {
+      done(null, body);
+    },
+  );
+
   server.register(multipart, {
     limits: {
-      fileSize: cnf.bodyMaxBytes || 10 * 1024 * 1024, // 参数最大容量 10MB
+      fileSize: bodyLimit, // 参数最大容量 10MB
     },
   });
   server.register(formbody);
