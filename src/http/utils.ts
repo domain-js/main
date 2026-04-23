@@ -143,10 +143,20 @@ export function Utils(cnf: Cnf) {
         if (req.isMultipart()) {
           const fields: Record<string, any> = {};
           const parts = req.parts();
-          for await (const part of parts as any) {
+          for await (const part of parts) {
             if (part.type === "file") {
               const saved = await RestifyFileConvertUploadFiles(part);
-              Object.assign(files, saved);
+              if (!saved) continue;
+              const [field, file] = saved;
+              if (files[field]) {
+                if (Array.isArray(files[field])) {
+                  files[field].push(file);
+                } else {
+                  files[field] = [files[field], file];
+                }
+              } else {
+                files[field] = file;
+              }
             } else if (part.type === "field") {
               const key = part.fieldname as string;
               const value = part.value as any;
@@ -224,17 +234,15 @@ export function Utils(cnf: Cnf) {
 
   async function RestifyFileConvertUploadFiles(
     files?: MultipartFile,
-  ): Promise<Record<string, UploadFile>> {
-    if (!files) return {};
-
-    const result: Record<string, UploadFile> = {};
+  ): Promise<[field: string, file: UploadFile] | undefined> {
+    if (!files) return;
 
     // 生成临时文件路径
     const tempFileName = `${crypto.randomBytes(16).toString("hex")}_${files.filename}`;
     const tempFilePath = `${TMPDIR}/${tempFileName}`;
 
     // 将文件流保存到临时文件
-    return new Promise<Record<string, UploadFile>>((resolve, reject) => {
+    return new Promise<[field: string, file: UploadFile] | undefined>((resolve, reject) => {
       const writeStream = fs.createWriteStream(tempFilePath);
       const fileStream = files.file;
 
@@ -258,8 +266,7 @@ export function Utils(cnf: Cnf) {
           mtime: stats.mtime.toISOString(),
         };
 
-        result[files.fieldname] = uploadFile;
-        resolve(result);
+        resolve([files.fieldname, uploadFile]);
       });
 
       writeStream.on("error", (error) => {
