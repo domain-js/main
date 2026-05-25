@@ -100,7 +100,7 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
   ): Promise<M[]> {
     if (!Array.isArray(pks) || !pks.length) return [];
     //静态方法调用同一个类中的其他静态方法，可使用 this 关键字
-    // eslint-disable-next-line no-undef
+
     const list = [];
     for await (const x of pks) {
       const item = await this.getByPk(x);
@@ -155,7 +155,7 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
   /** 模糊搜索相关设定 */
   static searchCols?: {
     [k: string]: {
-      op: "=" | "LIKE";
+      op: "=" | "LIKE" | "NOT LIKE" | "NOT IN" | "IN" | "NOT";
       match: string[];
     };
   };
