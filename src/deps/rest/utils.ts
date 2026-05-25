@@ -160,8 +160,10 @@ export function Utils(cnf: Cnf, deps: Deps) {
             return [
               `(\`${as || Model.name}\`.\`${col}\``,
               conf.op,
-              v ? `${mysql.escape(v)})` : "",
-            ].join(" ");
+              v ? `${mysql.escape(v)}` : undefined,
+            ]
+              .filter(Boolean)
+              .join(" ");
           });
           return `(${arr.join(" OR ")})`;
         }),
