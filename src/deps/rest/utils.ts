@@ -161,6 +161,7 @@ export function Utils(cnf: Cnf, deps: Deps) {
               `(\`${as || Model.name}\`.\`${col}\``,
               conf.op,
               v ? `${mysql.escape(v)}` : undefined,
+              ")",
             ]
               .filter(Boolean)
               .join(" ");
