@@ -155,7 +155,20 @@ export class ModelBase<Attrs extends {} = any, Attrs4Create extends {} = Attrs> 
   /** 模糊搜索相关设定 */
   static searchCols?: {
     [k: string]: {
-      op: "=" | "LIKE" | "NOT LIKE" | "NOT IN" | "IN" | "NOT";
+      op:
+        | "="
+        | "LIKE"
+        | "NOT LIKE"
+        | "NOT IN"
+        | "IN"
+        | "NOT"
+        | "IS NOT NULL"
+        | "IS NULL"
+        | "<>"
+        | ">"
+        | "<"
+        | ">="
+        | "<=";
       match: string[];
     };
   };

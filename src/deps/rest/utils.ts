@@ -157,9 +157,11 @@ export function Utils(cnf: Cnf, deps: Deps) {
         _.map(q, (x) => {
           const arr = _.map(conf.match, (match) => {
             const v = match.replace("{1}", x);
-            return [`(\`${as || Model.name}\`.\`${col}\``, conf.op, `${mysql.escape(v)})`].join(
-              " ",
-            );
+            return [
+              `(\`${as || Model.name}\`.\`${col}\``,
+              conf.op,
+              v ? `${mysql.escape(v)})` : "",
+            ].join(" ");
           });
           return `(${arr.join(" OR ")})`;
         }),
@@ -218,13 +220,14 @@ export function Utils(cnf: Cnf, deps: Deps) {
 
   const RELATIVE_RANGE_ERROR = errors.notAllowed(`相对时间跨度最多 ${RELATIVE_MAX_RANGE} 天`);
   // findOptFilter 的处理
-  // eslint-disable-next-line complexity
+
   const findOptFilter = (
     params: Record<string, any>,
     name: string,
     where: any,
     modelAlias4Ins: string,
     col: string = name,
+    // eslint-disable-next-line complexity
   ) => {
     let value: any;
     if (!params) return;
