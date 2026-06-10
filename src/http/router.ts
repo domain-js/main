@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import _ from "lodash";
+import { pipeline } from "stream";
 
 import { isStream } from "../utils";
 import { Domain, HttpCodes, Profile } from "./defines";
@@ -97,28 +98,38 @@ export function Router(deps: Deps) {
             res.raw.flushHeaders();
           }
           await new Promise<void>((resolve) => {
-            const onEnd = () => {
-              cleanup();
-              resolve();
-            };
-            const onError = () => {
-              cleanup();
-              resolve();
-            };
             const cleanup = () => {
               results.off("data", onData);
-              results.off("end", onEnd);
-              results.off("error", onError);
+              results.off("end", onFinish);
+              results.off("error", onFinish);
+              res.raw.off("close", onClose);
+            };
+            // 源流正常结束/出错：服务端主动终止响应（hijack 后 Fastify 不会代发 end）
+            const onFinish = () => {
+              cleanup();
+              if (!res.raw.writableEnded) res.raw.end();
+              resolve();
+            };
+            // 客户端断开：停止桥接并销毁源流，让上游生产者感知（检查 destroyed / 监听 close）并释放资源；
+            // 否则继续 write 已 end 的响应会抛 ERR_STREAM_WRITE_AFTER_END，且本 Promise 永不 resolve
+            const onClose = () => {
+              cleanup();
+              results.destroy();
+              resolve();
             };
             const onData = (chunk: any) => {
-              res.raw.write(chunk);
+              if (res.raw.writable && !res.raw.writableEnded) {
+                res.raw.write(chunk);
+              }
             };
             results.on("data", onData);
-            results.on("end", onEnd);
-            results.on("error", onError);
+            results.on("end", onFinish);
+            results.on("error", onFinish);
+            res.raw.on("close", onClose);
           });
         } else {
-          results.pipe(res.raw);
+          // pipeline 会在任一端异常/提前关闭时自动销毁两端，裸 pipe 不会
+          pipeline(results, res.raw, () => {});
         }
       } else {
         res.code(code);

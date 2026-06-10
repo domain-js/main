@@ -5,6 +5,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import * as fs from "fs";
 import _ from "lodash";
 import * as os from "os";
+import { pipeline } from "stream";
 import * as xlsx from "xlsx";
 
 import { Cnf, Profile, UploadFile } from "./defines";
@@ -209,22 +210,21 @@ export function Utils(cnf: Cnf) {
         ]);
         xlsx.utils.book_append_sheet(workBook, workSheet);
         xlsx.writeFile(workBook, file, { bookType: "xlsx", type: "binary" });
-        await new Promise((resolve: Function) => {
+        await new Promise<void>((resolve) => {
           const stream = fs.createReadStream(file);
-          stream.pipe(res.raw);
-          stream.on("end", () => {
+          // pipeline 在客户端中途断开时也会回调（裸 pipe + on("end") 会导致 Promise 挂死、临时文件泄漏）
+          pipeline(stream, res.raw, () => {
+            fs.unlink(file, () => {});
             resolve();
-            fs.unlinkSync(file);
           });
         });
       } else {
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
           const stream = stringify(rows, {
             header: true,
             columns: _.zipObject(keys, titles) as PlainObject<string>,
           });
-          stream.pipe(res.raw);
-          stream.on("end", resolve);
+          pipeline(stream, res.raw, () => resolve());
         });
       }
 

@@ -1,3 +1,6 @@
+import { EventEmitter } from "events";
+import { Readable } from "stream";
+
 import { Router } from "../router";
 import { Utils } from "../utils";
 
@@ -106,6 +109,87 @@ describe("router", () => {
       expect(res.send.mock.calls.pop()).toEqual([{ name: "redstone" }]);
     });
   }
+
+  describe("event-stream", () => {
+    const makeRawRes = () => {
+      const raw = Object.assign(new EventEmitter(), {
+        writable: true,
+        writableEnded: false,
+        setHeader: jest.fn(),
+        flushHeaders: jest.fn(),
+        write: jest.fn(),
+        end: jest.fn(),
+      });
+      raw.end.mockImplementation(() => {
+        raw.writable = false;
+        raw.writableEnded = true;
+      });
+      return raw;
+    };
+
+    const makeSSEReqRes = () => {
+      const raw = makeRawRes();
+      const sseRes = {
+        header: jest.fn(),
+        code: jest.fn(),
+        send: jest.fn(),
+        hijack: jest.fn(),
+        raw,
+      };
+      const sseReq = { ...req, headers: { ...req.headers, "response-event-stream": "yes" } };
+      return { raw, sseRes, sseReq };
+    };
+
+    it("正常结束：转发 chunk 并由服务端 end 响应", async () => {
+      router.get("/sse-normal", "home.index");
+      const [, handler] = server.get.mock.calls.pop();
+
+      const stream = new Readable({ read() {} });
+      domain["home.index"].method.mockResolvedValueOnce(stream);
+      const { raw, sseRes, sseReq } = makeSSEReqRes();
+
+      stream.push("data: 1\n\n");
+      stream.push("data: 2\n\n");
+      stream.push(null);
+
+      await handler(sseReq, sseRes);
+
+      expect(sseRes.hijack.mock.calls.length).toBe(1);
+      expect(raw.setHeader).toHaveBeenCalledWith("Content-Type", "text/event-stream");
+      expect(raw.write.mock.calls.map((c) => String(c[0]))).toEqual(["data: 1\n\n", "data: 2\n\n"]);
+      expect(raw.end.mock.calls.length).toBe(1);
+    });
+
+    it("客户端断开：销毁源流、停止写入且 Promise 正常 resolve", async () => {
+      router.get("/sse-disconnect", "home.index");
+      const [, handler] = server.get.mock.calls.pop();
+
+      const stream = new Readable({ read() {} });
+      domain["home.index"].method.mockResolvedValueOnce(stream);
+      const { raw, sseRes, sseReq } = makeSSEReqRes();
+
+      stream.push("data: 1\n\n");
+      const pending = handler(sseReq, sseRes);
+      // 等首个 chunk 经 data 事件写出
+      await new Promise((r) => setImmediate(r));
+      expect(raw.write.mock.calls.length).toBe(1);
+
+      // 模拟客户端断开
+      raw.writable = false;
+      raw.writableEnded = true;
+      raw.emit("close");
+
+      // 断开后 handler 不应挂死
+      await pending;
+
+      expect(stream.destroyed).toBe(true);
+      // 断开后即使源流仍有数据，也不再写入
+      stream.push("data: 2\n\n");
+      await new Promise((r) => setImmediate(r));
+      expect(raw.write.mock.calls.length).toBe(1);
+      expect(raw.end.mock.calls.length).toBe(0);
+    });
+  });
 
   /*
   it("collection", async () => {
